@@ -730,6 +730,22 @@ export default class MyPlugin extends Plugin {
 	
 	
 	
+	// loadLibraryAsynch (filepath:string) {
+	// 	console.log("Loading library at " + filepath)
+
+	// 	// Read the bib/Json file
+	// 	const bibAll = fs.readFile(filepath);
+	// 	  // Unload current library.
+
+	
+	// 	// Parse the bib file using BibTexParser
+	// 	const bibParsed = BibTeXParser.parse(bibAll.toString().substring(0));
+		
+	// 	//Check the number of references
+	// 	console.log("Bib file has " + bibParsed.entries.length + " entries")
+	// 	return bibParsed
+	// }
+
 	
 
 	

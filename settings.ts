@@ -29,43 +29,10 @@ export class SettingTab extends PluginSettingTab {
 					this.plugin.settings.bibPath = value;
 					await this.plugin.saveSettings();
 				}));
-		new Setting(containerEl)
-			.setName('Extract Metadata')
-			.setDesc('Select "Yes" to extract the metadata at the beginning of the note, "No" to extract only the title and the author/s')
-			.addToggle(text => text
-				.setValue(this.plugin.settings.exportMetadata)
-				.onChange(async (value) => {
-					this.plugin.settings.exportMetadata = value;
-					await this.plugin.saveSettings();
-					this.display()
-				}));
-		if (this.plugin.settings.exportMetadata == true){
-			new Setting(containerEl)
-			.setName('Note Template')
-			.setDesc('Add Path to the template (*.md) to use in importing the note')
-			.addText(text => text
-				.setPlaceholder('/path/to/Template.md')
-				.setValue(this.plugin.settings.templatePath)
-				.onChange(async (value) => {
-					console.log('Path Template: ' + value);
-					this.plugin.settings.templatePath = value;
-					this.display();
-					await this.plugin.saveSettings();
-				}));
-			new Setting(containerEl)
-			.setName("Missing Fields")
-			.setDesc("Fields that are present in the template but missing from the selected field.")
-			.addDropdown((d) => {
-				d.addOption("Leave placeholder", "Leave placeholder");
-				d.addOption("Replace with NA", "Replace with NA");
-				d.addOption("Remove (entire row)", "Remove (entire row)");
-				d.setValue(this.plugin.settings.missingfield);
-				d.onChange(async (v: "Leave placeholder" | "Replace with NA" | "Remove (entire row)") => {
-					this.plugin.settings.missingfield = v;
-					await this.plugin.saveSettings();
-				});
-				});			
-			}	
+
+
+
+		
 		new Setting(containerEl)
 			.setName('Export Path')
 			.setDesc('Add Path to the folder where the notes will be exported')
@@ -78,6 +45,16 @@ export class SettingTab extends PluginSettingTab {
 				await this.plugin.saveSettings();
 			}));
 		new Setting(containerEl)
+			.setName('Extract Metadata')
+			.setDesc('Select "Yes" to extract the metadata at the beginning of the note, "No" to extract only the title and the author/s')
+			.addToggle(text => text
+				.setValue(this.plugin.settings.exportMetadata)
+				.onChange(async (value) => {
+					this.plugin.settings.exportMetadata = value;
+					await this.plugin.saveSettings();
+					this.display()
+				}));
+		new Setting(containerEl)
 			.setName('Extract Annotations')
 			.addToggle(text => text
 				.setValue(this.plugin.settings.exportAnnotations)
@@ -88,8 +65,48 @@ export class SettingTab extends PluginSettingTab {
 				}));		
 
 
+
+		
+			
+
+	if (this.plugin.settings.exportMetadata == true){
+		const settingsTemplate: HTMLDetailsElement = containerEl.createEl("details");
+		settingsTemplate.createEl("summary", { text: "Template" });
+
+		new Setting(settingsTemplate)
+		.setName('Note Template')
+		.setDesc('Add Path to the template (*.md) to use in importing the note')
+		.addText(text => text
+			.setPlaceholder('/path/to/Template.md')
+			.setValue(this.plugin.settings.templatePath)
+			.onChange(async (value) => {
+				console.log('Path Template: ' + value);
+				this.plugin.settings.templatePath = value;
+				this.display();
+				await this.plugin.saveSettings();
+			}));
+		new Setting(settingsTemplate)
+		.setName("Missing Fields")
+		.setDesc("Fields that are present in the template but missing from the selected field.")
+		.addDropdown((d) => {
+			d.addOption("Leave placeholder", "Leave placeholder");
+			d.addOption("Replace with NA", "Replace with NA");
+			d.addOption("Remove (entire row)", "Remove (entire row)");
+			d.setValue(this.plugin.settings.missingfield);
+			d.onChange(async (v: "Leave placeholder" | "Replace with NA" | "Remove (entire row)") => {
+				this.plugin.settings.missingfield = v;
+				await this.plugin.saveSettings();
+			});
+			});			
+		}	
+				
+				
+
 		if (this.plugin.settings.exportAnnotations == true){
-			new Setting(containerEl)
+		const settingsHighlights: HTMLDetailsElement = containerEl.createEl("details");
+
+		settingsHighlights.createEl("summary", { text: "Highlights" });
+			new Setting(settingsHighlights)
 			.setName('Double Spaced')
 			.setDesc('Set toggle to on to add an empty space between different highlights')
 			.addToggle(text => text
@@ -99,13 +116,7 @@ export class SettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					this.display()
 				}));
-			}
 			
-		if (this.plugin.settings.exportAnnotations == true){
-		const settingsHighlights: HTMLDetailsElement = containerEl.createEl("details");
-
-		settingsHighlights.createEl("summary", { text: "Highlights" });
-
 			new Setting(settingsHighlights)
 			.setName("Quotation Marks")
 			.addToggle(text => text
