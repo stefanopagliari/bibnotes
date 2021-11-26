@@ -1,6 +1,7 @@
 import MyPlugin from "./main";
 import { App, Modal, FuzzySuggestModal, Notice } from "obsidian";
 import * as fs from "fs";
+import * as BibTeXParser from "@retorquere/bibtex-parser";
 export class importAllBib extends Modal {
 	plugin: MyPlugin;
 	constructor(app: App, plugin: MyPlugin) {
@@ -135,9 +136,14 @@ export interface referenceSelection {
 
 export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelection> {
 	plugin: MyPlugin;
+	bibParsed: BibTeXParser.Bibliography;
+
 	constructor(app: App, plugin: MyPlugin) {
 		super(app);
 		this.plugin = plugin;
+		this.bibParsed = this.plugin.loadLibrarySynch(
+			this.plugin.settings.bibPath
+		);
 	}
 
 	// Returns all available suggestions.
@@ -145,13 +151,13 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 		console.log(this.plugin.settings.bibPath);
 
 		//read the path of the bib file from the settings
-		const bibPath: string = this.plugin.settings.bibPath;
+		// const bibPath: string = this.plugin.settings.bibPath;
 
 		//run function to load the bibfile and return a parsed object
-		const bibParsed = this.plugin.loadLibrarySynch(bibPath);
+		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
 
 		//Check the number of references
-		const number_references: number = bibParsed.entries.length;
+		const number_references: number = this.bibParsed.entries.length;
 		console.log("This bib file has " + number_references + " entries");
 
 		// Extract the citekeys of all the references and store them in an array
@@ -160,9 +166,9 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 			//const authorList : string[] = []
 			//let authorListString: string
 			const bibtex_Array_Item = {} as referenceSelection;
-			bibtex_Array_Item.citeKey = bibParsed.entries[i].key;
+			bibtex_Array_Item.citeKey = this.bibParsed.entries[i].key;
 			bibtex_Array_Item.id = i;
-			const title = bibParsed.entries[i].fields.title;
+			const title = this.bibParsed.entries[i].fields.title;
 			//   let author = ""
 			//if (bibParsed.entries[i].creators.author.length>0) {author = bibParsed.entries[i].creators.author[0].lastName}
 			//   for (let k = 0; k < bibParsed.entries[i].creators.author.length; k++){
@@ -195,9 +201,9 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 			this.plugin.settings.templatePath,
 			"utf8"
 		);
-		const bibPath: string = this.plugin.settings.bibPath;
-		const bibParsed = this.plugin.loadLibrarySynch(bibPath);
-		const selectedEntry = bibParsed.entries[referenceSelected.id];
+		// const bibPath: string = this.plugin.settings.bibPath;
+		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
+		const selectedEntry = this.bibParsed.entries[referenceSelected.id];
 
 		//run function to process the selected chosenCiteKey from bibParsed using templateOriginal
 		this.plugin.parseTemplateBib(selectedEntry, templateOriginal);
