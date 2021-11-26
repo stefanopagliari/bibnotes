@@ -4,7 +4,7 @@ import * as BibTeXParser from "@retorquere/bibtex-parser";
 import { Entry } from "@retorquere/bibtex-parser";
 // Import fs to import bib file
 import * as fs from "fs";
-import { Plugin } from "obsidian";
+import { normalizePath, Plugin } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
 	HeaderLevels,
@@ -16,6 +16,7 @@ import { fuzzySelectEntryFromBib, importAllBib } from "./modal";
 //Import sample settings from /settings.ts
 import { SettingTab } from "./settings";
 import { AnnotationTypes, MyPluginSettings } from "./types";
+import { buildInTextCite } from "./utils";
 
 export { Entry } from "@retorquere/bibtex-parser";
 
@@ -117,6 +118,7 @@ export default class MyPlugin extends Plugin {
 			isDoubleSpaced,
 			exportPath,
 		} = this.settings;
+
 		//Create Note from Template
 		let note = templateOriginal;
 
@@ -129,10 +131,7 @@ export default class MyPlugin extends Plugin {
 		const authorList: string[] = [];
 		const authorListBracket: string[] = [];
 
-		if (
-			selectedEntry.creators.hasOwnProperty("author") &&
-			selectedEntry.creators.author.length > 1
-		) {
+		if (selectedEntry.creators.author?.length > 1) {
 			for (let k = 0; k < selectedEntry.creators.author.length; k++) {
 				const Author =
 					selectedEntry.creators.author[k].lastName +
@@ -143,22 +142,19 @@ export default class MyPlugin extends Plugin {
 				const authorListString = authorList.join("; "); //concatenate teh array to recreate single string
 				const authorListBracketString = authorListBracket.join(", ");
 
-				note = replaceAll(
+				note = replaceAllEscapes(
 					note,
 					"[[{{author}}]]",
 					authorListBracketString
 				);
-				note = replaceAll(note, "{{author}}", authorListString);
+				note = replaceAllEscapes(note, "{{author}}", authorListString);
 			}
 		}
 
 		//Create the list of editors when there is more than one
 		const editorList: string[] = [];
 		const editorListBracket: string[] = [];
-		if (
-			selectedEntry.creators.hasOwnProperty("editor") &&
-			selectedEntry.creators.editor.length > 1
-		) {
+		if (selectedEntry.creators.editor?.length > 1) {
 			for (let k = 0; k < selectedEntry.creators.editor.length; k++) {
 				const Editor =
 					selectedEntry.creators.editor[k].lastName +
@@ -169,12 +165,12 @@ export default class MyPlugin extends Plugin {
 				const editorListString = editorList.join("; "); //concatenate teh array to recreate single string
 				const editorListBracketString = editorListBracket.join(", ");
 
-				note = replaceAll(
+				note = replaceAllEscapes(
 					note,
 					"[[{{editor}}]]",
 					editorListBracketString
 				);
-				note = replaceAll(note, "{{editor}}", editorListString);
+				note = replaceAllEscapes(note, "{{editor}}", editorListString);
 			}
 		}
 
@@ -190,14 +186,18 @@ export default class MyPlugin extends Plugin {
 			const KW = entriesArray[z];
 			const KW_Brackets = "{{" + entriesArray[z] + "}}";
 			// 	 replace the keyword in the template
-			note = replaceAll(note, KW_Brackets, `${selectedEntry.fields[KW]}`);
+			note = replaceAllEscapes(
+				note,
+				KW_Brackets,
+				`${selectedEntry.fields[KW]}`
+			);
 		}
 
 		// replace the citekey
-		note = replaceAll(note, "{{citekey}}", selectedEntry.key);
+		note = replaceAllEscapes(note, "{{citekey}}", selectedEntry.key);
 
 		// replace the item type
-		note = replaceAll(note, "{{itemtype}}", selectedEntry.type);
+		note = replaceAllEscapes(note, "{{itemtype}}", selectedEntry.type);
 
 		console.log(missingfield);
 		// Replace elements that missing with NA if option is selected in the settings
@@ -223,23 +223,23 @@ export default class MyPlugin extends Plugin {
 		// EXPORT ANNOTATION
 		//Check the settings whether to export annotations and whether the selected source has notes
 
-		if (exportAnnotations == true && entriesArray.includes("note")) {
+		if (exportAnnotations && entriesArray.includes("note")) {
 			// if (exportAnnotations == true){
 
 			//store the annotation in a element called annotationsOriginal
 			const annotationsOriginal = selectedEntry.fields.note;
 
-			let annotationsNoFakeNewLine = replaceAll(
+			let annotationsNoFakeNewLine = replaceAllEscapes(
 				annotationsOriginal[0],
 				"\n\n",
 				"REALNEWLINE"
 			);
-			annotationsNoFakeNewLine = replaceAll(
+			annotationsNoFakeNewLine = replaceAllEscapes(
 				annotationsNoFakeNewLine,
 				"\n",
 				""
 			);
-			annotationsNoFakeNewLine = replaceAll(
+			annotationsNoFakeNewLine = replaceAllEscapes(
 				annotationsNoFakeNewLine,
 				"REALNEWLINE",
 				"\n"
@@ -279,17 +279,11 @@ export default class MyPlugin extends Plugin {
 
 			//Set the formatting variables based on the highlightsettings
 			let highlightItalic = isHighlightItalic ? "*" : "";
-
 			let highlightBold = isHighlightBold ? "**" : "";
-
 			let highlightHighlighted = isHighlightHighlighted ? "==" : "";
-
 			let highlightBullet = isHighlightBullet ? "- " : "";
-
 			let highlightBlockquote = isHighlightBlockquote ? "> " : "";
-
 			let highlightQuoteOpen = isHighlightQuote ? "“" : "";
-
 			let highlightQuoteClose = isHighlightQuote ? "”" : "";
 
 			//Create formatting to be added before and after highlights
@@ -366,8 +360,8 @@ export default class MyPlugin extends Plugin {
 
 				//if the annotation is from Zotfile then merge the comment in the next row to the related highlight. This is to address the way zotfile export comments to highlights as independent entries while Zotero exports them on the same row as the highlight they are related to
 				if (
-					AnnotationType == "Zotfile" &&
-					annotationsArray[i + 1].slice(0, 3) == "<i>"
+					AnnotationType === "Zotfile" &&
+					annotationsArray[i + 1].slice(0, 3) === "<i>"
 				) {
 					annotationsArray[i + 1] = annotationsArray[i + 1].replace(
 						"<i>",
@@ -398,10 +392,10 @@ export default class MyPlugin extends Plugin {
 
 				//Find the index with the starting point of the text within brackets following the character where the highlight/comment
 				let authorMatch = undefined;
-				if (AnnotationType == "Zotero") {
+				if (AnnotationType === "Zotero") {
 					authorMatch = authorKeyZotero.exec(annotationsArray[i]);
 				}
-				if (AnnotationType == "Zotfile") {
+				if (AnnotationType === "Zotfile") {
 					authorMatch = authorKeyZotfile.exec(annotationsArray[i]);
 				}
 
@@ -478,8 +472,13 @@ export default class MyPlugin extends Plugin {
 
 				// Remove quotation marks from annotationHighlight
 
-				const removeQuotes = (highlight: string, quote: string) =>
-					highlight.replaceAll(quote, "");
+				const removeQuotes = (highlight: string, quote: string) => {
+					const startReg = `$${quote}`;
+					const endReg = `${quote}^`;
+					highlight.replaceAll(startReg, "");
+					highlight.replaceAll(endReg, "");
+					return highlight;
+				};
 
 				console.log(annotationHighlight.charAt(0));
 				["“", '"', "`", "”", '"', "`"].forEach(
@@ -604,7 +603,7 @@ export default class MyPlugin extends Plugin {
 						pageNumberExportedCorrected <= pageNumberMetadataEnd;
 
 					//  if the pagenumber exported by Zotero is journal one, then identify the PDF page number
-					if (pageNumberExportedCorrectedCheck == true) {
+					if (pageNumberExportedCorrectedCheck) {
 						pageNumberKey = pageNumberExportedCorrected;
 						pageNumberPDF =
 							pageNumberExportedCorrected -
@@ -651,56 +650,7 @@ export default class MyPlugin extends Plugin {
 					// authorMatchStringAdjusted = authorMatchString.replace(", p. " + pageNumberExportedCorrected , ", p. " + pageNumberKey) //replace the page number to indicate the number in the actual publication rather than the pdf page
 				}
 
-				function buildAuthorKey(authors: BibTeXParser.Name[]) {
-					if (authors.length == 1) return authors[0].lastName;
-					else if (authors.length == 2) {
-						return (
-							authors[0].lastName + " and " + authors[1].lastName
-						);
-					} else if (authors.length > 2) {
-						return authors[0].lastName + " et al.";
-					} else return null;
-				}
-
-				function buildInTextCite(
-					entry: BibTeXParser.Entry,
-					pageNumberKey: number
-				) {
-					let inTextCite = "";
-					const authors = entry.creators.author;
-					inTextCite += buildAuthorKey(authors);
-
-					const { year } = entry.fields;
-					inTextCite += ", " + year;
-
-					if (pageNumberKey) inTextCite += ": " + pageNumberKey;
-
-					return "(" + inTextCite + ")";
-				}
-
 				let authorKey = buildInTextCite(selectedEntry, pageNumberKey);
-				// const authors = selectedEntry.creators.author;
-				// if (authors.length == 1) {
-				// 	authorKey = authors[0].lastName;
-				// }
-				// if (authors.length == 2) {
-				// 	authorKey =
-				// 		authors[0].lastName + " and " + authors[1].lastName;
-				// }
-				// if (authors.length > 2) {
-				// 	authorKey = authors[0].lastName + " et al.";
-				// }
-
-				// //add the year to the author
-				// authorKey = authorKey + ", " + selectedEntry.fields.year;
-
-				// //add the brackets to the page number to the author/year
-				// if (pageNumberKey != undefined) {
-				// 	authorKey = authorKey + ": " + pageNumberKey;
-				// }
-
-				// //add the brackets to the author/year
-				// authorKey = "(" + authorKey + ")";
 				console.log(authorKey);
 
 				//Create a correct author/year/page key that includes a link to the Zotero Reader
@@ -726,7 +676,7 @@ export default class MyPlugin extends Plugin {
 					")";
 
 				// Replace the page number exported by Zotero with the corrected page number including the link
-				annotationsArray[i] = replaceAll(
+				annotationsArray[i] = replaceAllEscapes(
 					annotationsArray[i],
 					authorMatchString,
 					keyAdjusted
@@ -782,61 +732,6 @@ export default class MyPlugin extends Plugin {
 					const level = parseInt(annotationType.charAt(-1));
 					formatHeader(level);
 				}
-				// if (annotationType == "typeH1") {
-				// 	annotationsArray[i] =
-				// 		"\n#" +
-				// 		" " +
-				// 		annotationHighlight +
-				// 		annotationCommentNoKey.trim();
-				// 	//Add empty row before the headline
-				// 	annotationsArray.splice(i, 0, "");
-				// }
-				// if (annotationType == "typeH2") {
-				// 	annotationsArray[i] =
-				// 		"\n##" +
-				// 		" " +
-				// 		annotationHighlight +
-				// 		annotationCommentNoKey.trim();
-
-				// 	//Add empty row before the headline
-				// 	annotationsArray.splice(i, 0, "");
-				// }
-				// if (annotationType == "typeH3") {
-				// 	annotationsArray[i] =
-				// 		"\n###" +
-				// 		" " +
-				// 		annotationHighlight +
-				// 		annotationCommentNoKey.trim();
-				// 	//Add empty row before the headline
-				// 	annotationsArray.splice(i, 0, "");
-				// }
-				// if (annotationType == "typeH4") {
-				// 	annotationsArray[i] =
-				// 		"\n####" +
-				// 		" " +
-				// 		annotationHighlight +
-				// 		annotationCommentNoKey.trim();
-
-				// 	//Add empty row before the headline
-				// 	annotationsArray.splice(i, 0, "");
-				// }
-				// if (annotationType == "typeH5") {
-				// 	annotationsArray[i] =
-				// 		"\n#####" +
-				// 		" " +
-				// 		annotationHighlight +
-				// 		annotationCommentNoKey.trim();
-
-				// 	//Add empty row before the headline
-				// 	annotationsArray.splice(i, 0, "");
-				// }
-				// if (annotationType == "typeH6") {
-				// 	annotationsArray[i] =
-				// 		"\n######" +
-				// 		" " +
-				// 		annotationHighlight +
-				// 		annotationCommentNoKey.trim();
-
 				// 	//Add empty row before the headline
 				// 	annotationsArray.splice(i, 0, "");
 				// }
@@ -874,19 +769,23 @@ export default class MyPlugin extends Plugin {
 				}
 
 				// Replace backticks with single quote
-				annotationsArray[i] = replaceAll(annotationsArray[i], "`", "'");
+				annotationsArray[i] = replaceAllEscapes(
+					annotationsArray[i],
+					"`",
+					"'"
+				);
 				annotationsArray[i] = annotationsArray[i].replace(
 					HTML_TAG_REG,
 					""
 				);
-				annotationsArray[i] = replaceAll(
+				annotationsArray[i] = replaceAllEscapes(
 					annotationsArray[i],
 					"/<i/>",
 					""
 				);
 
 				// Correct encoding issues
-				annotationsArray[i] = replaceAll(
+				annotationsArray[i] = replaceAllEscapes(
 					annotationsArray[i],
 					"&amp;",
 					"&"
@@ -931,8 +830,10 @@ export default class MyPlugin extends Plugin {
 
 		// EXPORT NOTE
 		const exportName: string = selectedEntry.key;
-		const exportPathFull: string = exportPath + exportName + ".md";
-		fs.writeFile(exportPathFull, note, function (err) {
+		const exportPathFull: string = exportPath + "/" + exportName + ".md";
+		const normalised = normalizePath(exportPathFull);
+		console.log({ normalised, exportPathFull });
+		fs.writeFile(normalised, note, function (err) {
 			if (err) console.log(err);
 		});
 	}
@@ -959,7 +860,6 @@ function escapeRegExp(stringAdd: string) {
 	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
-// Call this something else
-function replaceAll(stringAdd: string, find: string, replace: string) {
+function replaceAllEscapes(stringAdd: string, find: string, replace: string) {
 	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
 }
