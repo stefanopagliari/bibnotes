@@ -278,19 +278,13 @@ export default class MyPlugin extends Plugin {
 			);
 
 			//Set the formatting variables based on the highlightsettings
-			let highlightItalic = isHighlightItalic ? "*" : "";
-
-			let highlightBold = isHighlightBold ? "**" : "";
-
-			let highlightHighlighted = isHighlightHighlighted ? "==" : "";
-
-			let highlightBullet = isHighlightBullet ? "- " : "";
-
-			let highlightBlockquote = isHighlightBlockquote ? "> " : "";
-
-			let highlightQuoteOpen = isHighlightQuote ? "“" : "";
-
-			let highlightQuoteClose = isHighlightQuote ? "”" : "";
+			const highlightItalic = isHighlightItalic ? "*" : "";
+			const highlightBold = isHighlightBold ? "**" : "";
+			const highlightHighlighted = isHighlightHighlighted ? "==" : "";
+			const highlightBullet = isHighlightBullet ? "- " : "";
+			const highlightBlockquote = isHighlightBlockquote ? "> " : "";
+			const highlightQuoteOpen = isHighlightQuote ? "“" : "";
+			const highlightQuoteClose = isHighlightQuote ? "”" : "";
 
 			//Create formatting to be added before and after highlights
 			const highlightFormatBefore =
@@ -313,13 +307,13 @@ export default class MyPlugin extends Plugin {
 				highlightCustomTextBefore;
 
 			//Set the formatting variables based on the comments settings
-			let commentItalic = isCommentItalic ? "*" : "";
-			let commentBold = isCommentBold ? "**" : "";
-			let commentHighlighted = isCommentHighlighted ? "==" : "";
-			let commentBullet = isCommentBullet ? "- " : "";
-			let commentBlockquote = isCommentBlockquote ? "> " : "";
-			let commentQuoteOpen = isCommentQuote ? "“" : "";
-			let commentQuoteClose = isCommentQuote ? "”" : "";
+			const commentItalic = isCommentItalic ? "*" : "";
+			const commentBold = isCommentBold ? "**" : "";
+			const commentHighlighted = isCommentHighlighted ? "==" : "";
+			const commentBullet = isCommentBullet ? "- " : "";
+			const commentBlockquote = isCommentBlockquote ? "> " : "";
+			const commentQuoteOpen = isCommentQuote ? "“" : "";
+			const commentQuoteClose = isCommentQuote ? "”" : "";
 
 			//Create formatting to be added before and after highlights
 			const commentFormatBefore =
@@ -651,34 +645,20 @@ export default class MyPlugin extends Plugin {
 					// authorMatchStringAdjusted = authorMatchString.replace(", p. " + pageNumberExportedCorrected , ", p. " + pageNumberKey) //replace the page number to indicate the number in the actual publication rather than the pdf page
 				}
 
-				function buildAuthorKey(authors: BibTeXParser.Name[]) {
-					if (authors.length == 1) return authors[0].lastName;
-					else if (authors.length == 2) {
-						return (
-							authors[0].lastName + " and " + authors[1].lastName
-						);
-					} else if (authors.length > 2) {
-						return authors[0].lastName + " et al.";
-					} else return null;
-				}
+				// function buildAuthorKey(authors: BibTeXParser.Name[]) {
+				// 	if (authors.length == 1) return authors[0].lastName;
+				// 	else if (authors.length == 2) {
+				// 		return (
+				// 			authors[0].lastName + " and " + authors[1].lastName
+				// 		);
+				// 	} else if (authors.length > 2) {
+				// 		return authors[0].lastName + " et al.";
+				// 	} else return null;
+				// }
 
-				function buildInTextCite(
-					entry: BibTeXParser.Entry,
-					pageNumberKey: number
-				) {
-					let inTextCite = "";
-					const authors = entry.creators.author;
-					inTextCite += buildAuthorKey(authors);
 
-					const { year } = entry.fields;
-					inTextCite += ", " + year;
 
-					if (pageNumberKey) inTextCite += ": " + pageNumberKey;
-
-					return "(" + inTextCite + ")";
-				}
-
-				let authorKey = buildInTextCite(selectedEntry, pageNumberKey);
+				const authorKey = buildInTextCite(selectedEntry, pageNumberKey);
 				// const authors = selectedEntry.creators.author;
 				// if (authors.length == 1) {
 				// 	authorKey = authors[0].lastName;
@@ -962,4 +942,32 @@ function escapeRegExp(stringAdd: string) {
 // Call this something else
 function replaceAll(stringAdd: string, find: string, replace: string) {
 	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
+}
+
+function buildAuthorKey(authors: BibTeXParser.Name[]) {
+	if (authors.length == 1) return authors[0].lastName;
+	else if (authors.length == 2) {
+		return (
+			authors[0].lastName + " and " + authors[1].lastName
+		);
+	} else if (authors.length > 2) {
+		return authors[0].lastName + " et al.";
+	} else return null;
+}
+
+
+function buildInTextCite(
+	entry: BibTeXParser.Entry,
+	pageNumberKey: number
+) {
+	let inTextCite = "";
+	const authors = entry.creators.author;
+	inTextCite += buildAuthorKey(authors);
+
+	const { year } = entry.fields;
+	inTextCite += ", " + year;
+
+	if (pageNumberKey) inTextCite += ": " + pageNumberKey;
+
+	return "(" + inTextCite + ")";
 }
