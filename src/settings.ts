@@ -95,11 +95,11 @@ export class SettingTab extends PluginSettingTab {
 						) => {
 							settings.templateType = v;
 							await plugin.saveSettings();
-							if (settings.templateType === "Simple"){settings.templateContent = "Simple"}
-							if (settings.templateType === "Enhanced"){settings.templateContent = "Enhanced"}
-							if (settings.templateType === "Custom"){settings.templateContent = "Custom"}
-							if (settings.templateType === "Import from Note"){settings.templateContent = "Import from Note"}
-							this.display();
+							// if (settings.templateType === "Simple"){settings.templateContent = "Simple"}
+							// if (settings.templateType === "Enhanced"){settings.templateContent = "Enhanced"}
+							// if (settings.templateType === "Custom"){settings.templateContent = "Custom"}
+							// if (settings.templateType === "Import from Note"){settings.templateContent = "Import from Note"}
+							// this.display();
 
 						} 
 					);
@@ -113,26 +113,27 @@ export class SettingTab extends PluginSettingTab {
 						.onChange(async (value) => {
 							settings.templateContent = value;
 							console.log(value);
-							await plugin.saveSettings();
 						})
 					);
 				}
-			new Setting(settingsTemplate)
-				.setName("Note Template")
-				.setDesc(
-					"Add Path to the template (*.md) to use in importing the note"
-				)
-				.addText((text) =>
-					text
-						.setPlaceholder("/path/to/Template.md")
-						.setValue(settings.templatePath)
-						.onChange(async (value) => {
-							console.log("Path Template: " + value);
-							settings.templatePath = value;
-							this.display();
-							await plugin.saveSettings();
-						})
-				);
+			if (settings.templateType === "Import from Note") {
+				new Setting(settingsTemplate)
+					.setName("Note Template")
+					.setDesc(
+						"Add Path to the template (*.md) to use in importing the note"
+					)
+					.addText((text) =>
+						text
+							.setPlaceholder("/path/to/Template.md")
+							.setValue(settings.templatePath)
+							.onChange(async (value) => {
+								console.log("Path Template: " + value);
+								settings.templatePath = value;
+								this.display();
+								await plugin.saveSettings();
+							})
+					);
+				}	
 			new Setting(settingsTemplate)
 				.setName("Missing Fields")
 				.setDesc(
