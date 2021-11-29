@@ -197,10 +197,20 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 		new Notice(`Selected ${referenceSelected.citeKey}`);
 
 		// Load Template
+		const { templatePath } = this.plugin.settings;
+		if (templatePath === "") {
+			new Notice("Please select a template first!");
+			return;
+		}
 		const templateOriginal = fs.readFileSync(
 			this.plugin.settings.templatePath,
 			"utf8"
 		);
+
+		if (!templateOriginal) {
+			new Notice("Template not found!");
+			return;
+		}
 		// const bibPath: string = this.plugin.settings.bibPath;
 		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
 		const selectedEntry = this.bibParsed.entries[referenceSelected.id];
