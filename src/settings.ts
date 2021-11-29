@@ -40,7 +40,6 @@ export class SettingTab extends PluginSettingTab {
 					.setPlaceholder("/path/to/Folder/Note/")
 					.setValue(settings.exportPath)
 					.onChange(async (value) => {
-						console.log("Export Path Template: " + value);
 						settings.exportPath = value;
 						await plugin.saveSettings();
 					})
@@ -75,7 +74,49 @@ export class SettingTab extends PluginSettingTab {
 			const settingsTemplate: HTMLDetailsElement =
 				containerEl.createEl("details");
 			settingsTemplate.createEl("summary", { text: "Template" });
+			new Setting(settingsTemplate)
+				.setName("Select Template")
+				.setDesc(
+					"Select Template."
+				)
+				.addDropdown((d) => {
+					d.addOption("Simple", "Simple");
+					d.addOption("Enhanced", "Enhanced");
+					d.addOption("Custom", "Custom");
+					d.setValue(settings.templateType);
+					d.onChange(
+						async (
+							v:
+								| "Simple"
+								| "Enhanced"
+								| "Custom"
+								| "Import from Note"
 
+						) => {
+							settings.templateType = v;
+							await plugin.saveSettings();
+							if (settings.templateType === "Simple"){settings.templateContent = "Simple"}
+							if (settings.templateType === "Enhanced"){settings.templateContent = "Enhanced"}
+							if (settings.templateType === "Custom"){settings.templateContent = "Custom"}
+							if (settings.templateType === "Import from Note"){settings.templateContent = "Import from Note"}
+							this.display();
+
+						} 
+					);
+				});
+			if (settings.templateType === "Custom") {
+				new Setting(settingsTemplate)
+					.setName('Template')
+					.addTextArea((text) =>
+						text
+						.setValue(settings.templateContent)
+						.onChange(async (value) => {
+							settings.templateContent = value;
+							console.log(value);
+							await plugin.saveSettings();
+						})
+					);
+				}
 			new Setting(settingsTemplate)
 				.setName("Note Template")
 				.setDesc(

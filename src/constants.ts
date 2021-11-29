@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	bibPath: "default",
 	exportMetadata: true,
 	exportAnnotations: true,
-	templatePath: "default",
+	templateContent: "",
 	exportPath: "default",
 	missingfield: "Leave placeholder",
 	keyMergeAbove: "+",

@@ -594,7 +594,9 @@ export default class MyPlugin extends Plugin {
 					// authorMatchStringAdjusted = authorMatchString.replace(", p. " + pageNumberExportedCorrected , ", p. " + pageNumberKey) //replace the page number to indicate the number in the actual publication rather than the pdf page
 				}
 
-				let authorKey = buildInTextCite(selectedEntry, pageNumberKey);
+
+				const authorKey = buildInTextCite(selectedEntry, pageNumberKey);
+
 				console.log(authorKey);
 
 				//Create a correct author/year/page key that includes a link to the Zotero Reader
@@ -660,7 +662,7 @@ export default class MyPlugin extends Plugin {
 				//FORMAT THE HEADERS
 
 				function formatHeader(level: HeaderLevels) {
-					const hashes = "#".repeat(level);
+					const hashes = "#".repeat(level); 
 					currRow =
 						`\n${hashes} ` +
 						annotationHighlight +
@@ -784,3 +786,42 @@ export default class MyPlugin extends Plugin {
 
 	// Function to replace all values in the template with the Zotero value
 }
+
+
+function escapeRegExp(stringAdd: string) {
+	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+}
+
+// Call this something else
+function replaceAll(stringAdd: string, find: string, replace: string) {
+	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
+}
+
+function buildAuthorKey(authors: BibTeXParser.Name[]) {
+	if (authors.length == 1) return authors[0].lastName;
+	else if (authors.length == 2) {
+		return (
+			authors[0].lastName + " and " + authors[1].lastName
+		);
+	} else if (authors.length > 2) {
+		return authors[0].lastName + " et al.";
+	} else return null;
+}
+
+
+function buildInTextCite(
+	entry: BibTeXParser.Entry,
+	pageNumberKey: number
+) {
+	let inTextCite = "";
+	const authors = entry.creators.author;
+	inTextCite += buildAuthorKey(authors);
+
+	const { year } = entry.fields;
+	inTextCite += ", " + year;
+
+	if (pageNumberKey) inTextCite += ": " + pageNumberKey;
+
+	return "(" + inTextCite + ")";
+}
+

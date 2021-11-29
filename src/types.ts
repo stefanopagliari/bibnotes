@@ -88,7 +88,9 @@ export interface MyPluginSettings {
 	bibPath: string;
 	exportMetadata: boolean;
 	exportAnnotations: boolean;
+	templateContent: string;
 	templatePath: string;
+	templateType: string;
 	exportPath: string;
 	missingfield: string;
 	keyMergeAbove: string;
