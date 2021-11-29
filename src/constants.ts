@@ -48,3 +48,6 @@ export enum HeaderLevels {
 	"typeH5" = 5,
 	"typeH6" = 6,
 }
+
+export const TEMPLATE_REG = /\{\{[^}]+\}\}/g;
+export const TEMPLATE_BRACKET_REG = /\[\[\{\{[^}]+\}\}\]\]/g;
