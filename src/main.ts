@@ -4,19 +4,21 @@ import * as BibTeXParser from "@retorquere/bibtex-parser";
 import { Entry } from "@retorquere/bibtex-parser";
 // Import fs to import bib file
 import * as fs from "fs";
-import { normalizePath, Plugin } from "obsidian";
+import { normalizePath, Notice, Plugin } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
 	HeaderLevels,
 	HTML_TAG_REG,
 	PAGE_NUM_REG,
+	TEMPLATE_BRACKET_REG,
+	TEMPLATE_REG,
 } from "./constants";
 //Import modals from /modal.ts
 import { fuzzySelectEntryFromBib, importAllBib } from "./modal";
 //Import sample settings from /settings.ts
 import { SettingTab } from "./settings";
 import { AnnotationTypes, MyPluginSettings } from "./types";
-import { buildInTextCite } from "./utils";
+import { buildInTextCite, replaceTemplate, replaceAllTemplates } from "./utils";
 
 export { Entry } from "@retorquere/bibtex-parser";
 
@@ -70,7 +72,10 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
-
+	/**
+	 * Load the file at `filepath`, parse it using BibTexParser, and return the parsed data.
+	 * @param  {string} filepath
+	 */
 	loadLibrarySynch(filepath: string) {
 		console.log("Loading library at " + filepath);
 
@@ -127,92 +132,56 @@ export default class MyPlugin extends Plugin {
 			note = "# {{title}}";
 		}
 
-		//Create the list of authors when there is more than one
-		const authorList: string[] = [];
-		const authorListBracket: string[] = [];
+		const authors = selectedEntry.creators.author;
+		const editors = selectedEntry.creators.editor;
+		["author", "editor"].forEach((creator) => {
+			const creators = selectedEntry.creators[creator];
+			const creatorList = creators.map((creator) => {
+				const { firstName, lastName } = creator;
+				if (!firstName) return lastName;
+				if (!lastName) return firstName;
+				return lastName + ", " + firstName;
+			});
+			const creatorListBracket = creatorList.map(
+				(creator) => "[[" + creator + "]]"
+			);
 
-		if (selectedEntry.creators.author?.length > 1) {
-			for (let k = 0; k < selectedEntry.creators.author.length; k++) {
-				const Author =
-					selectedEntry.creators.author[k].lastName +
-					", " +
-					selectedEntry.creators.author[k].firstName;
-				authorList.push(Author);
-				authorListBracket.push("[[" + Author + "]]");
-				const authorListString = authorList.join("; "); //concatenate teh array to recreate single string
-				const authorListBracketString = authorListBracket.join(", ");
+			const creatorListStr = creatorList.join("; ");
+			const creatorListBracketStr = creatorListBracket.join("; ");
 
-				note = replaceAllEscapes(
-					note,
-					"[[{{author}}]]",
-					authorListBracketString
-				);
-				note = replaceAllEscapes(note, "{{author}}", authorListString);
-			}
-		}
-
-		//Create the list of editors when there is more than one
-		const editorList: string[] = [];
-		const editorListBracket: string[] = [];
-		if (selectedEntry.creators.editor?.length > 1) {
-			for (let k = 0; k < selectedEntry.creators.editor.length; k++) {
-				const Editor =
-					selectedEntry.creators.editor[k].lastName +
-					", " +
-					selectedEntry.creators.editor[k].firstName;
-				editorList.push(Editor);
-				editorListBracket.push("[[" + Editor + "]]");
-				const editorListString = editorList.join("; "); //concatenate teh array to recreate single string
-				const editorListBracketString = editorListBracket.join(", ");
-
-				note = replaceAllEscapes(
-					note,
-					"[[{{editor}}]]",
-					editorListBracketString
-				);
-				note = replaceAllEscapes(note, "{{editor}}", editorListString);
-			}
-		}
+			note = replaceTemplate(
+				note,
+				`[[{{${creator}}}]]`,
+				creatorListBracketStr
+			);
+			note = replaceTemplate(note, `{{${creator}}}`, creatorListStr);
+		});
 
 		// Create an array with all the fields
-		const entriesArray: string[] = [];
-		Object.keys(selectedEntry.fields).forEach((key) =>
-			entriesArray.push(key)
-		);
+		const entriesArray: string[] = Object.keys(selectedEntry.fields);
 
-		// loop to replace the values in the template with values in Zotero_Properties
-		for (let z = 0; z < entriesArray.length; z++) {
-			// 	 Identify the keyword to be replaced
-			const KW = entriesArray[z];
-			const KW_Brackets = "{{" + entriesArray[z] + "}}";
-			// 	 replace the keyword in the template
-			note = replaceAllEscapes(
-				note,
-				KW_Brackets,
-				`${selectedEntry.fields[KW]}`
-			);
-		}
+		note = replaceAllTemplates(entriesArray, note, selectedEntry);
 
 		// replace the citekey
-		note = replaceAllEscapes(note, "{{citekey}}", selectedEntry.key);
+		note = replaceTemplate(note, "{{citekey}}", selectedEntry.key);
 
 		// replace the item type
-		note = replaceAllEscapes(note, "{{itemtype}}", selectedEntry.type);
+		note = replaceTemplate(note, "{{itemtype}}", selectedEntry.type);
 
 		console.log(missingfield);
 		// Replace elements that missing with NA if option is selected in the settings
-		if (missingfield == "Replace with NA") {
-			note = note.replace(/\[\[\{\{[^}]+\}\}\]\]/g, "*NA*").trim();
-			note = note.replace(/\{\{[^}]+\}\}/g, "*NA*").trim();
+		if (missingfield === "Replace with NA") {
+			note = note.replace(TEMPLATE_BRACKET_REG, "*NA*").trim();
+			note = note.replace(TEMPLATE_REG, "*NA*").trim();
 		}
 
 		// Remove fields (entire line) that are missing is the option is selected in settings
-		if (missingfield == "Remove (entire row)") {
+		if (missingfield === "Remove (entire row)") {
 			console.log("Trying to remove all rows with missing field");
 			const templateArray = note.split(/\r?\n/); //split the template in rows
 			// 	run function to determine where we still have double curly brackets
 			for (let j = 0; j < templateArray.length; j++) {
-				if (templateArray[j].match("{{[^}]+}}")) {
+				if (templateArray[j].match(TEMPLATE_REG)) {
 					templateArray.splice(j, 1);
 					j--;
 				}
@@ -229,17 +198,17 @@ export default class MyPlugin extends Plugin {
 			//store the annotation in a element called annotationsOriginal
 			const annotationsOriginal = selectedEntry.fields.note;
 
-			let annotationsNoFakeNewLine = replaceAllEscapes(
+			let annotationsNoFakeNewLine = replaceTemplate(
 				annotationsOriginal[0],
 				"\n\n",
 				"REALNEWLINE"
 			);
-			annotationsNoFakeNewLine = replaceAllEscapes(
+			annotationsNoFakeNewLine = replaceTemplate(
 				annotationsNoFakeNewLine,
 				"\n",
 				""
 			);
-			annotationsNoFakeNewLine = replaceAllEscapes(
+			annotationsNoFakeNewLine = replaceTemplate(
 				annotationsNoFakeNewLine,
 				"REALNEWLINE",
 				"\n"
@@ -258,19 +227,16 @@ export default class MyPlugin extends Plugin {
 
 			//split the original annotation in separate rows
 
-			let annotationsArray = annotationsOriginalNoTags.split(/\r?\n/);
-
-			// remove the empty rows from the array
-			annotationsArray = annotationsArray.filter((a) => a);
-
-			// Remove the first row (Annotation title)
-			annotationsArray.splice(0, 1);
+			let annotationsArray = annotationsOriginalNoTags
+				.split(/\r?\n/)
+				// Remove empty lines
+				.filter((a) => a)
+				// Remove first row
+				.splice(0, 1);
 
 			// Identify the key with the author name, year, and page number added by Zotero at the end of each  highlighted sentence. This does not work with notes extracted from Zotfile
 			const authorKeyZotero = new RegExp(
-				"\\(" +
-					selectedEntry.creators.author[0].lastName +
-					".*, p. \\d+\\)"
+				"\\(" + authors[0].lastName + ".*, p. \\d+\\)"
 			);
 
 			const authorKeyZotfile = new RegExp(
@@ -278,13 +244,13 @@ export default class MyPlugin extends Plugin {
 			);
 
 			//Set the formatting variables based on the highlightsettings
-			let highlightItalic = isHighlightItalic ? "*" : "";
-			let highlightBold = isHighlightBold ? "**" : "";
-			let highlightHighlighted = isHighlightHighlighted ? "==" : "";
-			let highlightBullet = isHighlightBullet ? "- " : "";
-			let highlightBlockquote = isHighlightBlockquote ? "> " : "";
-			let highlightQuoteOpen = isHighlightQuote ? "“" : "";
-			let highlightQuoteClose = isHighlightQuote ? "”" : "";
+			const highlightItalic = isHighlightItalic ? "*" : "";
+			const highlightBold = isHighlightBold ? "**" : "";
+			const highlightHighlighted = isHighlightHighlighted ? "==" : "";
+			const highlightBullet = isHighlightBullet ? "- " : "";
+			const highlightBlockquote = isHighlightBlockquote ? "> " : "";
+			const highlightQuoteOpen = isHighlightQuote ? "“" : "";
+			const highlightQuoteClose = isHighlightQuote ? "”" : "";
 
 			//Create formatting to be added before and after highlights
 			const highlightFormatBefore =
@@ -307,13 +273,13 @@ export default class MyPlugin extends Plugin {
 				highlightCustomTextBefore;
 
 			//Set the formatting variables based on the comments settings
-			let commentItalic = isCommentItalic ? "*" : "";
-			let commentBold = isCommentBold ? "**" : "";
-			let commentHighlighted = isCommentHighlighted ? "==" : "";
-			let commentBullet = isCommentBullet ? "- " : "";
-			let commentBlockquote = isCommentBlockquote ? "> " : "";
-			let commentQuoteOpen = isCommentQuote ? "“" : "";
-			let commentQuoteClose = isCommentQuote ? "”" : "";
+			const commentItalic = isCommentItalic ? "*" : "";
+			const commentBold = isCommentBold ? "**" : "";
+			const commentHighlighted = isCommentHighlighted ? "==" : "";
+			const commentBullet = isCommentBullet ? "- " : "";
+			const commentBlockquote = isCommentBlockquote ? "> " : "";
+			const commentQuoteOpen = isCommentQuote ? "“" : "";
+			const commentQuoteClose = isCommentQuote ? "”" : "";
 
 			//Create formatting to be added before and after highlights
 			const commentFormatBefore =
@@ -340,64 +306,44 @@ export default class MyPlugin extends Plugin {
 				console.log("-----------------------------");
 				console.log("ENTRY: " + selectedEntry.key + " - Row Num: " + i);
 
-				console.log("ORIGINAL NOTE: " + annotationsArray[i]);
+				let currRow = annotationsArray[i];
+				let nextRow = annotationsArray[i + 1];
+
+				console.log("ORIGINAL NOTE: " + currRow);
 
 				//Check if the annotations have been extracted via Zotero Native Reader or Zotfile
-				let AnnotationType: string = undefined;
-				if (authorKeyZotero.exec(annotationsArray[i]) !== null) {
-					AnnotationType = "Zotero";
-				}
-				if (authorKeyZotfile.exec(annotationsArray[i]) !== null) {
-					AnnotationType = "Zotfile";
-				}
-				console.log("AnnotationType: " + AnnotationType);
-				if (
-					AnnotationType !== "Zotfile" &&
-					AnnotationType !== "Zotero"
-				) {
+				let FormattingType: string = undefined;
+				if (authorKeyZotero.exec(currRow)) {
+					FormattingType = "Zotero";
+				} else if (authorKeyZotfile.exec(currRow)) {
+					FormattingType = "Zotfile";
+				} else {
 					continue;
 				}
+				console.log("AnnotationType: " + FormattingType);
 
 				//if the annotation is from Zotfile then merge the comment in the next row to the related highlight. This is to address the way zotfile export comments to highlights as independent entries while Zotero exports them on the same row as the highlight they are related to
 				if (
-					AnnotationType === "Zotfile" &&
-					annotationsArray[i + 1].slice(0, 3) === "<i>"
+					FormattingType === "Zotfile" &&
+					nextRow.slice(0, 3) === "<i>"
 				) {
-					annotationsArray[i + 1] = annotationsArray[i + 1].replace(
-						"<i>",
-						""
-					);
-					annotationsArray[i + 1] = annotationsArray[i + 1].replace(
-						"</i>",
-						""
-					);
-					annotationsArray[i + 1] = annotationsArray[i + 1].replace(
-						authorKeyZotfile,
-						""
-					);
-					annotationsArray[i] =
-						annotationsArray[i] + " " + annotationsArray[i + 1];
+					nextRow = nextRow.replace("<i>", "");
+					nextRow = nextRow.replace("</i>", "");
+					nextRow = nextRow.replace(authorKeyZotfile, "");
+					currRow = currRow + " " + nextRow;
 					indexRowsToBeRemoved.push(i + 1);
 				}
 				// if the row has been flagged as "toberemoved", skip
-				if (indexRowsToBeRemoved.includes(i)) {
-					continue;
-				}
+				if (indexRowsToBeRemoved.includes(i)) continue;
 
 				//Remove HTML Tags
-				annotationsArray[i] = annotationsArray[i].replace(
-					HTML_TAG_REG,
-					""
-				);
+				currRow = currRow.replace(HTML_TAG_REG, "");
 
 				//Find the index with the starting point of the text within brackets following the character where the highlight/comment
-				let authorMatch = undefined;
-				if (AnnotationType === "Zotero") {
-					authorMatch = authorKeyZotero.exec(annotationsArray[i]);
-				}
-				if (AnnotationType === "Zotfile") {
-					authorMatch = authorKeyZotfile.exec(annotationsArray[i]);
-				}
+				let authorMatch =
+					FormattingType === "Zotero"
+						? authorKeyZotero.exec(currRow)
+						: authorKeyZotfile.exec(currRow);
 
 				//Turn the index into a string
 				let authorMatchString = authorMatch + "";
@@ -408,17 +354,15 @@ export default class MyPlugin extends Plugin {
 				console.log(authorMatchEnd);
 
 				//extract the comment to the annotation found after the authorKey (authordatepage)
-				let annotationCommentAll = annotationsArray[i].substr(
-					authorMatchEnd + 1
-				);
-				annotationCommentAll = annotationCommentAll.trim(); // remove white spaces
+				let annotationCommentAll = currRow
+					.substring(authorMatchEnd + 1)
+					// remove white spaces
+					.trim();
 
 				//Extract the first word in the comment added to the annotation
 				const spaceIndex = annotationCommentAll.indexOf(" ");
-				const annotationCommentFirstWord = annotationCommentAll.substr(
-					0,
-					spaceIndex
-				);
+				const annotationCommentFirstWord =
+					annotationCommentAll.substring(0, spaceIndex);
 
 				//  Identify what type of formatting needs to be applied to this row based on the first word
 				let annotationType: AnnotationTypes = "noKey";
@@ -459,14 +403,14 @@ export default class MyPlugin extends Plugin {
 					annotationCommentFirstWord === keyKeyword
 				) {
 					annotationType = "typeKeyword";
-				} else if (annotationsArray[i].startsWith(authorMatchString)) {
+				} else if (currRow.startsWith(authorMatchString)) {
 					annotationType = "typeComment";
 				}
 				console.log("TYPE: " + annotationType);
 				console.log("COMMENT: " + annotationCommentAll);
 
 				// Extract the highlighted text and store it in variable annotationHighlight
-				let annotationHighlight = annotationsArray[i]
+				let annotationHighlight = currRow
 					.substring(0, authorMatch.index - 1)
 					.trim(); //extract the comment to the annotation
 
@@ -560,7 +504,7 @@ export default class MyPlugin extends Plugin {
 				let pdfID = undefined;
 				//let authorMatchStringAdjusted = undefined
 
-				if (AnnotationType === "Zotero") {
+				if (FormattingType === "Zotero") {
 					//extract the zotero ID of the PDF from the URI
 					const URI = selectedEntry.fields.uri;
 					const URIStr = URI.toString();
@@ -621,7 +565,7 @@ export default class MyPlugin extends Plugin {
 						// authorMatchStringAdjusted = authorMatchString.replace(", p. " + pageNumberExportedCorrected , ", p. " + pageNumberKey) //replace the page number to indicate the number in the actual publication rather than the pdf page
 					}
 				}
-				if (AnnotationType === "Zotfile") {
+				if (FormattingType === "Zotfile") {
 					//extract the zotero ID of the PDF from the URI
 					const URI = selectedEntry.fields.uri;
 					pdfID = URI.toString().substring(URI.toString().length - 8);
@@ -676,8 +620,8 @@ export default class MyPlugin extends Plugin {
 					")";
 
 				// Replace the page number exported by Zotero with the corrected page number including the link
-				annotationsArray[i] = replaceAllEscapes(
-					annotationsArray[i],
+				currRow = replaceTemplate(
+					currRow,
 					authorMatchString,
 					keyAdjusted
 				);
@@ -702,7 +646,7 @@ export default class MyPlugin extends Plugin {
 				//PREPEND COMMENT TO THE HIGHLIGHTED SENTENCE
 				if (annotationType === "typeCommentPrepend") {
 					//add the comment before the highlight
-					annotationsArray[i] =
+					currRow =
 						highlightPrepend +
 						commentFormatBefore +
 						annotationCommentNoKey.trim() +
@@ -710,14 +654,14 @@ export default class MyPlugin extends Plugin {
 						": " +
 						annotationHighlightFormatted +
 						keyAdjusted;
-					console.log("OUTPUT: " + annotationsArray[i]);
+					console.log("OUTPUT: " + currRow);
 				}
 
 				//FORMAT THE HEADERS
 
 				function formatHeader(level: HeaderLevels) {
 					const hashes = "#".repeat(level);
-					annotationsArray[i] =
+					currRow =
 						`\n${hashes} ` +
 						annotationHighlight +
 						annotationCommentNoKey.trim();
@@ -752,7 +696,7 @@ export default class MyPlugin extends Plugin {
 
 				// FORMAT HIGHLIGHTED SENTENCES
 				if (annotationType === "noKey") {
-					annotationsArray[i] =
+					currRow =
 						highlightPrepend +
 						annotationHighlightFormatted +
 						keyAdjusted;
@@ -760,7 +704,7 @@ export default class MyPlugin extends Plugin {
 
 				//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
 				if (annotationType === "typeComment") {
-					annotationsArray[i] =
+					currRow =
 						commentPrepend +
 						commentFormatBefore +
 						annotationCommentNoKey.trim() +
@@ -769,27 +713,12 @@ export default class MyPlugin extends Plugin {
 				}
 
 				// Replace backticks with single quote
-				annotationsArray[i] = replaceAllEscapes(
-					annotationsArray[i],
-					"`",
-					"'"
-				);
-				annotationsArray[i] = annotationsArray[i].replace(
-					HTML_TAG_REG,
-					""
-				);
-				annotationsArray[i] = replaceAllEscapes(
-					annotationsArray[i],
-					"/<i/>",
-					""
-				);
+				currRow = replaceTemplate(currRow, "`", "'");
+				currRow = currRow.replace(HTML_TAG_REG, "");
+				currRow = replaceTemplate(currRow, "/<i/>", "");
 
 				// Correct encoding issues
-				annotationsArray[i] = replaceAllEscapes(
-					annotationsArray[i],
-					"&amp;",
-					"&"
-				);
+				currRow = replaceTemplate(currRow, "&amp;", "&");
 			}
 			// //PERFORM THE FOLLOWING OPERATIONS ON THE WHOLE ARRAY
 
@@ -854,12 +783,4 @@ export default class MyPlugin extends Plugin {
 	// }
 
 	// Function to replace all values in the template with the Zotero value
-}
-
-function escapeRegExp(stringAdd: string) {
-	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-}
-
-function replaceAllEscapes(stringAdd: string, find: string, replace: string) {
-	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
 }
