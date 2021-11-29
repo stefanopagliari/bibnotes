@@ -24,3 +24,34 @@ export function buildInTextCite(
 
 	return "(" + inTextCite + ")";
 }
+
+export function replaceAllTemplates(
+	entriesArray: string[],
+	note: string,
+	selectedEntry: BibTeXParser.Entry
+) {
+	for (let z = 0; z < entriesArray.length; z++) {
+		// 	 Identify the keyword to be replaced
+		const KW = entriesArray[z];
+		const KW_Brackets = "{{" + entriesArray[z] + "}}";
+		// 	 replace the keyword in the template
+		note = replaceTemplate(
+			note,
+			KW_Brackets,
+			`${selectedEntry.fields[KW]}`
+		);
+	}
+	return note;
+}
+
+export function escapeRegExp(stringAdd: string) {
+	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+}
+
+export function replaceTemplate(
+	stringAdd: string,
+	find: string,
+	replace: string
+) {
+	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
+}
