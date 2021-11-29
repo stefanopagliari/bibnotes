@@ -91,6 +91,9 @@ export default class MyPlugin extends Plugin {
 	}
 
 	parseTemplateBib(selectedEntry: Entry, templateOriginal: string) {
+
+		console.log("-----------------------------");
+		console.log("ENTRY: " + selectedEntry.key);
 		const {
 			exportMetadata,
 			missingfield,
@@ -168,7 +171,7 @@ export default class MyPlugin extends Plugin {
 		// replace the item type
 		note = replaceTemplate(note, "{{itemtype}}", selectedEntry.type);
 
-		console.log(missingfield);
+		//console.log(missingfield);
 		// Replace elements that missing with NA if option is selected in the settings
 		if (missingfield === "Replace with NA") {
 			note = note.replace(TEMPLATE_BRACKET_REG, "*NA*").trim();
@@ -176,8 +179,9 @@ export default class MyPlugin extends Plugin {
 		}
 
 		// Remove fields (entire line) that are missing is the option is selected in settings
-		if (missingfield === "Remove (entire row)") {
-			console.log("Trying to remove all rows with missing field");
+
+		if (missingfield == "Remove (entire row)") {
+			//console.log("Trying to remove all rows with missing field");
 			const templateArray = note.split(/\r?\n/); //split the template in rows
 			// 	run function to determine where we still have double curly brackets
 			for (let j = 0; j < templateArray.length; j++) {
@@ -303,8 +307,9 @@ export default class MyPlugin extends Plugin {
 
 			// LOOP EACH ROW (ELEMENT OF THE ARRAY)
 			for (let i = 0; i < annotationsArray.length; i++) {
-				console.log("-----------------------------");
-				console.log("ENTRY: " + selectedEntry.key + " - Row Num: " + i);
+				// console.log("-----------------------------");
+				// console.log("ENTRY: " + selectedEntry.key + " - Row Num: " + i);
+
 
 				let currRow = annotationsArray[i];
 				let nextRow = annotationsArray[i + 1];
@@ -318,6 +323,7 @@ export default class MyPlugin extends Plugin {
 				} else if (authorKeyZotfile.exec(currRow)) {
 					FormattingType = "Zotfile";
 				} else {
+
 					continue;
 				}
 				console.log("AnnotationType: " + FormattingType);
@@ -351,7 +357,7 @@ export default class MyPlugin extends Plugin {
 				//  Find the index with the end point of the text within brackets following the character where the highlight/comment
 				const authorMatchEnd =
 					authorMatch.index + authorMatch[0].length;
-				console.log(authorMatchEnd);
+				//(authorMatchEnd);
 
 				//extract the comment to the annotation found after the authorKey (authordatepage)
 				let annotationCommentAll = currRow
@@ -406,8 +412,8 @@ export default class MyPlugin extends Plugin {
 				} else if (currRow.startsWith(authorMatchString)) {
 					annotationType = "typeComment";
 				}
-				console.log("TYPE: " + annotationType);
-				console.log("COMMENT: " + annotationCommentAll);
+				//console.log("TYPE: " + annotationType);
+				//console.log("COMMENT: " + annotationCommentAll);
 
 				// Extract the highlighted text and store it in variable annotationHighlight
 				let annotationHighlight = currRow
@@ -424,7 +430,7 @@ export default class MyPlugin extends Plugin {
 					return highlight;
 				};
 
-				console.log(annotationHighlight.charAt(0));
+				//console.log(annotationHighlight.charAt(0));
 				["“", '"', "`", "”", '"', "`"].forEach(
 					(quote) =>
 						(annotationHighlight = removeQuotes(
@@ -472,7 +478,7 @@ export default class MyPlugin extends Plugin {
 				// 	);
 				// }
 
-				console.log("HIGHLIGHT: " + annotationHighlight);
+				//console.log("HIGHLIGHT: " + annotationHighlight);
 
 				// FORMATTING HIGHLIGHT
 				//   add the markdown formatting for the highlight (e.g. bold, italic, highlight)
@@ -518,7 +524,7 @@ export default class MyPlugin extends Plugin {
 
 					//  Find the publication page number in the Metadata
 					const pageNumberMetadata = selectedEntry.fields.pages + "";
-					console.log(pageNumberMetadata);
+					//console.log(pageNumberMetadata);
 					let pageNumberMetadataStart = parseInt(
 						pageNumberMetadata.split("–")[0],
 						10
@@ -533,13 +539,13 @@ export default class MyPlugin extends Plugin {
 					if (isNaN(pageNumberMetadataEnd)) {
 						pageNumberMetadataEnd = 1000000000;
 					}
-					console.log(pageNumberMetadataEnd);
+					//console.log(pageNumberMetadataEnd);
 					//  check if the number exported by Zotero falls within the page range in the metadata
 					const pageNumberExportedCorrected = parseInt(
 						pageNumberExported + "",
 						10
 					);
-					console.log(pageNumberExportedCorrected);
+					//console.log(pageNumberExportedCorrected);
 
 					const pageNumberExportedCorrectedCheck =
 						pageNumberExportedCorrected >=
@@ -575,7 +581,7 @@ export default class MyPlugin extends Plugin {
 					const pageNumberExported =
 						PAGE_NUM_REG.exec(authorMatchString);
 
-					console.log({ pageNumberExported });
+					//console.log({ pageNumberExported });
 					pageNumberPDF = parseInt(pageNumberExported);
 
 					//  Find the publication page number in the Metadata
@@ -597,7 +603,7 @@ export default class MyPlugin extends Plugin {
 
 				const authorKey = buildInTextCite(selectedEntry, pageNumberKey);
 
-				console.log(authorKey);
+
 
 				//Create a correct author/year/page key that includes a link to the Zotero Reader
 				const keyAdjusted: string =
@@ -609,7 +615,7 @@ export default class MyPlugin extends Plugin {
 					"?page=" +
 					pageNumberPDF +
 					")"; //created a corrected citation that includes the proper page number and the link to the relevant page in Zotero
-				console.log("REFERENCE: " + keyAdjusted);
+				//console.log("REFERENCE: " + keyAdjusted);
 
 				//  create a link to the pdf without citing the author/year
 				const keyAdjustedNoReference: string =
@@ -656,7 +662,7 @@ export default class MyPlugin extends Plugin {
 						": " +
 						annotationHighlightFormatted +
 						keyAdjusted;
-					console.log("OUTPUT: " + currRow);
+
 				}
 
 				//FORMAT THE HEADERS
@@ -671,7 +677,7 @@ export default class MyPlugin extends Plugin {
 					annotationsArray.splice(i, 0, "");
 				}
 
-				annotationType.charAt(-1);
+				// annotationType.charAt(-1);
 
 				//  Transform header in H1/H2/H3/H4/H5/H6 Level
 				if (/typeH\d/.test(annotationType)) {
