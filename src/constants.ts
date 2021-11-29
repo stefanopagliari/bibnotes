@@ -8,6 +8,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	exportMetadata: true,
 	exportAnnotations: true,
 	templateContent: "",
+	templatePath: "",
+	templateType: "",
 	exportPath: "default",
 	missingfield: "Leave placeholder",
 	keyMergeAbove: "+",
