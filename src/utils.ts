@@ -30,18 +30,19 @@ export function replaceAllTemplates(
 	note: string,
 	selectedEntry: BibTeXParser.Entry
 ) {
+	let copy = note.slice();
 	for (let z = 0; z < entriesArray.length; z++) {
 		// 	 Identify the keyword to be replaced
 		const KW = entriesArray[z];
-		const KW_Brackets = "{{" + entriesArray[z] + "}}";
+		const KW_Brackets = "{{" + KW + "}}";
 		// 	 replace the keyword in the template
-		note = replaceTemplate(
-			note,
+		copy = replaceTemplate(
+			copy,
 			KW_Brackets,
 			`${selectedEntry.fields[KW]}`
 		);
 	}
-	return note;
+	return copy;
 }
 
 export function escapeRegExp(stringAdd: string) {
@@ -54,4 +55,24 @@ export function replaceTemplate(
 	replace: string
 ) {
 	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
+}
+
+export const getNameStr = (name: BibTeXParser.Name) => {
+	const { firstName, lastName } = name;
+	if (!firstName) return lastName;
+	if (!lastName) return firstName;
+	return lastName + ", " + firstName;
+};
+
+export const makeWiki = (str: string) => "[[" + str + "]]";
+
+export function removeQuoteFromStart(quote: string, annotation: string) {
+	let copy = annotation.slice();
+	while (copy.charAt(0) === quote) copy = copy.substring(1);
+	return copy;
+}
+export function removeQuoteFromEnd(quote: string, annotation: string) {
+	let copy = annotation.slice();
+	while (copy.charAt(-1) === quote) copy = copy.substring(0, -1);
+	return copy;
 }
