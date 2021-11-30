@@ -4,7 +4,7 @@ import * as BibTeXParser from "@retorquere/bibtex-parser";
 import { Entry } from "@retorquere/bibtex-parser";
 // Import fs to import bib file
 import * as fs from "fs";
-import { normalizePath, Notice, Plugin } from "obsidian";
+import { normalizePath, Plugin } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
 	HeaderLevels,
@@ -139,25 +139,30 @@ export default class MyPlugin extends Plugin {
 		const editors = selectedEntry.creators.editor;
 		["author", "editor"].forEach((creator) => {
 			const creators = selectedEntry.creators[creator];
-			const creatorList = creators.map((creator) => {
-				const { firstName, lastName } = creator;
-				if (!firstName) return lastName;
-				if (!lastName) return firstName;
-				return lastName + ", " + firstName;
-			});
-			const creatorListBracket = creatorList.map(
-				(creator) => "[[" + creator + "]]"
-			);
+			//console.log("creators = " + creators)
+			//console.log("creator = " + creator)
+			if(creators){ //Added this if statement to skip cases when editors or authors are missing
+				const creatorList = creators.map((creator) => {
+					const { firstName, lastName } = creator;
+					if (!firstName) return lastName;
+					if (!lastName) return firstName;
+					return lastName + ", " + firstName;
+				});
+				//console.log("creatorList = "+ creatorList)
+				const creatorListBracket = creatorList.map(
+					(creator) => "[[" + creator + "]]"
+				);
 
-			const creatorListStr = creatorList.join("; ");
-			const creatorListBracketStr = creatorListBracket.join("; ");
+				const creatorListStr = creatorList.join("; ");
+				const creatorListBracketStr = creatorListBracket.join("; ");
 
-			note = replaceTemplate(
-				note,
-				`[[{{${creator}}}]]`,
-				creatorListBracketStr
-			);
-			note = replaceTemplate(note, `{{${creator}}}`, creatorListStr);
+				note = replaceTemplate(
+					note,
+					`[[{{${creator}}}]]`,
+					creatorListBracketStr
+				);
+				note = replaceTemplate(note, `{{${creator}}}`, creatorListStr);
+			}
 		});
 
 		// Create an array with all the fields
@@ -196,47 +201,89 @@ export default class MyPlugin extends Plugin {
 		// EXPORT ANNOTATION
 		//Check the settings whether to export annotations and whether the selected source has notes
 
+		//console.log("NOTE INCLUDED: "+ entriesArray.includes("note"))
 		if (exportAnnotations && entriesArray.includes("note")) {
+
+////------
+			//store the annotation in a element called annotationsOriginal
+			const annotationsOriginal = selectedEntry.fields.note
+			let annotationsNoFakeNewLine = replaceAll(annotationsOriginal[0], "\n\n", "REALNEWLINE");
+			annotationsNoFakeNewLine = replaceAll(annotationsNoFakeNewLine, "\n", "");
+			annotationsNoFakeNewLine = replaceAll(annotationsNoFakeNewLine, "REALNEWLINE", "\n");
+			const annotationsOriginalNoTags = annotationsNoFakeNewLine.replace(/(&lt;([^>]+)>)/gi, "");
+		
+			
+		
+		
+			// Set an array that collect the keywords from the highlight
+			const keywordArray : string[] = [] 
+			
+			// Set an array that collect the number of the rows to be removed  
+			const indexRowsToBeRemoved : number[] = [] 
+		
+			
+			//split the original annotation in separate rows
+			
+			let annotationsArray = annotationsOriginalNoTags.split(/\r?\n/); 
+		
+			// remove the empty rows from the array
+			annotationsArray = annotationsArray.filter((a) => a);
+		
+ 
+	
+		
+		// Remove the first row (Annotation title)
+			annotationsArray.splice(0, 1)
+
+
+////-----
+
+
 			// if (exportAnnotations == true){
 
-			//store the annotation in a element called annotationsOriginal
-			const annotationsOriginal = selectedEntry.fields.note;
+			// //store the annotation in a element called annotationsOriginal
+			// const annotationsOriginal = selectedEntry.fields.note;
+			// console.log("INCLUDE NEW LINE: " + annotationsOriginal[0].includes("\n"))
 
-			let annotationsNoFakeNewLine = replaceTemplate(
-				annotationsOriginal[0],
-				"\n\n",
-				"REALNEWLINE"
-			);
-			annotationsNoFakeNewLine = replaceTemplate(
-				annotationsNoFakeNewLine,
-				"\n",
-				""
-			);
-			annotationsNoFakeNewLine = replaceTemplate(
-				annotationsNoFakeNewLine,
-				"REALNEWLINE",
-				"\n"
-			);
 
-			const annotationsOriginalNoTags = annotationsNoFakeNewLine.replace(
-				/(&lt;([^>]+)>)/gi,
-				""
-			);
+			// if(annotationsOriginal[0].includes("\n\n")){
+			// let annotationsNoFakeNewLine = replaceTemplate(
+			// 	annotationsOriginal[0],
+			// 	"\n\n",
+			// 	"REALNEWLINE"
+			// );
+			// annotationsNoFakeNewLine = replaceTemplate(
+			// 	annotationsNoFakeNewLine,
+			// 	"\n",
+			// 	""
+			// );
+			// annotationsOriginal[0] = replaceTemplate(
+			// 	annotationsNoFakeNewLine,
+			// 	"REALNEWLINE",
+			// 	"\n"
+			// )
+			// }
+			// console.log("INCLUDE NEW LINE: " + annotationsOriginal[0].includes("\n"))
+			// const annotationsOriginalNoTags = annotationsOriginal[0].replace(HTML_TAG_REG, "");
+			// console.log("INCLUDE NEW LINE AFTER HTML TAG REG: " + annotationsOriginal[0].includes("\n"))
 
-			// Set an array that collect the keywords from the highlight
-			const keywordArray: string[] = [];
 
-			// Set an array that collect the number of the rows to be removed
-			const indexRowsToBeRemoved: number[] = [];
+			// // Set an array that collect the keywords from the highlight
+			// const keywordArray: string[] = [];
 
-			//split the original annotation in separate rows
+			// // Set an array that collect the number of the rows to be removed
+			// const indexRowsToBeRemoved: number[] = [];
 
-			let annotationsArray = annotationsOriginalNoTags
-				.split(/\r?\n/)
-				// Remove empty lines
-				.filter((a) => a)
-				// Remove first row
-				.splice(0, 1);
+			// //split the original annotation in separate rows
+			// //console.log("annotationsOriginalNoTags: " + annotationsOriginalNoTags)
+			// let annotationsArray = annotationsOriginalNoTags
+			// 	//.split(/\r?\n/)
+			// 	.split("\n")
+			// 	// Remove empty lines
+			// 	.filter((a) => a)
+			// 	// Remove first row
+			// 	.splice(0, 1);
+			// console.log("Length: " + annotationsArray.length)	
 
 			// Identify the key with the author name, year, and page number added by Zotero at the end of each  highlighted sentence. This does not work with notes extracted from Zotfile
 			const authorKeyZotero = new RegExp(
@@ -306,9 +353,11 @@ export default class MyPlugin extends Plugin {
 				commentCustomTextBefore;
 
 			// LOOP EACH ROW (ELEMENT OF THE ARRAY)
-			for (let i = 0; i < annotationsArray.length; i++) {
-				// console.log("-----------------------------");
-				// console.log("ENTRY: " + selectedEntry.key + " - Row Num: " + i);
+			const startLoop = 0
+			const endLoop = annotationsArray.length
+			for (let i = startLoop; i < endLoop; i++) {
+				console.log("-----------------------------");
+				console.log("ENTRY: " + selectedEntry.key + " - Row Num: " + i);
 
 
 				let currRow = annotationsArray[i];
@@ -329,16 +378,17 @@ export default class MyPlugin extends Plugin {
 				console.log("AnnotationType: " + FormattingType);
 
 				//if the annotation is from Zotfile then merge the comment in the next row to the related highlight. This is to address the way zotfile export comments to highlights as independent entries while Zotero exports them on the same row as the highlight they are related to
-				if (
-					FormattingType === "Zotfile" &&
-					nextRow.slice(0, 3) === "<i>"
-				) {
-					nextRow = nextRow.replace("<i>", "");
-					nextRow = nextRow.replace("</i>", "");
-					nextRow = nextRow.replace(authorKeyZotfile, "");
-					currRow = currRow + " " + nextRow;
-					indexRowsToBeRemoved.push(i + 1);
-				}
+				if (i<annotationsArray.length){
+					if (
+						FormattingType === "Zotfile" &&
+						nextRow.slice(0, 3) === "<i>") {
+						nextRow = nextRow.replace("<i>", "");
+						nextRow = nextRow.replace("</i>", "");
+						nextRow = nextRow.replace(authorKeyZotfile, "");
+						currRow = currRow + " " + nextRow;
+						indexRowsToBeRemoved.push(i + 1);
+					}
+				}	
 				// if the row has been flagged as "toberemoved", skip
 				if (indexRowsToBeRemoved.includes(i)) continue;
 
@@ -346,7 +396,7 @@ export default class MyPlugin extends Plugin {
 				currRow = currRow.replace(HTML_TAG_REG, "");
 
 				//Find the index with the starting point of the text within brackets following the character where the highlight/comment
-				let authorMatch =
+				const authorMatch =
 					FormattingType === "Zotero"
 						? authorKeyZotero.exec(currRow)
 						: authorKeyZotfile.exec(currRow);
@@ -412,8 +462,8 @@ export default class MyPlugin extends Plugin {
 				} else if (currRow.startsWith(authorMatchString)) {
 					annotationType = "typeComment";
 				}
-				//console.log("TYPE: " + annotationType);
-				//console.log("COMMENT: " + annotationCommentAll);
+				console.log("TYPE: " + annotationType);
+				console.log("COMMENT: " + annotationCommentAll);
 
 				// Extract the highlighted text and store it in variable annotationHighlight
 				let annotationHighlight = currRow
@@ -515,7 +565,7 @@ export default class MyPlugin extends Plugin {
 					const URI = selectedEntry.fields.uri;
 					const URIStr = URI.toString();
 					// Not being used?
-					const pdfID = URIStr.substring(URIStr.length - 8);
+					pdfID = URIStr.substring(URIStr.length - 8);
 
 					// Find the page number exported by Zotero
 					authorMatchString = authorMatch.toLocaleString();
@@ -769,7 +819,7 @@ export default class MyPlugin extends Plugin {
 		const exportName: string = selectedEntry.key;
 		const exportPathFull: string = exportPath + "/" + exportName + ".md";
 		const normalised = normalizePath(exportPathFull);
-		console.log({ normalised, exportPathFull });
+		//console.log({ normalised, exportPathFull });
 		fs.writeFile(normalised, note, function (err) {
 			if (err) console.log(err);
 		});
@@ -798,36 +848,21 @@ function escapeRegExp(stringAdd: string) {
 	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
-// Call this something else
+//Call this something else
 function replaceAll(stringAdd: string, find: string, replace: string) {
 	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
 }
 
-function buildAuthorKey(authors: BibTeXParser.Name[]) {
-	if (authors.length == 1) return authors[0].lastName;
-	else if (authors.length == 2) {
-		return (
-			authors[0].lastName + " and " + authors[1].lastName
-		);
-	} else if (authors.length > 2) {
-		return authors[0].lastName + " et al.";
-	} else return null;
-}
+// function buildAuthorKey(authors: BibTeXParser.Name[]) {
+// 	if (authors.length == 1) return authors[0].lastName;
+// 	else if (authors.length == 2) {
+// 		return (
+// 			authors[0].lastName + " and " + authors[1].lastName
+// 		);
+// 	} else if (authors.length > 2) {
+// 		return authors[0].lastName + " et al.";
+// 	} else return null;
+// }
 
 
-function buildInTextCite(
-	entry: BibTeXParser.Entry,
-	pageNumberKey: number
-) {
-	let inTextCite = "";
-	const authors = entry.creators.author;
-	inTextCite += buildAuthorKey(authors);
-
-	const { year } = entry.fields;
-	inTextCite += ", " + year;
-
-	if (pageNumberKey) inTextCite += ": " + pageNumberKey;
-
-	return "(" + inTextCite + ")";
-}
 
