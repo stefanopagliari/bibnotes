@@ -679,8 +679,6 @@ export default class MyPlugin extends Plugin {
 				lines.splice(i, 0, "");
 			}
 
-			annotationType.charAt(-1);
-
 			//  Transform header in H1/H2/H3/H4/H5/H6 Level
 			if (/typeH\d/.test(annotationType)) {
 				const level = parseInt(annotationType.charAt(-1));
@@ -788,3 +786,42 @@ export default class MyPlugin extends Plugin {
 
 	// Function to replace all values in the template with the Zotero value
 }
+
+
+function escapeRegExp(stringAdd: string) {
+	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+}
+
+// Call this something else
+function replaceAll(stringAdd: string, find: string, replace: string) {
+	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
+}
+
+function buildAuthorKey(authors: BibTeXParser.Name[]) {
+	if (authors.length == 1) return authors[0].lastName;
+	else if (authors.length == 2) {
+		return (
+			authors[0].lastName + " and " + authors[1].lastName
+		);
+	} else if (authors.length > 2) {
+		return authors[0].lastName + " et al.";
+	} else return null;
+}
+
+
+function buildInTextCite(
+	entry: BibTeXParser.Entry,
+	pageNumberKey: number
+) {
+	let inTextCite = "";
+	const authors = entry.creators.author;
+	inTextCite += buildAuthorKey(authors);
+
+	const { year } = entry.fields;
+	inTextCite += ", " + year;
+
+	if (pageNumberKey) inTextCite += ": " + pageNumberKey;
+
+	return "(" + inTextCite + ")";
+}
+

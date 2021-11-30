@@ -40,7 +40,6 @@ export class SettingTab extends PluginSettingTab {
 					.setPlaceholder("/path/to/Folder/Note/")
 					.setValue(settings.exportPath)
 					.onChange(async (value) => {
-						console.log("Export Path Template: " + value);
 						settings.exportPath = value;
 						await plugin.saveSettings();
 					})
@@ -75,23 +74,66 @@ export class SettingTab extends PluginSettingTab {
 			const settingsTemplate: HTMLDetailsElement =
 				containerEl.createEl("details");
 			settingsTemplate.createEl("summary", { text: "Template" });
-
 			new Setting(settingsTemplate)
-				.setName("Note Template")
+				.setName("Select Template")
 				.setDesc(
-					"Add Path to the template (*.md) to use in importing the note"
+					"Select Template."
 				)
-				.addText((text) =>
-					text
-						.setPlaceholder("/path/to/Template.md")
-						.setValue(settings.templatePath)
-						.onChange(async (value) => {
-							console.log("Path Template: " + value);
-							settings.templatePath = value;
-							this.display();
+				.addDropdown((d) => {
+					d.addOption("Simple", "Simple");
+					d.addOption("Enhanced", "Enhanced");
+					d.addOption("Custom", "Custom");
+					d.setValue(settings.templateType);
+					d.onChange(
+						async (
+							v:
+								| "Simple"
+								| "Enhanced"
+								| "Custom"
+								| "Import from Note"
+
+						) => {
+							settings.templateType = v;
 							await plugin.saveSettings();
+							// if (settings.templateType === "Simple"){settings.templateContent = "Simple"}
+							// if (settings.templateType === "Enhanced"){settings.templateContent = "Enhanced"}
+							// if (settings.templateType === "Custom"){settings.templateContent = "Custom"}
+							// if (settings.templateType === "Import from Note"){settings.templateContent = "Import from Note"}
+							// this.display();
+
+						} 
+					);
+				});
+			if (settings.templateType === "Custom") {
+				new Setting(settingsTemplate)
+					.setName('Template')
+					.addTextArea((text) =>
+						text
+						.setValue(settings.templateContent)
+						.onChange(async (value) => {
+							settings.templateContent = value;
+							console.log(value);
 						})
-				);
+					);
+				}
+			if (settings.templateType === "Import from Note") {
+				new Setting(settingsTemplate)
+					.setName("Note Template")
+					.setDesc(
+						"Add Path to the template (*.md) to use in importing the note"
+					)
+					.addText((text) =>
+						text
+							.setPlaceholder("/path/to/Template.md")
+							.setValue(settings.templatePath)
+							.onChange(async (value) => {
+								console.log("Path Template: " + value);
+								settings.templatePath = value;
+								this.display();
+								await plugin.saveSettings();
+							})
+					);
+				}	
 			new Setting(settingsTemplate)
 				.setName("Missing Fields")
 				.setDesc(

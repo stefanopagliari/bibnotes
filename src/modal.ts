@@ -146,10 +146,29 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 		);
 	}
 
+	onOpen() {
+		console.log("THIS IS INSIDE ON OPEN");
+		
+
+		}
 	// Returns all available suggestions.
 	getItems(): referenceSelection[] {
-		console.log(this.plugin.settings.bibPath);
+		console.log("THIS IS INSIDE GET ITEMS");
+		// console.log(this.plugin.settings.bibPath);
 
+		// //read the path of the bib file from the settings
+		// const bibPath: string = this.plugin.settings.bibPath;
+
+		// //run function to load the bibfile and return a parsed object
+		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
+
+		// //Check the number of references
+		// const number_references: number = bibParsed.entries.length;
+		// console.log("This bib file has " + number_references + " entries");
+
+		
+
+		// let { contentEl } = this;
 		//read the path of the bib file from the settings
 		// const bibPath: string = this.plugin.settings.bibPath;
 
@@ -180,9 +199,8 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 				title + " - " + "citekey: " + bibtex_Array_Item.citeKey;
 			bibtex_Array.push(bibtex_Array_Item);
 		}
-
 		return bibtex_Array;
-	}
+		}
 
 	// Renders each suggestion item.
 	getItemText(referenceSelected: referenceSelection) {
