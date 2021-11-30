@@ -73,6 +73,6 @@ export function removeQuoteFromStart(quote: string, annotation: string) {
 }
 export function removeQuoteFromEnd(quote: string, annotation: string) {
 	let copy = annotation.slice();
-	while (copy.charAt(-1) === quote) copy = copy.substring(0, -1);
+	while (copy[copy.length - 1] === quote) copy = copy.substring(0, -1);
 	return copy;
 }

@@ -4,7 +4,7 @@ import * as BibTeXParser from "@retorquere/bibtex-parser";
 import { Entry } from "@retorquere/bibtex-parser";
 // Import fs to import bib file
 import * as fs from "fs";
-import { info } from "loglevel";
+import { info, setLevel } from "loglevel";
 import { normalizePath, Plugin } from "obsidian";
 import {
 	DEFAULT_SETTINGS,
@@ -88,7 +88,7 @@ export default class MyPlugin extends Plugin {
 	 * @param  {string} filepath
 	 */
 	loadLibrarySynch(filepath: string) {
-		info("Loading library at " + filepath);
+		console.log("Loading library at " + filepath);
 
 		// Read the bib/Json file
 		const bibAll = fs.readFileSync(filepath);
@@ -97,7 +97,7 @@ export default class MyPlugin extends Plugin {
 		const bibParsed = BibTeXParser.parse(bibAll.toString().substring(0));
 
 		//Check the number of references
-		info("Bib file has " + bibParsed.entries.length + " entries");
+		console.log("Bib file has " + bibParsed.entries.length + " entries");
 		return bibParsed;
 	}
 
@@ -105,6 +105,7 @@ export default class MyPlugin extends Plugin {
 		let copy = template.slice();
 		["author", "editor"].forEach((creator) => {
 			const creators = selectedEntry.creators[creator];
+			if (!creators) return;
 			const creatorList = creators.map(getNameStr);
 			const creatorListBracket = creatorList.map(makeWiki);
 
@@ -129,7 +130,7 @@ export default class MyPlugin extends Plugin {
 			copy = copy.replace(TEMPLATE_BRACKET_REG, "*NA*").trim();
 			copy = copy.replace(TEMPLATE_REG, "*NA*").trim();
 		} else if (missingfield === "Remove (entire row)") {
-			info("Trying to remove all rows with missing field");
+			console.log("Trying to remove all rows with missing field");
 			const lines = copy.split(/\r?\n/);
 			// 	run function to determine where we still have double curly brackets
 			for (let j = 0; j < lines.length; j++) {
@@ -145,7 +146,7 @@ export default class MyPlugin extends Plugin {
 
 	removeFakeNewlines(note: string) {
 		let annotationsNoFakeNewLine = replaceTemplate(
-			note[0],
+			note,
 			"\n\n",
 			"REALNEWLINE"
 		);
@@ -345,7 +346,7 @@ export default class MyPlugin extends Plugin {
 
 			//  Find the publication page number in the Metadata
 			const pageNumberMetadata = selectedEntry.fields.pages + "";
-			info(pageNumberMetadata);
+			console.log(pageNumberMetadata);
 			let pageNumberMetadataStart = parseInt(
 				pageNumberMetadata.split("–")[0],
 				10
@@ -360,13 +361,13 @@ export default class MyPlugin extends Plugin {
 			if (isNaN(pageNumberMetadataEnd)) {
 				pageNumberMetadataEnd = 1000000000;
 			}
-			info(pageNumberMetadataEnd);
+			console.log(pageNumberMetadataEnd);
 			//  check if the number exported by Zotero falls within the page range in the metadata
 			const pageNumberExportedCorrected = parseInt(
 				pageNumberExported + "",
 				10
 			);
-			info(pageNumberExportedCorrected);
+			console.log(pageNumberExportedCorrected);
 
 			const pageNumberExportedCorrectedCheck =
 				pageNumberExportedCorrected >= pageNumberMetadataStart &&
@@ -397,7 +398,7 @@ export default class MyPlugin extends Plugin {
 			authorMatchString = authorMatch.toLocaleString();
 			const pageNumberExported = PAGE_NUM_REG.exec(authorMatchString);
 
-			info({ pageNumberExported });
+			console.log({ pageNumberExported });
 			pageNumberPDF = parseInt(pageNumberExported);
 
 			//  Find the publication page number in the Metadata
@@ -418,6 +419,16 @@ export default class MyPlugin extends Plugin {
 		}
 	}
 
+	exportNote(selectedEntry: Entry, exportPath: string, template: string) {
+		const exportName: string = selectedEntry.key;
+		const exportPathFull: string = exportPath + "/" + exportName + ".md";
+		const normalised = normalizePath(exportPathFull);
+		console.log({ normalised, exportPathFull });
+		fs.writeFile(normalised, template, function (err) {
+			if (err) console.log(err);
+		});
+	}
+
 	parseTemplateBib(selectedEntry: Entry, templateOriginal: string) {
 		const {
 			exportMetadata,
@@ -431,8 +442,6 @@ export default class MyPlugin extends Plugin {
 		let template = exportMetadata ? templateOriginal : "# {{title}}";
 
 		// Replace creators templates with actual creators
-		const authors = selectedEntry.creators.author;
-
 		template = this.replaceCreatorsTemplates(selectedEntry, template);
 
 		// Create an array with all the fields
@@ -451,14 +460,16 @@ export default class MyPlugin extends Plugin {
 		);
 
 		template = this.replaceMissingFields(template);
-
 		// EXPORT ANNOTATION
 		//Check the settings whether to export annotations and whether the selected source has notes
-		if (!(exportAnnotations && entriesArray.includes("note"))) return;
-
+		if (!(exportAnnotations && entriesArray.includes("note"))) {
+			this.exportNote(selectedEntry, exportPath, template);
+			return;
+		}
 		const { note } = selectedEntry.fields;
 
 		const annotationsNoFakeNewLine = this.removeFakeNewlines(note[0]);
+		console.log({ annotationsNoFakeNewLine });
 
 		const annotationsOriginalNoTags = annotationsNoFakeNewLine.replace(
 			/(&lt;([^>]+)>)/gi,
@@ -476,9 +487,10 @@ export default class MyPlugin extends Plugin {
 		let lines = annotationsOriginalNoTags
 			.split(/\r?\n/)
 			// Remove empty lines
-			.filter((a) => a)
-			// Remove first row
-			.splice(0, 1);
+			.filter((a) => a !== "");
+
+		// Remove first row
+		lines.splice(0, 1);
 
 		// Identify the key with the author name, year, and page number added by Zotero at the end of each  highlighted sentence. This does not work with notes extracted from Zotfile
 
@@ -492,8 +504,10 @@ export default class MyPlugin extends Plugin {
 		} = this.createFormatting();
 
 		// LOOP EACH ROW (ELEMENT OF THE ARRAY)
-		for (let i = 0; i < lines.length; i++) {
-			info(
+		// Hardcoding the end point may be an issue
+		const end = lines.length;
+		for (let i = 0; i < end; i++) {
+			console.log(
 				"-----------------------------\nENTRY: " +
 					selectedEntry.key +
 					" - Row Num: " +
@@ -503,11 +517,11 @@ export default class MyPlugin extends Plugin {
 			let currRow = lines[i];
 			let nextRow = lines[i + 1];
 
-			info("ORIGINAL NOTE: " + currRow);
+			console.log("ORIGINAL NOTE: " + currRow);
 
 			//Check if the annotations have been extracted via Zotero Native Reader or Zotfile
 			const formattingType = this.getFormattingType(currRow);
-			info("AnnotationType: " + formattingType);
+			console.log("AnnotationType: " + formattingType);
 
 			//if the annotation is from Zotfile then merge the comment in the next row to the related highlight. This is to address the way zotfile export comments to highlights as independent entries while Zotero exports them on the same row as the highlight they are related to
 			if (formattingType === "Zotfile" && nextRow.slice(0, 3) === "<i>") {
@@ -529,12 +543,14 @@ export default class MyPlugin extends Plugin {
 					? ZOTERO_REG.exec(currRow)
 					: ZOTFILE_REG.exec(currRow);
 
+			console.log({ currRow });
+
 			//Turn the index into a string
 			let authorMatchString = authorMatch + "";
 
 			//  Find the index with the end point of the text within brackets following the character where the highlight/comment
 			const authorMatchEnd = authorMatch.index + authorMatch[0].length;
-			info(authorMatchEnd);
+			console.log(authorMatchEnd);
 
 			//extract the comment to the annotation found after the authorKey (authordatepage)
 			let annotationCommentAll = currRow
@@ -555,13 +571,15 @@ export default class MyPlugin extends Plugin {
 				currRow,
 				authorMatchString
 			);
-			info("TYPE: " + annotationType);
-			info("COMMENT: " + annotationCommentAll);
+			console.log("TYPE: " + annotationType);
+			console.log("COMMENT: " + annotationCommentAll);
 
 			// Extract the highlighted text and store it in variable annotationHighlight
 			let annotationHighlight = currRow
 				.substring(0, authorMatch.index - 1)
 				.trim();
+
+			console.log(annotationHighlight.slice());
 
 			// Remove quotation marks from annotationHighlight
 			["“", '"', "`"].forEach(
@@ -579,7 +597,7 @@ export default class MyPlugin extends Plugin {
 					))
 			);
 
-			info("HIGHLIGHT: " + annotationHighlight);
+			console.log("HIGHLIGHT: " + annotationHighlight);
 
 			// FORMATTING HIGHLIGHT
 			//   add the markdown formatting for the highlight (e.g. bold, italic, highlight)
@@ -602,7 +620,7 @@ export default class MyPlugin extends Plugin {
 							.trim();
 
 			// CORRECT THE PAGE NUMBER
-			let { pageNumberKey, pageNumberPDF, pdfID } =
+			let {authorMatchString, pageNumberKey, pageNumberPDF, pdfID } =
 				this.handleFormattingType(
 					selectedEntry,
 					authorMatch,
@@ -610,7 +628,7 @@ export default class MyPlugin extends Plugin {
 				);
 
 			let authorKey = buildInTextCite(selectedEntry, pageNumberKey);
-			info(authorKey);
+			console.log(authorKey);
 
 			//Create a correct author/year/page key that includes a link to the Zotero Reader
 			const keyAdjusted: string =
@@ -622,7 +640,7 @@ export default class MyPlugin extends Plugin {
 				"?page=" +
 				pageNumberPDF +
 				")"; //created a corrected citation that includes the proper page number and the link to the relevant page in Zotero
-			info("REFERENCE: " + keyAdjusted);
+			console.log("REFERENCE: " + keyAdjusted);
 
 			//  create a link to the pdf without citing the author/year
 			const keyAdjustedNoReference: string =
@@ -664,24 +682,27 @@ export default class MyPlugin extends Plugin {
 					": " +
 					annotationHighlightFormatted +
 					keyAdjusted;
-				info("OUTPUT: " + currRow);
+				console.log("OUTPUT: " + currRow);
 			}
 
 			//FORMAT THE HEADERS
 
 			function formatHeader(level: HeaderLevels) {
 				const hashes = "#".repeat(level);
+				console.log({ currRow, level });
 				currRow =
 					`\n${hashes} ` +
 					annotationHighlight +
 					annotationCommentNoKey.trim();
+				console.log({ currRow });
 				//Add empty row before the headline
 				lines.splice(i, 0, "");
 			}
 
 			//  Transform header in H1/H2/H3/H4/H5/H6 Level
 			if (/typeH\d/.test(annotationType)) {
-				const level = parseInt(annotationType.charAt(-1));
+				const lastChar = annotationType[annotationType.length - 1];
+				const level = parseInt(lastChar);
 				formatHeader(level);
 			}
 			// 	//Add empty row before the headline
@@ -761,16 +782,10 @@ export default class MyPlugin extends Plugin {
 		// }
 
 		// EXPORT NOTE
-		const exportName: string = selectedEntry.key;
-		const exportPathFull: string = exportPath + "/" + exportName + ".md";
-		const normalised = normalizePath(exportPathFull);
-		info({ normalised, exportPathFull });
-		fs.writeFile(normalised, template, function (err) {
-			if (err) info(err);
-		});
+		this.exportNote(selectedEntry, exportPath, template);
 	}
 	// loadLibraryAsynch (filepath:string) {
-	// 	info("Loading library at " + filepath)
+	// 	console.log("Loading library at " + filepath)
 
 	// 	// Read the bib/Json file
 	// 	const bibAll = fs.readFile(filepath);
@@ -780,13 +795,12 @@ export default class MyPlugin extends Plugin {
 	// 	const bibParsed = BibTeXParser.parse(bibAll.toString().substring(0));
 
 	// 	//Check the number of references
-	// 	info("Bib file has " + bibParsed.entries.length + " entries")
+	// 	console.log("Bib file has " + bibParsed.entries.length + " entries")
 	// 	return bibParsed
 	// }
 
 	// Function to replace all values in the template with the Zotero value
 }
-
 
 function escapeRegExp(stringAdd: string) {
 	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
@@ -800,19 +814,13 @@ function replaceAll(stringAdd: string, find: string, replace: string) {
 function buildAuthorKey(authors: BibTeXParser.Name[]) {
 	if (authors.length == 1) return authors[0].lastName;
 	else if (authors.length == 2) {
-		return (
-			authors[0].lastName + " and " + authors[1].lastName
-		);
+		return authors[0].lastName + " and " + authors[1].lastName;
 	} else if (authors.length > 2) {
 		return authors[0].lastName + " et al.";
 	} else return null;
 }
 
-
-function buildInTextCite(
-	entry: BibTeXParser.Entry,
-	pageNumberKey: number
-) {
+function buildInTextCite(entry: BibTeXParser.Entry, pageNumberKey: number) {
 	let inTextCite = "";
 	const authors = entry.creators.author;
 	inTextCite += buildAuthorKey(authors);
@@ -824,4 +832,3 @@ function buildInTextCite(
 
 	return "(" + inTextCite + ")";
 }
-
