@@ -3,6 +3,10 @@ import { MyPluginSettings } from "./types";
 export const HTML_TAG_REG = new RegExp(/<\/?[^>]+(>|$)/g);
 export const PAGE_NUM_REG = new RegExp(/([0-9]+)\)/);
 
+export const ZOTFILE_REG = new RegExp(
+	"\\(zotero://open-pdf/library/items/\\w+\\?page=\\d+\\)"
+);
+
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	bibPath: "default",
 	exportMetadata: true,

@@ -1,7 +1,10 @@
 import MyPlugin from "./main";
 import { App, Modal, FuzzySuggestModal, Notice } from "obsidian";
 import * as fs from "fs";
+
 import * as BibTeXParser from "@retorquere/bibtex-parser";
+
+import * as fsp from "fs/promises";
 export class importAllBib extends Modal {
 	plugin: MyPlugin;
 	constructor(app: App, plugin: MyPlugin) {
@@ -137,6 +140,7 @@ export interface referenceSelection {
 export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelection> {
 	plugin: MyPlugin;
 	bibParsed: BibTeXParser.Bibliography;
+	template: string;
 
 	constructor(app: App, plugin: MyPlugin) {
 		super(app);
@@ -146,11 +150,13 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 		);
 	}
 
-	onOpen() {
+	async onOpen() {
+		this.template = await fsp.readFile(
+			this.plugin.settings.templatePath,
+			"utf8"
+		);
 		console.log("THIS IS INSIDE ON OPEN");
-		
-
-		}
+	}
 	// Returns all available suggestions.
 	getItems(): referenceSelection[] {
 		console.log("THIS IS INSIDE GET ITEMS");
@@ -165,8 +171,6 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 		// //Check the number of references
 		// const number_references: number = bibParsed.entries.length;
 		// console.log("This bib file has " + number_references + " entries");
-
-		
 
 		// let { contentEl } = this;
 		//read the path of the bib file from the settings
@@ -200,7 +204,7 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 			bibtex_Array.push(bibtex_Array_Item);
 		}
 		return bibtex_Array;
-		}
+	}
 
 	// Renders each suggestion item.
 	getItemText(referenceSelected: referenceSelection) {
@@ -208,7 +212,7 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 	}
 
 	// Perform action on the selected suggestion.
-	onChooseItem(
+	async onChooseItem(
 		referenceSelected: referenceSelection,
 		evt: MouseEvent | KeyboardEvent
 	) {
@@ -220,12 +224,13 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 			new Notice("Please select a template first!");
 			return;
 		}
-		const templateOriginal = fs.readFileSync(
-			this.plugin.settings.templatePath,
-			"utf8"
-		);
 
-		if (!templateOriginal) {
+		// const templateOriginal = fs.readFileSync(
+		// 	this.plugin.settings.templatePath,
+		// 	"utf8"
+		// );
+
+		if (!this.template) {
 			new Notice("Template not found!");
 			return;
 		}
@@ -233,8 +238,9 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
 		const selectedEntry = this.bibParsed.entries[referenceSelected.id];
 
-		//run function to process the selected chosenCiteKey from bibParsed using templateOriginal
-		this.plugin.parseTemplateBib(selectedEntry, templateOriginal);
+		//run function to process the selected chosenCiteKey from bibParsed using this.template
+		this.plugin.parseTemplateBib(selectedEntry, this.template);
+		console.log({ selectedEntry, template: this.template });
 		console.log("Imported Note " + referenceSelected.citeKey);
 	}
 }
