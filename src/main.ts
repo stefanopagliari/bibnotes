@@ -49,16 +49,8 @@ export default class MyPlugin extends Plugin {
 			},
 		});
 
-		//Add Command to Import Bib file
-		// this.addCommand({
-		// 	id: "importSelectedBib-modal",
-		// 	name: "Select References from Bibliography",
-		// 	callback: () => {
-		// 	new selectEntryFromBib(this.app, this).open();
-		// 	},
-		// });
 
-		//Add Command to Import Bib file
+		//Add Command to Select a single Entry from Bib file
 		this.addCommand({
 			id: "importSelectedBib-modal",
 			name: "Select References from Bibliography (Fuzzy)",
@@ -253,17 +245,17 @@ export default class MyPlugin extends Plugin {
 	/**
 	 * Check if the annotations have been extracted via Zotero Native Reader or Zotfile
 	 **/
+	// Function to derive the regex to identify if an annotaiton has been extracted via Zotero native reader
 	getZoteroRegex(selectedEntry: Entry) {
-		const NumAuthors = selectedEntry.creators.author[0].lastName.length 
-			let AuthorKeyNew:string = undefined
-			if (NumAuthors == 1){AuthorKeyNew = selectedEntry.creators.author[0].lastName
+		const NumAuthors = selectedEntry.creators.author.length //check the number of authors
+		let AuthorKeyNew:string = undefined
+		if (NumAuthors == 1){AuthorKeyNew = selectedEntry.creators.author[0].lastName
 			} else if (NumAuthors == 2) {AuthorKeyNew =
 				selectedEntry.creators.author[0].lastName +
 				" and " + selectedEntry.creators.author[1].lastName
 			} else if (NumAuthors>2) {AuthorKeyNew = selectedEntry.creators.author[0].lastName + " et al."}
-			console.log (AuthorKeyNew)
 		const ZOTERO_REG = new RegExp("\\(" + AuthorKeyNew + ", \\d+, p. \\d+\\)")
-		return ZOTERO_REG
+		return ZOTERO_REG 
 	}
 
 	getFormattingType(currLine: string, selectedEntry: Entry) {
@@ -472,7 +464,13 @@ export default class MyPlugin extends Plugin {
 		);
 
 		template = this.replaceMissingFields(template);
-		// EXPORT ANNOTATION
+		
+		//remove backticks
+		template = template.replace(
+			/`/g, "'"
+			);
+		
+		// IMPORT ANNOTATION
 		//Check the settings whether to export annotations and whether the selected source has notes
 		if (!(exportAnnotations && entriesArray.includes("note"))) {
 			this.exportNote(selectedEntry, exportPath, template);
@@ -526,7 +524,6 @@ export default class MyPlugin extends Plugin {
 					" - Row Num: " +
 					i
 			);
-			console.log(lines[i])
 			let currRow = lines[i];
 			let nextRow = lines[i + 1];
 
@@ -534,15 +531,23 @@ export default class MyPlugin extends Plugin {
 
 			//Check if the annotations have been extracted via Zotero Native Reader or Zotfile
 			const formattingType = this.getFormattingType(currRow, selectedEntry);
-			console.log("AnnotationType: " + formattingType);
+			console.log("Annotation Origin: " + formattingType);
+
+			//if the row is recognized as neither extracted from Zotero nor from Zotfile then leave as it is and skip to the next iteration
+			if (formattingType !== "Zotero" && formattingType !== "Zotfile") continue
+
 
 			//if the annotation is from Zotfile then merge the comment in the next row to the related highlight. This is to address the way zotfile export comments to highlights as independent entries while Zotero exports them on the same row as the highlight they are related to
-			if (formattingType === "Zotfile" && nextRow.slice(0, 3) === "<i>") {
-				nextRow = nextRow.replace("<i>", "");
-				nextRow = nextRow.replace("</i>", "");
-				nextRow = nextRow.replace(ZOTFILE_REG, "");
-				currRow = currRow + " " + nextRow;
-				indexRowsToBeRemoved.push(i + 1);
+		
+
+			if (nextRow != undefined && formattingType === "Zotfile"){
+				if (nextRow.slice(0, 3) === "<i>") {
+					nextRow = nextRow.replace("<i>", "");
+					nextRow = nextRow.replace("</i>", "");
+					nextRow = nextRow.replace(ZOTFILE_REG, "");
+					currRow = currRow + " " + nextRow;
+					indexRowsToBeRemoved.push(i + 1);
+				}
 			}
 			// if the row has been flagged as "toberemoved", skip
 			if (indexRowsToBeRemoved.includes(i)) continue;
@@ -557,9 +562,6 @@ export default class MyPlugin extends Plugin {
 
 
 			//Identify the author/year/page expression created by the Zotero reader
-
-
-			
 			const ZOTERO_REG = this.getZoteroRegex(selectedEntry)
 			//Find the index with the starting point of the text within brackets following the character where the highlight/comment ends
 			const authorMatch =
@@ -567,23 +569,13 @@ export default class MyPlugin extends Plugin {
 					? ZOTERO_REG.exec(currRow)
 					: ZOTFILE_REG.exec(currRow);
 			console.log("authorMatch: "+ authorMatch)
-			//console.log({ currRow }); 
-
-			// const match = currRow.match(ZOTERO_REG);
-			// const firstIndex = currRow.indexOf(match[0]);
-			// console.log ("firstIndex = " + firstIndex)
-			// const lastIndex  = currRow.lastIndexOf(match[match.length-1]);
-			// console.log ("lastIndex = " + lastIndex)
  
-
-
 
 			//Turn the index into a string
 			const authorMatchString = authorMatch + "";
 
 			//  Find the index with the end point of the text within brackets following the character where the highlight/comment
 			const authorMatchEnd = authorMatch.index + authorMatch[0].length;
-			console.log("authorMatch.index : "+ authorMatch.index); 
 			//extract the comment to the annotation found after the authorKey (authordatepage)
 			const annotationCommentAll = currRow
 				.substring(authorMatchEnd + 1)
@@ -607,7 +599,7 @@ export default class MyPlugin extends Plugin {
 			console.log("COMMENT ALL: " + annotationCommentAll);
 
 			// Extract the highlighted text and store it in variable annotationHighlight
-			console.log(authorMatch.index - 1)
+			
 			let annotationHighlight = currRow
 				.substring(0, authorMatch.index - 1)
 				.trim();
@@ -733,20 +725,15 @@ export default class MyPlugin extends Plugin {
 			//  Transform header in H1/H2/H3/H4/H5/H6 Level
 			if (/typeH\d/.test(annotationType)) {
 				const lastChar = annotationType[annotationType.length - 1];
-				console.log("lastChar : "+ lastChar)
 				const level = parseInt(lastChar);
-				console.log("level : "+level)
 				const hashes = "#".repeat(level);
-				console.log("annotationHighlight = "+ annotationHighlight)
-				console.log("annotationCommentNoKey = "+ annotationCommentNoKey)
-				lines[i] =
+				currRow =
 					`\n${hashes} ` +
 					annotationHighlight +
 					annotationCommentNoKey.trim();
-				console.log("AFTER HEADER TRANSFORMATION: "+ lines[i])	
 			}
 			// 	//Add empty row before the headline
-			// 	annotationsArray.splice(i, 0, "");
+			//	lines.splice(i, 0, "");
 			
 
 			//FORMAT KEYWORDS
@@ -765,7 +752,7 @@ export default class MyPlugin extends Plugin {
 
 			// FORMAT HIGHLIGHTED SENTENCES
 			if (annotationType === "noKey") {
-				lines[i] =
+				currRow =
 					highlightPrepend +
 					annotationHighlightFormatted +
 					keyAdjusted;
@@ -774,7 +761,7 @@ export default class MyPlugin extends Plugin {
 
 			//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
 			if (annotationType === "typeComment") {
-				lines[i] =
+				currRow =
 					commentPrepend +
 					commentFormatBefore +
 					annotationCommentNoKey.trim() +
@@ -783,12 +770,15 @@ export default class MyPlugin extends Plugin {
 			}
 
 			// Replace backticks with single quote
-			lines[i] = replaceTemplate(lines[i], "`", "'");
-			lines[i] = lines[i].replace(HTML_TAG_REG, "");
-			lines[i] = replaceTemplate(lines[i], "/<i/>", "");
+			currRow = replaceTemplate(currRow, "`", "'");
+			currRow = currRow.replace(HTML_TAG_REG, "");
+			currRow = replaceTemplate(currRow, "/<i/>", "");
 
 			// Correct encoding issues
-			lines[i] = replaceTemplate(lines[i], "&amp;", "&");
+			currRow = replaceTemplate(currRow, "&amp;", "&");
+
+			//Replace the  unedited row with the edited currRow
+			lines[i] = currRow
 		}
 		// //PERFORM THE FOLLOWING OPERATIONS ON THE WHOLE ARRAY
 
@@ -812,7 +802,15 @@ export default class MyPlugin extends Plugin {
 				lines.splice(index, 0, "");
 			}
 		}
-		// }
+		
+		// // Add empty row before the heading in the settings
+		
+		for (let index = lines.length - 1; index >= 0; index--) {
+			if(lines[index].charAt(0) === "#"){
+				lines.splice(index, 0, "")
+				}
+			}
+		
 
 		// Turn the annotations in a string including newline symbols
 		const annotationsArrayJoined = lines.join("\n");
@@ -825,22 +823,6 @@ export default class MyPlugin extends Plugin {
 		// EXPORT NOTE
 		this.exportNote(selectedEntry, exportPath, template);
 	}
-	// loadLibraryAsynch (filepath:string) {
-	// 	console.log("Loading library at " + filepath)
-
-	// 	// Read the bib/Json file
-	// 	const bibAll = fs.readFile(filepath);
-	// 	  // Unload current library.
-
-	// 	// Parse the bib file using BibTexParser
-	// 	const bibParsed = BibTeXParser.parse(bibAll.toString().substring(0));
-
-	// 	//Check the number of references
-	// 	console.log("Bib file has " + bibParsed.entries.length + " entries")
-	// 	return bibParsed
-	// }
-
-	// Function to replace all values in the template with the Zotero value
 }
 
 function escapeRegExp(stringAdd: string) {
@@ -852,24 +834,5 @@ function replaceAll(stringAdd: string, find: string, replace: string) {
 	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
 }
 
-function buildAuthorKey(authors: BibTeXParser.Name[]) {
-	if (authors.length == 1) return authors[0].lastName;
-	else if (authors.length == 2) {
-		return authors[0].lastName + " and " + authors[1].lastName;
-	} else if (authors.length > 2) {
-		return authors[0].lastName + " et al.";
-	} else return null;
-}
 
-// function buildInTextCite(entry: BibTeXParser.Entry, pageNumberKey: number) {
-// 	let inTextCite = "";
-// 	const authors = entry.creators.author;
-// 	inTextCite += buildAuthorKey(authors);
-
-// 	const { year } = entry.fields;
-// 	inTextCite += ", " + year;
-
-// 	if (pageNumberKey) inTextCite += ": " + pageNumberKey;
-
-// 	return "(" + inTextCite + ")";
-// }
+ 
