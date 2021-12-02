@@ -160,25 +160,6 @@ export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelectio
 	// Returns all available suggestions.
 	getItems(): referenceSelection[] {
 		console.log("THIS IS INSIDE GET ITEMS");
-		// console.log(this.plugin.settings.bibPath);
-
-		// //read the path of the bib file from the settings
-		// const bibPath: string = this.plugin.settings.bibPath;
-
-		// //run function to load the bibfile and return a parsed object
-		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
-
-		// //Check the number of references
-		// const number_references: number = bibParsed.entries.length;
-		// console.log("This bib file has " + number_references + " entries");
-
-		// let { contentEl } = this;
-		//read the path of the bib file from the settings
-		// const bibPath: string = this.plugin.settings.bibPath;
-
-		//run function to load the bibfile and return a parsed object
-		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
-
 		//Check the number of references
 		const number_references: number = this.bibParsed.entries.length;
 		console.log("This bib file has " + number_references + " entries");

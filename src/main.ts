@@ -95,20 +95,25 @@ export default class MyPlugin extends Plugin {
 		let copy = template.slice();
 		["author", "editor"].forEach((creator) => {
 			const creators = selectedEntry.creators[creator];
+			console.log("creators = " + creators)
 			if (!creators) return;
 			const creatorList = creators.map(getNameStr);
+			console.log("creatorList = " + creatorList)
 			const creatorListBracket = creatorList.map(makeWiki);
-
+			console.log("creatorListBracket = " + creatorListBracket)
+			console.log(creatorListBracket.join("; "))
+			
+			copy = replaceTemplate(
+				copy,
+				`[[{{${creator}}}]]`,
+				creatorListBracket.join("; ")
+			);
 			copy = replaceTemplate(
 				copy,
 				`{{${creator}}}`,
 				creatorList.join("; ")
 			);
-			copy = replaceTemplate(
-				copy,
-				makeWiki(`{{${creator}}}`),
-				creatorListBracket.join("; ")
-			);
+
 		});
 		return copy;
 	}
