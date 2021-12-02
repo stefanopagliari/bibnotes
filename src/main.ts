@@ -477,17 +477,23 @@ export default class MyPlugin extends Plugin {
 			return;
 		}
 		const { note } = selectedEntry.fields;
-
+		console.log("Pre-processed note: " + note)
 		const annotationsCleaned = this.removeFakeNewlines(note[0])
-			.replace(
-				/(&lt;([^>]+)>)/gi,
-				"")		
-				// // Replace backticks
+			// .replace(
+			// 	// Remove HTML tags
+			// 	HTML_TAG_REG,
+			// 	"")		
+			// 	// // Replace backticks
 			.replace(
 				/`/g, "'"
-				);
+				)
+				// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
+			.replace(
+				/, p. p. /g,
+				", p. "
+			)
 				
-
+		console.log("Cleaned note: " + annotationsCleaned)			
 		// Set an array that collect the keywords from the highlight
 		const keywordArray: string[] = [];
 
@@ -563,6 +569,8 @@ export default class MyPlugin extends Plugin {
 
 			//Identify the author/year/page expression created by the Zotero reader
 			const ZOTERO_REG = this.getZoteroRegex(selectedEntry)
+			
+
 			//Find the index with the starting point of the text within brackets following the character where the highlight/comment ends
 			const authorMatch =
 				formattingType === "Zotero"
@@ -756,8 +764,14 @@ export default class MyPlugin extends Plugin {
 					highlightPrepend +
 					annotationHighlightFormatted +
 					keyAdjusted;
-				
-			}
+				if (annotationCommentAll != "")  {
+					currRow = currRow + 
+					"\n" +
+					commentPrepend +
+					commentFormatBefore +
+					annotationCommentNoKey.trim() +
+					commentFormatAfter + keyAdjustedNoReference}
+				}
 
 			//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
 			if (annotationType === "typeComment") {
