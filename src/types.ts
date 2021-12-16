@@ -92,6 +92,7 @@ export interface MyPluginSettings {
 	templatePath: string;
 	templateType: string;
 	exportPath: string;
+	exportTitle: string;
 	missingfield: string;
 	keyMergeAbove: string;
 	keyCommentPrepend: string;
@@ -122,3 +123,74 @@ export interface MyPluginSettings {
 	commentCustomTextAfter: string;
 	isDoubleSpaced: boolean;
 }
+
+export interface Reference {
+	authorKey: string;
+	id: number;
+	citationKey: string;
+	year: string;
+	itemType: string;
+	inlineReference: string;
+	date: string;
+	dateModified: string;
+	itemKey:string;
+	title: string;
+	creators: {
+		creatorType: string;
+		firstName: string;
+		lastName: string;
+		name: string;
+		}[]
+	file: string;
+	localLibrary: string;
+	select:string;
+	attachments:{
+		dateAdded: string,
+		dateModified: string,
+		itemType: string,
+		path: string,
+		relations: string[],
+		tags: string[],
+		title: string,
+		uri: string,
+	}[],
+	notes:{
+		"dateAdded": string,
+		"dateModified": string,
+		"itemType": string,
+		"key": string,
+		"note": string,
+		"parentItem": "VMSSFNIR",
+        "relations": string[],
+        "tags": string[],
+        "uri": string,
+        "version": number
+	}[],
+	tags: 
+        {
+          "tag": string
+        }[],
+	zoteroTags: string[]
+}
+
+export interface AnnotationElements {
+	annotationType: string,
+	citeKey: string,
+	commentText: string,
+	highlightText: string,
+	highlightColour: string,
+	indexNote: number,
+	rowOriginal: string,
+	rowEdited: string,
+	}[]
+
+
+
+export interface Creator {
+    creatorType: string;
+    firstName: string;
+    lastName: string;
+    name: string;
+}
+
+export type CreatorArray = Array<Creator>

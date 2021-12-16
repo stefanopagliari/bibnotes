@@ -1,4 +1,5 @@
 import MyPlugin from "./main";
+import {templateSimple} from "./constants"
 import { App, PluginSettingTab, Setting } from "obsidian";
 
 export class SettingTab extends PluginSettingTab {
@@ -41,9 +42,22 @@ export class SettingTab extends PluginSettingTab {
 					.setValue(settings.exportPath)
 					.onChange(async (value) => {
 						settings.exportPath = value;
-						await plugin.saveSettings();
+						await plugin.saveSettings(); 
 					})
 			);
+
+		new Setting(containerEl)
+		.setName("Exported Note Title")
+		.setDesc("Indicate the format of the title of the note. Possible values include: {{citeKey}}, {{title}}, {{author}}, {{year}}")
+		.addText((text) =>
+			text
+				.setPlaceholder("{{citeKey}}")
+				.setValue(settings.exportTitle)
+				.onChange(async (value) => {
+					settings.exportTitle = value;
+					await plugin.saveSettings();
+				})
+		);	
 		new Setting(containerEl)
 			.setName("Extract Metadata")
 			.setDesc(
@@ -58,82 +72,45 @@ export class SettingTab extends PluginSettingTab {
 						this.display();
 					})
 			);
-		new Setting(containerEl)
-			.setName("Extract Annotations")
-			.addToggle((text) =>
-				text
-					.setValue(settings.exportAnnotations)
-					.onChange(async (value) => {
-						settings.exportAnnotations = value;
-						await plugin.saveSettings();
-						this.display();
-					})
-			);
-
+		
 		if (settings.exportMetadata) {
 			const settingsTemplate: HTMLDetailsElement =
 				containerEl.createEl("details");
+				settingsTemplate.setAttribute("open", "");
 			settingsTemplate.createEl("summary", { text: "Template" });
+
+				
 			new Setting(settingsTemplate)
-				.setName("Select Template")
-				.setDesc(
-					"Select Template."
-				)
-				.addDropdown((d) => {
-					d.addOption("Simple", "Simple");
-					d.addOption("Enhanced", "Enhanced");
-					d.addOption("Custom", "Custom");
-					d.setValue(settings.templateType);
-					d.onChange(
-						async (
-							v:
-								| "Simple"
-								| "Enhanced"
-								| "Custom"
-								| "Import from Note"
+				.setName('Template')
+				.addTextArea((text) =>
+					text
+					.setValue(settings.templateContent)
+					.onChange(async (value) => {
+						settings.templateContent = value;
+						await plugin.saveSettings();
+						this.display();
+					})
+				);
+				
+				// new Setting(settingsTemplate)
+				// 	.setName("Note Template")
+				// 	.setDesc(
+				// 		"Add Path to the template (*.md) to use in importing the note."
+				// 	)
+				// 	.addText((text) =>
+				// 		text
+				// 			.setPlaceholder("/path/to/Template.md")
+				// 			.setValue(settings.templatePath)
+				// 			.onChange(async (value) => {
+				// 				console.log("Path Template: " + value);
 
-						) => {
-							settings.templateType = v;
-							await plugin.saveSettings();
-							// if (settings.templateType === "Simple"){settings.templateContent = "Simple"}
-							// if (settings.templateType === "Enhanced"){settings.templateContent = "Enhanced"}
-							// if (settings.templateType === "Custom"){settings.templateContent = "Custom"}
-							// if (settings.templateType === "Import from Note"){settings.templateContent = "Import from Note"}
-							// this.display();
 
-						} 
-					);
-				});
-			if (settings.templateType === "Custom") {
-				new Setting(settingsTemplate)
-					.setName('Template')
-					.addTextArea((text) =>
-						text
-						.setValue(settings.templateContent)
-						.onChange(async (value) => {
-							settings.templateContent = value;
-							console.log(value);
-						})
-					);
-				}
-			if (settings.templateType === "Import from Note") {
-				new Setting(settingsTemplate)
-					.setName("Note Template")
-					.setDesc(
-						"Add Path to the template (*.md) to use in importing the note"
-					)
-					.addText((text) =>
-						text
-							.setPlaceholder("/path/to/Template.md")
-							.setValue(settings.templatePath)
-							.onChange(async (value) => {
-								console.log("Path Template: " + value);
-								settings.templatePath = value;
-								this.display();
-								await plugin.saveSettings();
-							})
-					);
-				}	
+				// 				settings.templatePath = value;
+				// 				this.display();
+				// 				await plugin.saveSettings();
+				// 			})
+				// 	);
+					
 			new Setting(settingsTemplate)
 				.setName("Missing Fields")
 				.setDesc(
@@ -156,7 +133,41 @@ export class SettingTab extends PluginSettingTab {
 						}
 					);
 				});
+
+			// new Setting(settingsTemplate)
+			// .setName("Tags")
+			// .setDesc(
+			// 	"Formatting of the tags exported from the metadata."
+			// )
+			// .addDropdown((d) => {
+			// 	d.addOption("Brackets - [[tag]]", "Brackets - [[tag]]");
+			// 	d.addOption("Hashtag - #tag", "Hashtag - #tag");
+			// 	d.addOption("Plain - tag", "Plain - tag");
+			// 	d.setValue(settings.tagsFormat);
+			// 	d.onChange(
+			// 		async (
+			// 			v:
+			// 				| "Brackets - [[tag]]"
+			// 				| "Hashtag - #tag"
+			// 				| "Plain - tag"
+			// 		) => {
+			// 			settings.tagsFormat = v;
+			// 			await plugin.saveSettings();
+			// 		}
+			// 	);
+			// });	
 		}
+		new Setting(containerEl)
+		.setName("Extract Annotations")
+		.addToggle((text) =>
+			text
+				.setValue(settings.exportAnnotations)
+				.onChange(async (value) => {
+					settings.exportAnnotations = value;
+					await plugin.saveSettings();
+					this.display();
+				})
+		);
 
 		if (settings.exportAnnotations) {
 			const settingsHighlights: HTMLDetailsElement =
@@ -181,7 +192,7 @@ export class SettingTab extends PluginSettingTab {
 			new Setting(settingsHighlights)
 				.setName("Quotation Marks")
 				.addToggle((text) =>
-					text
+					text 
 						.setValue(settings.isHighlightQuote)
 						.onChange(async (value) => {
 							settings.isHighlightQuote = value;

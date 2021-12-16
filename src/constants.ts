@@ -7,14 +7,51 @@ export const ZOTFILE_REG = new RegExp(
 	"\\(zotero://open-pdf/library/items/\\w+\\?page=\\d+\\)"
 );
 
+export const templateSimple = "# {{title}}\n" +
+"\n" + 
+"## Metadata\n" +
+"- **CiteKey**: {{citekey}}\n " +
+"- **Type**: {{itemType}}\n " +
+"- **Title**: {{title}}, \n " +
+"- **Author**:: [[{{author}}]];  \n"+
+"- **Editor**:: [[{{editor}}]];  \n"+
+"- **Translator**: {{translator}}\n"+
+"- **Publisher**: {{publisher}},\n"+
+"- **Location**: {{place}},\n"+
+"- **Series**: {{volume}},\n"+
+"- **Journal**: {{publicationTitle}}, \n"+
+"- **Volume**: {{volume}},\n"+
+"- **Issue**: {{issue}}\n"+
+"- **Pages**: {{pages}}\n"+
+"- **Year**: {{year}} \n"+
+"- **Date Added**: {{dateAdded}}\n"+
+"- **Date Modified**: {{dateModified}}\n"+
+"- **DOI**: {{DOI}}\n"+
+"- **ISSN**: {{ISBN}}\n"+
+"- **ISBN**: {{ISBN}}\n"+
+"\n"+
+"## Abstract" +
+"{{abstractNote}}" +
+"\n"+
+"## Files and Links\n"+
+"- **Url**: {{url}}\n"+
+"- **Uri**: {{uri}}\n"+
+"- **Eprint**: {{eprint}}\n"+
+"- **File**: {{file}}\n"+
+"- **Local Library**: {{localLibrary}}\n"+
+"\n"+
+"## Tags\n"+
+"* Keywords: {{keywords}}\n "
+
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	bibPath: "default",
 	exportMetadata: true,
 	exportAnnotations: true,
-	templateContent: "",
+	templateContent: templateSimple,
 	templatePath: "",
 	templateType: "",
 	exportPath: "default",
+	exportTitle: "{{citeKey}}",
 	missingfield: "Leave placeholder",
 	keyMergeAbove: "+",
 	keyCommentPrepend: "%",
@@ -57,3 +94,5 @@ export enum HeaderLevels {
 
 export const TEMPLATE_REG = /\{\{[^}]+\}\}/g;
 export const TEMPLATE_BRACKET_REG = /\[\[\{\{[^}]+\}\}\]\]/g;
+
+
