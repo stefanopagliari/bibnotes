@@ -14,7 +14,7 @@ import {
 } from "./constants";
 
 //Import modals from /modal.ts
-import {importAllBib, 
+import {
 	fuzzySelectEntryFromJson 
 } from "./modal";
 
@@ -49,25 +49,6 @@ export default class MyPlugin extends Plugin {
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SettingTab(this.app, this));
-
-		//Add Command to Import Bib file
-		this.addCommand({
-			id: "importAllBib-modal",
-			name: "Import Entire Bibliography",
-			callback: () => {
-				new importAllBib(this.app, this).open();
-			},
-		});
-
-
-		//Add Command to Select a single Entry from Bib file
-		// this.addCommand({
-		// 	id: "importSelectedBib-modal",
-		// 	name: "Select References from Bibliography (Fuzzy)",
-		// 	callback: () => {
-		// 		new fuzzySelectEntryFromBib(this.app, this).open();
-		// 	},
-		// });
 
 		//Add Command to Select a single Entry from Bib file via SQL
 		this.addCommand({
@@ -856,9 +837,6 @@ export default class MyPlugin extends Plugin {
 			note = note.replace("# Abstract\n", "");
 			note = note.replace("## Abstract\n", "");
 			note = note.replace("### Abstract\n", "");
-			note = note.replace("# Abstract:\n", "");
-			note = note.replace("## Abstract:\n", "");
-			note = note.replace("### Abstract:\n", "");
 			}
 
 
@@ -1017,6 +995,7 @@ export default class MyPlugin extends Plugin {
 								.trim();
 				} else {lineElements.rowEdited = selectedLine }
 		//Add the element to the array containing all the elements
+		console.log(indexLines)
 		console.log(lineElements)
 		noteElements.push(lineElements)
 		}

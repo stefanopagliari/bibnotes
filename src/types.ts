@@ -182,6 +182,8 @@ export interface AnnotationElements {
 	indexNote: number,
 	rowOriginal: string,
 	rowEdited: string,
+	foundOld: boolean,
+	positionOld: number,
 	}[]
 
 

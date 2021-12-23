@@ -1,9 +1,7 @@
 import MyPlugin from "./main";
 import { App, Modal, FuzzySuggestModal, Notice, Setting } from "obsidian";
 import * as fs from "fs";
-//import * as BibTeXParser from "@retorquere/bibtex-parser";
-//import * as fsp from "fs/promises";
-import data from '/Users/stefanopagliari/Desktop/My_Library_json.json';
+
 
 import { Reference,
 		AnnotationElements,
@@ -11,176 +9,42 @@ import { Reference,
 		
 		
 import {
+	compareNewOldNotes,
 	createAuthorKey,
+	createNoteTitle,
 	createTagList,
-	exportNote,
 	orderByDateModified,
-	replaceMissingFields
+	replaceMissingFields 
 	} from "./utils";
 import { DEFAULT_SETTINGS } from "./constants";
-import { SettingTab } from "./settings";
-//const Database = require('better-sqlite3');
-//import sqlite3 from 'sqlite3' 
-//import Database from 'better-sqlite3';
+import { SettingTab } from "./settings"; 
 
- 
-
-export class importAllBib extends Modal {
-	plugin: MyPlugin;
-	constructor(app: App, plugin: MyPlugin) {
-		super(app);
-		this.plugin = plugin;
-	}
-
-	onOpen() {
-		// let { contentEl } = this;
-		//read the path of the bib file from the settings
-		const bibPath: string = this.plugin.settings.bibPath;
-
-		//run function to load the bibfile and return a parsed object
-		const bibParsed = this.plugin.loadLibrarySynch(bibPath);
-
-		//Check the number of references
-		const number_references: number = bibParsed.entries.length;
-		console.log("This bib file has " + number_references + " entries");
-
-		// Extract the citekeys of all the references and store them in an array
-		const bibtexArray: string[] = [];
-		for (let i = 0; i < number_references; i++) {
-			bibtexArray.push(bibParsed.entries[i].key);
-		}
-		console.log(
-			"This bib file has " +
-				bibtexArray.length +
-				" entries: " +
-				bibtexArray
-		);
-
-		// Load Template
-		const templateOriginal = fs.readFileSync(
-			this.plugin.settings.templatePath,
-			"utf8"
-		);
-
-		//Loop through all the all the entries in the bib file and process each file
-		for (
-			let EntryNumber = 0;
-			EntryNumber < bibParsed.entries.length;
-			EntryNumber++
-		) {
-			const selectedEntry = bibParsed.entries[EntryNumber];
-			//run function to process the selected chosenCiteKey from bibParsed using templateOriginal
-			this.plugin.parseTemplateBib(selectedEntry, templateOriginal);
-		}
-		//const selectedCiteKey = bibtexArray[0]
-	}
-
-	onClose() {
-		// let { contentEl } = this;
-		// contentEl.empty();
-	}
-}
-  
-// export class fuzzySelectEntryFromBib extends FuzzySuggestModal<referenceSelection> {
-// 	plugin: MyPlugin;
-// 	bibParsed: BibTeXParser.Bibliography;
-// 	template: string;
-// 	selectArray: referenceSelection[]
- 
-
-// 	constructor(app: App, plugin: MyPlugin) {
-// 		super(app);
-// 		this.plugin = plugin;
-// 		this.bibParsed = this.plugin.loadLibrarySynch(
-// 			this.plugin.settings.bibPath);
-// 	}
-
-// 	async onOpen() {
-// 		this.template = await fsp.readFile(
-// 			this.plugin.settings.templatePath,
-// 			"utf8"
-// 		);
-// 		const number_references: number = this.bibParsed.entries.length;
-// 		new Notice(`The imported bib file has ${number_references} entries`);
-
-// 		const bibtexArray: referenceSelection[] = []
-
-// 		for (let i = 0; i < number_references; i++) {
-
-// 			const bibtexArrayItem = {} as referenceSelection;
-// 			bibtexArrayItem.citeKey = this.bibParsed.entries[i].key;
-// 			bibtexArrayItem.id = i;
-// 			const title = this.bibParsed.entries[i].fields.title;
-
-// 			bibtexArrayItem.reference =
-// 				title + " - " + "citekey: " + bibtexArrayItem.citeKey;
-// 			bibtexArray.push(bibtexArrayItem);
-// 		}
-// 		this.selectArray = bibtexArray
-
-// 	}
-// 	// Returns all available suggestions.
-// 	getItems(): referenceSelection[] {
-				
-// 		return this.selectArray
-// 	}
-
-// 	// Renders each suggestion item.
-// 	getItemText(referenceSelected: referenceSelection) {
-// 		return referenceSelected.reference;
-// 	}
-
-// 	// Perform action on the selected suggestion.
-// 	async onChooseItem(
-// 		referenceSelected: referenceSelection,
-// 		evt: MouseEvent | KeyboardEvent
-// 	) {
-// 		new Notice(`Selected ${referenceSelected.citeKey}`);
-
-// 		// Load Template
-// 		const { templatePath } = this.plugin.settings;
-// 		if (templatePath === "") {
-// 			new Notice("Please select a template first!");
-// 			return;
-// 		}
-
-// 		// const templateOriginal = fs.readFileSync(
-// 		// 	this.plugin.settings.templatePath,
-// 		// 	"utf8"
-// 		// );
-
-// 		if (!this.template) {
-// 			new Notice("Template not found!");
-// 			return;
-// 		}
-// 		// const bibPath: string = this.plugin.settings.bibPath;
-// 		// const bibParsed = this.plugin.loadLibrarySynch(bibPath);
-// 		const selectedEntry = this.bibParsed.entries[referenceSelected.id];
-
-// 		//run function to process the selected chosenCiteKey from bibParsed using this.template
-// 		this.plugin.parseTemplateBib(selectedEntry, this.template);
-// 		console.log({ selectedEntry, template: this.template });
-// 		console.log("Imported Note " + referenceSelected.citeKey);
-// 	}
-// }
 
 export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 	plugin: MyPlugin;
 	template: string;
 	selectArray: Reference[]
 	allCitationKeys: string[]
-	
+	data: {
+		collections: {},
+		config: {},
+		items:{},
+		version: {}
+		__proto__: Object
+	}
+
 	constructor(app: App, plugin: MyPlugin) {
 		super(app);
 		this.plugin = plugin;
+
 		
 	}
 
 	async onOpen() {
-		//const data = $.getJSON('url': this.plugin.settings.bibPath);
-
-		//var json = $.getJSON({'url': "http://spoonertuner.com/projects/test/test.json", 'async': false});  
-
+ 
+		//Load the Json file
+		const data = require(this.plugin.settings.bibPath)
+		
 
 		const bibtexArray: Reference[] = [] 
 		for (let index = 0; index < data.items.length; index++) {
@@ -251,6 +115,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 		//console.log(bibtexArray.citeKey)
 		this.selectArray = bibtexArray 
 		await this.updateSuggestions()
+		this.data = data
 
 	}
 	// Returns all available suggestions.
@@ -274,26 +139,30 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 		//Load Template
 		const templateNote = this.plugin.settings.templateContent;
-		console.log(templateNote) 
-		//data.items.citationKey === referenceSelected.citationKey
+		
 		
 		//Find the index of the reference selected
-		const indexSelectedReference = data.items.findIndex(item => item.citationKey === referenceSelected.citationKey);
+		const indexSelectedReference = this.data.items.findIndex(item => item.citationKey === referenceSelected.citationKey);
 		
 		//Selected Reference
-		const selectedEntry: Reference = data.items[indexSelectedReference]
-		console.log(selectedEntry)
+		const selectedEntry: Reference = this.data.items[indexSelectedReference]
+		//console.log(selectedEntry)
 		
 
 		//Run function to extract the metadata
 		let metadata:string = this.plugin.parseMetadata(selectedEntry, templateNote);
-		console.log("THIS IS THE METADATA " + metadata)
-		// console.log(this.plugin.settings.exportAnnotations)
-		// console.log(selectedEntry.notes.length>0)
-
+		//console.log("THIS IS THE METADATA " + metadata)
+		
+		//Define the name and full path of the file to be exported
+		const noteTitleFull = createNoteTitle(selectedEntry, this.plugin.settings.exportTitle, this.plugin.settings.exportPath);
+		
+		
 		//Run function to extract the annotation
 		let notesArray: string[] = []
+		let existingNoteRevised:string = undefined
 		let arrayExtractedKeywords: string[] = []
+ 
+
 		if(this.plugin.settings.exportAnnotations && selectedEntry.notes.length>0){
 			//run the function to parse the annotation for each note (there could be more than one)
 			let noteElements:AnnotationElements[] = []
@@ -306,16 +175,72 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 			//Run the function to edit each line
 			const resultsLineElements = this.plugin.formatNoteElements(noteElements)
-			notesArray = resultsLineElements.rowEditedArray
 			arrayExtractedKeywords = resultsLineElements.keywordArray
+
+			//Run the function to compare each line with the existing version of the note
+			
+			let oldFileExists = false;
+			let existingNoteNote:string = undefined
+
+			//Check if an old version exists
+			if (fs.existsSync(noteTitleFull)) {
+
+				//Import the old version of the note 
+				const existingNoteAll = fs.readFileSync(noteTitleFull)
+				//Extract only the annotation from the old file
+				const positionBeginningOldNotes = existingNoteAll.indexOf("## Extracted Annotations")
+				// If there are old notes in the existing file compared the old and new annotations
+				if (positionBeginningOldNotes !== -1){
+					existingNoteNote = String(existingNoteAll).substring(positionBeginningOldNotes)
+
+					noteElements  = compareNewOldNotes(existingNoteNote, noteElements)
+
+					//console.log("THIS IS THE EXISTING NOTE: " + existingNoteNote)
+					let existingNoteRevisedTemp = existingNoteNote
+					console.log("Length of noteElements.length: " + noteElements.length)
+
+					//console.log(resultsLineElements.rowEditedArray)
+					
+
+					for (let indexNoteElements = noteElements.length-1; indexNoteElements >=0; indexNoteElements--) {		
+			
+						if(noteElements[indexNoteElements].foundOld == false){
+							const positionReplacement = noteElements[indexNoteElements].positionOld
+							const textReplacement = noteElements[indexNoteElements].rowEdited
+							//console.log("textReplacement :"+ textReplacement)
+							if (textReplacement.length <= 0) {continue}
+							//add the text replacement in the position
+		
+							let doubleSpaceAdd = ""
+							if(this.plugin.settings.isDoubleSpaced){doubleSpaceAdd = "\n"}
+
+							// Paste the missing list in the right position
+							existingNoteRevisedTemp = existingNoteRevisedTemp.slice(0, positionReplacement) + doubleSpaceAdd + "\n" + textReplacement + "\n" + existingNoteRevisedTemp.slice(positionReplacement)
+
+							// console.log("existingNoteRevised at 354 in the loop iteration"+ indexNoteElements + ": " + existingNoteRevisedTemp)
+						} 
+					}	
+					existingNoteRevised = existingNoteRevisedTemp
+				} else {
+				//If there is an existing file but no annotations (only metadata),  then create the string containing the edited notes 
+
+					const ArrayJoined = resultsLineElements.rowEditedArray.join("\n");
+					existingNoteRevised = "\n" + "\n" + "## Extracted Annotations" + "\n" + ArrayJoined
+				}
+			} else {
+				//If there is not an existing file, then create the string containing the edited notes
+				// // Turn the annotations in a string including newline symbols
+				const ArrayJoined = resultsLineElements.rowEditedArray.join("\n");
+				existingNoteRevised = "\n" + "\n" + "## Extracted Annotations" + "\n" + ArrayJoined}
+			
 		}
+
+
 		
 		// Copy the keywords extracted by Zotero and store them in an array
 		selectedEntry.zoteroTags = []; 
 		if(selectedEntry.tags.length>0){
 			for (let indexTag = 0; indexTag < selectedEntry.tags.length; indexTag++) {
-				console.log(indexTag)
-				console.log(selectedEntry.tags[indexTag].tag)
 				selectedEntry.zoteroTags.push(selectedEntry.tags[indexTag].tag)
 			}}
 
@@ -324,7 +249,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 		selectedEntry.zoteroTags = selectedEntry.zoteroTags.concat(arrayExtractedKeywords)
 		//Sort the tags in alphabetical order	
 		selectedEntry.zoteroTags = selectedEntry.zoteroTags.sort()
-		console.log("Tags = " + selectedEntry.zoteroTags)
+		//console.log("Tags = " + selectedEntry.zoteroTags)
 		metadata = createTagList(selectedEntry.zoteroTags, metadata)
 		if(selectedEntry.zoteroTags.length==0){
 			metadata = metadata.replace("# Tags\n", "");
@@ -335,74 +260,20 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 				//delete the missing fields
 		const missingFieldSetting = this.plugin.settings.missingfield
-
-	
-
 		metadata = replaceMissingFields(metadata, missingFieldSetting);
 
-		console.log("AAAAAAAAA")
 
 		// Add metadata in front of the annotations
-		notesArray.splice(0, 0, "## Extracted Annotations");
-		notesArray.splice(0, 0, "\n");
-		notesArray.splice(0, 0, "\n");
-		notesArray.splice(0, 0, metadata);
-
-		// Turn the annotations in a string including newline symbols
-		const ArrayJoined = notesArray.join("\n");
+		const finalNote = metadata + 
+			"\n" +
+			existingNoteRevised
+ 
 	
 		//Export the file
-		const exportPath = this.plugin.settings.exportPath
-		const exportTitle = this.plugin.settings.exportTitle
-		console.log(exportTitle)
 
-		exportNote(selectedEntry, exportTitle, exportPath, ArrayJoined) ;
+		fs.writeFile(noteTitleFull, finalNote, function (err) {
+			if (err) console.log(err);
+		});
 		
 	}
 }
-
-
-// export class selectJSON extends SuggestModal<referenceSelection> {
-// 	plugin: MyPlugin;
-// 	template: string;
-// 	selectArray: referenceSelection[]
-
-// 	async onOpen() {
-// 		const bibtexArray: referenceSelection[] = []
-// 		for (let index = 0; index < data.items.length; index++) {
-// 			const bibtexArrayItem = {} as referenceSelection;
-// 			bibtexArrayItem.citeKey = data.items[index].citationKey
-// 			bibtexArrayItem.id = index
-// 			bibtexArrayItem.title = data.items[index].title
-// 			bibtexArrayItem.reference =
-// 				bibtexArrayItem.title + 
-// 				" - " + 
-// 				"citekey: " + 
-// 				bibtexArrayItem.citeKey;
-// 			//console.log(bibtexArrayItem)
-// 			bibtexArray.push(bibtexArrayItem);
-// 		}
-// 		//console.log(bibtexArray.citeKey)
-// 		this.selectArray = bibtexArray
-// 	}
-
-// 	// Returns all available suggestions.
-// 	getSuggestions(query: string): referenceSelection[] {
-// 		return this.selectArray.filter((reference) =>
-// 		reference.reference.toLowerCase().includes(query.toLowerCase()))
-// 	}
-
-  
-// 	// Renders each suggestion item.
-// 	renderSuggestion(referenceSelection: referenceSelection, el: HTMLElement) {
-// 		el.createEl("div", { text: referenceSelection.reference});
-// 	//   el.createEl("small", { text: book.author });
-// 	}
-  
-// 	// Perform action on the selected suggestion.
-// 	onChooseSuggestion(referenceSelection: referenceSelection, evt: MouseEvent | KeyboardEvent) {  
-// 	//   new Notice(`Selected ${book.title}`);
-// 	}
-//   }
- 
-  
