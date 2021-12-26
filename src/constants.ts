@@ -50,6 +50,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	templateContent: templateSimple,
 	templatePath: "",
 	templateType: "",
+	lastUpdateDate: new Date('1995-12-17T03:24:00'),
 	exportPath: "default",
 	exportTitle: "{{citeKey}}",
 	missingfield: "Leave placeholder",

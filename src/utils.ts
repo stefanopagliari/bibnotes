@@ -5,13 +5,15 @@ import {
 	Creator,
 	CreatorArray,
 	Reference,
-	AnnotationElements
+	AnnotationElements,
+	AnnotationTypes
 		} from "./types"
 
 import {
 		TEMPLATE_BRACKET_REG,
 		TEMPLATE_REG,
 		} from "./constants";
+import { Plugin } from "obsidian";
 
 
 export function buildAuthorKey(authors: BibTeXParser.Name[]) {
@@ -247,18 +249,9 @@ export function createLocalFileLink(reference: Reference)  {
 		return filesListString
 	
 	}
-
-// function escapeRegExp(stringAdd: string) {
-// 	return stringAdd.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-// 	}
-
-// // // Call this something else
-// function replaceAll(stringAdd: string, find: string, replace: string) {
-// return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
-//  } 
+ 
 
 export function createNoteTitle(selectedEntry: Reference, exportTitle: string, exportPath: string) {
-	console.log("started the exportNote function")
 	//Replace the placeholders
 	exportTitle = exportTitle.replace("{{citeKey}}", selectedEntry.citationKey)
 	exportTitle = exportTitle.replace("{{citationKey}}", selectedEntry.citationKey)
@@ -397,4 +390,85 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 	}
 	return noteElements
 }
+ 
 
+// export function getFormattingType(currLine: string, selectedEntry: Entry) {
+// 	const ZOTERO_REG = this.getZoteroRegex(selectedEntry)
+// 	if (ZOTERO_REG.test(currLine)) {
+// 		return "Zotero";
+// 	} else if (ZOTFILE_REG.test(currLine)) {
+// 		return "Zotfile";
+// 	} else {
+// 		return null;
+// 	}
+// }
+
+
+// export function getZoteroRegex(selectedEntry: Entry) {
+// 	const NumAuthors = selectedEntry.creators.author.length //check the number of authors
+// 	let AuthorKeyNew:string = undefined
+// 	if (NumAuthors == 1){AuthorKeyNew = selectedEntry.creators.author[0].lastName
+// 		} else if (NumAuthors == 2) {AuthorKeyNew =
+// 			selectedEntry.creators.author[0].lastName +
+// 			" and " + selectedEntry.creators.author[1].lastName
+// 		} else if (NumAuthors>2) {AuthorKeyNew = selectedEntry.creators.author[0].lastName + " et al."}
+// 	const ZOTERO_REG = new RegExp("\\(" + AuthorKeyNew + ", \\d+, p. \\d+\\)")
+// 	return ZOTERO_REG 
+// }
+
+export function loadLibrarySynch(filepath: string) {
+	console.log("Loading library at " + filepath);
+
+	// Read the bib/Json file
+	const bibAll = fs.readFileSync(filepath);
+
+	// Parse the bib file using BibTexParser
+	const bibParsed = BibTeXParser.parse(bibAll.toString().substring(0));
+
+	//Check the number of references
+	console.log("Bib file has " + bibParsed.entries.length + " entries");
+	return bibParsed;
+}
+
+
+export function replaceTagList(selectedEntry:Reference, arrayExtractedKeywords:string[], metadata:string){
+	// Copy the keywords extracted by Zotero and store them in an array
+	selectedEntry.zoteroTags = []; 
+	if(selectedEntry.tags.length>0){
+		for (let indexTag = 0; indexTag < selectedEntry.tags.length; indexTag++) {
+			selectedEntry.zoteroTags.push(selectedEntry.tags[indexTag].tag)
+		}}
+	
+	//Add to the array the tags extracted by the text
+	selectedEntry.zoteroTags = selectedEntry.zoteroTags.concat(arrayExtractedKeywords)
+
+	//Sort the tags in alphabetical order	
+	selectedEntry.zoteroTags = selectedEntry.zoteroTags.sort()
+	//console.log("Tags = " + selectedEntry.zoteroTags)
+	metadata = createTagList(selectedEntry.zoteroTags, metadata)
+
+	if(selectedEntry.zoteroTags.length==0){
+		metadata = metadata.replace("# Tags\n", "");
+		metadata = metadata.replace("## Tags\n", "");
+		metadata = metadata.replace("### Tags\n", "");
+	}
+	return metadata
+} 
+
+ 
+export function addNewAnnotationToOldAnnotation (existingAnnotation:string, noteElements:AnnotationElements[], doubleSpaceAdd: string ){
+	for (let indexNoteElements = noteElements.length-1; indexNoteElements >=0; indexNoteElements--) {		
+		if(noteElements[indexNoteElements].foundOld == false){
+			const positionReplacement = noteElements[indexNoteElements].positionOld
+			const textReplacement = noteElements[indexNoteElements].rowEdited
+			//console.log("textReplacement :"+ textReplacement)
+			//console.log("positionReplacement :"+ positionReplacement)
+			if (textReplacement.length <= 0) {continue}
+			//add the text replacement in the position
+			// Paste the missing list in the right position
+			existingAnnotation = existingAnnotation.slice(0, positionReplacement) + doubleSpaceAdd + "\n" + textReplacement + "\n" + existingAnnotation.slice(positionReplacement)
+
+			// console.log("extractedAnnotations at 354 in the loop iteration"+ indexNoteElements + ": " + extractedAnnotationsTemp) 
+		}}
+	return existingAnnotation
+}

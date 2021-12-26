@@ -105,6 +105,7 @@ export interface MyPluginSettings {
 	keyKeyword: string;
 	highlightStart: string;
 	commentStart: string;
+	lastUpdateDate: Date;
 	isHighlightItalic: boolean;
 	isHighlightBold: boolean;
 	isHighlightHighlighted: boolean;
@@ -134,6 +135,7 @@ export interface Reference {
 	date: string;
 	dateModified: string;
 	itemKey:string;
+	itemID: number;
 	title: string;
 	creators: {
 		creatorType: string;
@@ -193,6 +195,14 @@ export interface Creator {
     firstName: string;
     lastName: string;
     name: string;
+}
+
+export interface Collection {
+    collections: string[];
+    items: string[];
+    key: string;
+    name: string;
+    parent: string;
 }
 
 export type CreatorArray = Array<Creator>
