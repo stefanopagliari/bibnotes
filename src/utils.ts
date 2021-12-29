@@ -1,4 +1,4 @@
-import * as BibTeXParser from "@retorquere/bibtex-parser";
+import { normalizePath } from "obsidian";
 import * as fs from "fs";
 import { 
 	//Reference,
@@ -13,7 +13,7 @@ import {
 		TEMPLATE_BRACKET_REG,
 		TEMPLATE_REG,
 		} from "./constants";
-import { Plugin } from "obsidian";
+import { Plugin, Setting } from "obsidian";
 
 
 export function buildAuthorKey(authors: BibTeXParser.Name[]) {
@@ -227,6 +227,17 @@ export function replaceMissingFields(note: string, missingfield: string) {
 			}
 			copy = lines.join("\n");
 		}
+
+		//Remove empty sections when there is no data
+		copy = copy.replace("```ad-quote\n" + "title: Abstract\n"  +"```\n","")	
+		copy = copy.replace("```ad-abstract\n" + "title: Files and Links\n"  +"```\n","")	
+		copy = copy.replace("```ad-note\n" + "title: Tags and Collections\n"  +"```\n","")	
+
+		//Remove empty sections when there is no data
+		copy = copy.replace("## Abstract\n" + "\n"+ "## Files and Links\n","## Files and Links\n")	
+		copy = copy.replace("## Files and Links\n"+"\n"+"## Tags and Collections\n", "## Tags and Collections\n")	
+		copy = copy.replace("## Tags and Collections\n"+"\n", "\n")	
+
 		//console.log(copy)
 		return copy;
 	}	
@@ -269,8 +280,12 @@ export function createNoteTitle(selectedEntry: Reference, exportTitle: string, e
 	//Remove special characters from the name of the file
 	exportTitle = exportTitle.replace(/[^0-9a-z-A-Z]/g, "")
 
-	const exportPathFull: string = exportPath + "/" + exportTitle + ".md";
-	//const normalised = normalizePath(exportPathFull);\
+	//Get the path of the vault
+	const vaultPath = this.app.vault.adapter.getBasePath()
+		
+	//Create the full path
+	const exportPathFull: string = normalizePath(vaultPath + "/" + exportPath + "/" + exportTitle + ".md");
+
 	return exportPathFull
 	
 }
@@ -471,4 +486,19 @@ export function addNewAnnotationToOldAnnotation (existingAnnotation:string, note
 			// console.log("extractedAnnotations at 354 in the loop iteration"+ indexNoteElements + ": " + extractedAnnotationsTemp) 
 		}}
 	return existingAnnotation
+}
+
+export function openSelectedNote(selectedEntry:Reference, exportTitle, exportPath){
+	 
+	const noteTitleFull = createNoteTitle(selectedEntry, exportTitle, exportPath);
+	
+	//remove from the path of the note to be exported the path of the vault
+	const noteTitleShort = noteTitleFull.replace(normalizePath(this.app.vault.adapter.getBasePath())+"/", "")
+
+	//Find the TFile
+	const myFile = this.app.vault.getAbstractFileByPath(noteTitleShort)
+	
+	//Open the Note ina new leaf
+	this.app.workspace.getUnpinnedLeaf().openFile(myFile);
+
 }

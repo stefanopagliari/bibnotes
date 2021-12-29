@@ -7,7 +7,7 @@ export const ZOTFILE_REG = new RegExp(
 	"\\(zotero://open-pdf/library/items/\\w+\\?page=\\d+\\)"
 );
 
-export const templateSimple = "# {{title}}\n" +
+export const templatePlain = "# {{title}}\n" +
 "\n" + 
 "## Metadata\n" +
 "- **CiteKey**: {{citekey}}\n " +
@@ -30,7 +30,7 @@ export const templateSimple = "# {{title}}\n" +
 "- **ISSN**: {{ISBN}}\n"+
 "- **ISBN**: {{ISBN}}\n"+
 "\n"+
-"## Abstract" +
+"## Abstract\n" +
 "{{abstractNote}}" +
 "\n"+
 "## Files and Links\n"+
@@ -40,18 +40,60 @@ export const templateSimple = "# {{title}}\n" +
 "- **File**: {{file}}\n"+
 "- **Local Library**: {{localLibrary}}\n"+
 "\n"+
-"## Tags\n"+
-"* Keywords: {{keywords}}\n "
+"## Tags and Collections\n"+
+"- **Keywords**: {{keywords}}\n"+
+"- **Collections**: {{collections}} {{collectionsParent}}\n"
+
+export const templateAdmonition = "# {{title}}\n" +
+"\n" + 
+"``` ad-info\n" +
+"title: Metadata\n" +
+"- **CiteKey**: {{citekey}}\n" +
+"- **Type**: {{itemType}}\n" +
+"- **Author**:: [[{{author}}]]\n"+
+"- **Editor**:: [[{{editor}}]]\n"+
+"- **Translator**: {{translator}}\n"+
+"- **Publisher**: {{publisher}}\n"+
+"- **Location**: {{place}}\n"+
+"- **Series**: {{volume}}\n"+
+"- **Journal**: {{publicationTitle}}\n"+
+"- **Volume**: {{volume}}\n"+
+"- **Issue**: {{issue}}\n"+
+"- **Pages**: {{pages}}\n"+
+"- **Year**: {{year}} \n"+
+"- **Date Added**: {{dateAdded}}\n"+
+"- **Date Modified**: {{dateModified}}\n"+
+"- **DOI**: {{DOI}}\n"+
+"- **ISSN**: {{ISBN}}\n"+
+"- **ISBN**: {{ISBN}}\n"+
+"```\n" +
+"```ad-quote\n" +
+"title: Abstract\n" +
+"{{abstractNote}}\n" +
+"```\n" +
+"```ad-abstract\n" +
+"title: Files and Links\n" +
+"- **Url**: {{url}}\n"+
+"- **Uri**: {{uri}}\n"+
+"- **Eprint**: {{eprint}}\n"+
+"- **File**: {{file}}\n"+
+"- **Local Library**: {{localLibrary}}\n"+
+"```\n" +
+"```ad-note\n" +
+"title: Tags and Collections\n" +
+"- **Keywords**: {{keywords}}\n"+
+"- **Collections**: {{collections}} {{collectionsParent}}\n"+
+"```\n" 
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
-	bibPath: "default",
+	bibPath: "",
 	exportMetadata: true,
 	exportAnnotations: true,
-	templateContent: templateSimple,
+	templateContent: templatePlain,
 	templatePath: "",
-	templateType: "",
+	templateType: "Admonition",
 	lastUpdateDate: new Date('1995-12-17T03:24:00'),
-	exportPath: "default",
+	exportPath: "",
 	exportTitle: "{{citeKey}}",
 	missingfield: "Leave placeholder",
 	keyMergeAbove: "+",
@@ -63,8 +105,6 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	keyH5: "#####",
 	keyH6: "######",
 	keyKeyword: "=",
-	highlightStart: "Bullet points",
-	commentStart: "Blockquotes",
 	isHighlightItalic: true,
 	isHighlightBold: false,
 	isHighlightHighlighted: false,

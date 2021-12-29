@@ -1,5 +1,4 @@
 import MyPlugin from "./main";
-import {templateSimple} from "./constants"
 import { App, PluginSettingTab, Setting } from "obsidian";
 
 export class SettingTab extends PluginSettingTab {
@@ -35,7 +34,7 @@ export class SettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Export Path")
-			.setDesc("Add Path to the folder where the notes will be exported")
+			.setDesc("Add relative path to the folder in your vault where the notes will be exported")
 			.addText((text) =>
 				text
 					.setPlaceholder("/path/to/Folder/Note/")
@@ -47,8 +46,8 @@ export class SettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-		.setName("Exported Note Title")
-		.setDesc("Indicate the format of the title of the note. Possible values include: {{citeKey}}, {{title}}, {{author}}, {{year}}")
+		.setName("Note Title")
+		.setDesc("Select the format of the title of the note. Possible values include: {{citeKey}}, {{title}}, {{author}}, {{year}}")
 		.addText((text) =>
 			text
 				.setPlaceholder("{{citeKey}}")
@@ -79,37 +78,65 @@ export class SettingTab extends PluginSettingTab {
 				settingsTemplate.setAttribute("open", "");
 			settingsTemplate.createEl("summary", { text: "Template" });
 
+
+			new Setting(settingsTemplate)
+				.setName("Select Template")
+				.setDesc(
+					"Select Template."
+				)
+				.addDropdown((d) => {
+					d.addOption("Plain", "Plain");
+					d.addOption("Admonition", "Admonition");
+					d.addOption("Custom", "Custom");
+					//d.addOption("Import from Note", "Import from Note");
+					d.setValue(settings.templateType);
+					d.onChange(
+						async (
+							v:
+								| "Plain"
+								| "Admonition"
+								| "Custom"
+								//| "Import from Note"
+ 						) => {
+ 							settings.templateType = v;
+ 							await plugin.saveSettings();
+						}
+						);
+					}
+				);
+
 				
 			new Setting(settingsTemplate)
-				.setName('Template')
+				.setName('Custom Template')
 				.addTextArea((text) =>
 					text
 					.setValue(settings.templateContent)
 					.onChange(async (value) => {
 						settings.templateContent = value;
 						await plugin.saveSettings();
-						this.display();
+						//this.display();
 					})
 				);
 				
-				// new Setting(settingsTemplate)
-				// 	.setName("Note Template")
-				// 	.setDesc(
-				// 		"Add Path to the template (*.md) to use in importing the note."
-				// 	)
-				// 	.addText((text) =>
-				// 		text
-				// 			.setPlaceholder("/path/to/Template.md")
-				// 			.setValue(settings.templatePath)
-				// 			.onChange(async (value) => {
-				// 				console.log("Path Template: " + value);
+			new Setting(settingsTemplate)
+				.setName("Note Template")
+				.setDesc(
+					"Add Path to the template (*.md) to use in importing the note."
+				)
+				.addText((text) =>
+					text
+						.setPlaceholder("/path/to/Template.md")
+						.setValue(settings.templatePath)
+						.onChange(async (value) => {
+							console.log("Path Template: " + value);
 
 
-				// 				settings.templatePath = value;
-				// 				this.display();
-				// 				await plugin.saveSettings();
-				// 			})
-				// 	);
+							settings.templatePath = value;
+							this.display();
+							await plugin.saveSettings();
+						}
+					)
+				);
 					
 			new Setting(settingsTemplate)
 				.setName("Missing Fields")

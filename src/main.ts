@@ -1,13 +1,14 @@
-// Import BibTexParser to parse bib
-import * as BibTeXParser from "@retorquere/bibtex-parser";
-//Import from types
-import { Entry } from "@retorquere/bibtex-parser";
-// Import fs to import bib file
+
+// Import fs 
 import * as fs from "fs";
 //import { info, setLevel } from "loglevel";
-import { Plugin, Notice } from "obsidian";
+import {Plugin, Notice, normalizePath } from "obsidian";
+
+
 import {
 	DEFAULT_SETTINGS,
+	templateAdmonition,
+	templatePlain,
 	HTML_TAG_REG,
 	PAGE_NUM_REG,
 	ZOTFILE_REG,
@@ -21,8 +22,7 @@ import {
 
 //Import sample settings from /settings.ts
 import { SettingTab } from "./settings";
-import {AnnotationTypes, 
-		AnnotationElements,
+import {AnnotationElements,
 		MyPluginSettings,
 		Reference,
 		Collection
@@ -238,19 +238,34 @@ export default class MyPlugin extends Plugin {
 		//replace the single-value placeholders with the value of the field
 		note = replaceAllTemplates(entriesArray, note, selectedEntry);
 		
-		//if the abstract is missing, delete Abstract headings
-		if(selectedEntry.hasOwnProperty("abstractNote")===false){
-			note = note.replace("# Abstract\n", "");
-			note = note.replace("## Abstract\n", "");
-			note = note.replace("### Abstract\n", "");
-			}
 
 
 
-		//remove backticks
+		//remove single backticks but retain triple backticks
+		note = note.replace(
+			/```/g, "HEREISAPLACEHOLDERFORBACKTICK"
+			)
 		note = note.replace(
 			/`/g, "'"
-			);
+			)
+		note = note.replace(
+				/HEREISAPLACEHOLDERFORBACKTICK/g,
+				"```"
+				)	
+			
+	// //if the abstract is missing, delete Abstract headings
+	
+		note = note.replace(
+			"```ad-quote\n" + "title: Abstract\n" + "```\n",
+			"")
+		note = note.replace(
+			"```ad-abstract\n" + "title: Files and Links\n" + "```\n",
+			"")
+		note = note.replace(
+			"```ad-note\n" + "title: Tags and Collections\n" + "```",
+			"")
+		
+		
 		
 		// Return the metadata
 		return note
@@ -737,19 +752,34 @@ export default class MyPlugin extends Plugin {
 
 	}
 
+	importTemplate(){
+		let template = templatePlain
+		if (this.settings.templateType === "Plain"){
+			template = templatePlain
+		} else if (this.settings.templateType === "Admonition"){
+			template = templateAdmonition
+		}
+		else if (this.settings.templateType === "Custom"){
+			template = this.settings.templateContent
+		}
+		
+		return template
+
+	}
 
 	createNote(selectedEntry: Reference, data:{}){
 		
 		console.log("Bibnotes Importing reference: " + selectedEntry.citationKey)
 
 		//Load Template
-		const templateNote = this.settings.templateContent;
+		const templateNote = this.importTemplate()
 
 		//Create the metadata
 		let metadata:string = this.parseMetadata(selectedEntry, templateNote);
 
 		//Extract the list of collections
 		metadata = this.parseCollection(selectedEntry, data, metadata);
+		//console.log(metadata)
 
 		
 		//Define the name and full path of the file to be exported
@@ -773,11 +803,13 @@ export default class MyPlugin extends Plugin {
 			"\n" +
 			extractedAnnotations
 
+		
 		//Export the file
 		fs.writeFile(noteTitleFull, finalNote, function (err) {
 				if (err) console.log(err);
 			});
 		new Notice(`Imported ${selectedEntry.citationKey}!`);
+
 
 	}
 					

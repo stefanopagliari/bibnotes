@@ -103,8 +103,6 @@ export interface MyPluginSettings {
 	keyH5: string;
 	keyH6: string;
 	keyKeyword: string;
-	highlightStart: string;
-	commentStart: string;
 	lastUpdateDate: Date;
 	isHighlightItalic: boolean;
 	isHighlightBold: boolean;

@@ -9,6 +9,7 @@ import { Reference,
 		
 import {
 	createAuthorKey,
+	openSelectedNote,
 	orderByDateModified,
 	} from "./utils";
 import { DEFAULT_SETTINGS } from "./constants";
@@ -38,7 +39,17 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 	async onOpen() {
  
 		//Load the Json file
-		const data = require(this.plugin.settings.bibPath)
+
+		
+	
+	
+	
+	//Create the full path
+	
+		const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
+		
+
+		//const checkAdmonition  = this.app.plugins.getPlugin("obsidian-admonition")._loaded
 		
 		const bibtexArray: Reference[] = [] 
 		for (let index = 0; index < data.items.length; index++) {
@@ -151,7 +162,16 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 			
 			//Create and export Note for select reference
 			this.plugin.createNote(selectedEntry, this.data)
+
+			//if the note is the last one to be processed, then open it
+			if(indexNoteToBeProcessed == citeKeyToBeProcessed.length-1){
+				openSelectedNote(selectedEntry, this.plugin.settings.exportTitle, this.plugin.settings.exportPath);
+			}
+
 		}
+
+
+
 
 	}
 }
@@ -168,14 +188,12 @@ export class updateLibrary extends Modal {
 	onOpen() {
 		
 		console.log("Updating Zotero library")
+		const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
 		
-	 	const data = require(this.plugin.settings.bibPath)
 		const bibtexArray: string[] = [] 
 
 		//Check the last time the library was updated
 		const lastUpdate = new Date(this.plugin.settings.lastUpdateDate)
-		console.log(lastUpdate)
-
 
 		//loop through all the entries in the bibliography to find out which ones have been modified since the last time the library on obsidian was updated. 
 		for (let index = 0; index < data.items.length; index++) {
@@ -193,7 +211,8 @@ export class updateLibrary extends Modal {
 			//console.log(datemodified>lastUpdate)
 			if(datemodified>lastUpdate){
 				//Create and export Note for select reference
-				this.plugin.createNote(selectedEntry)
+				this.plugin.createNote(selectedEntry, data)
+
 				bibtexArray.push(selectedEntry.citationKey)
 			}
     	}

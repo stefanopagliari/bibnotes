@@ -18,6 +18,14 @@ In order to import your references and notes from Zotero, you need to:
 - **Create/Update Literature Note**: when you select this command you will be prompted to chose one of references from the library you have imported. If the reference has not been imported yet in the specified folder, a new note will be generated. If a note already exists, then its content will be updated without over-writing the existing annotation (e.g. comments added manually from within Obsidian and block-references will not be over-written). The first option ("Entire Library") can be selected to create/update all the notes from the imported library.
 - **Update Library**: when you select this command, the plugin will generate/update all the notes that have been modified from Zotero since the last time the same command was selected. If this is the first time that you select this command, then the plugin will create/update literature notes for all the entries in the imported bibliography.
 
+### Format of Literature Notes
+
+- **Note Title**: In the plugin setting you can specify the format of the note title. Possible values include: 
+    - {{citeKey}}, 
+    - {{title}}, 
+    - {{author}},
+    - {{year}}
+
 ### Template
 
 ### Annotations Formatting
