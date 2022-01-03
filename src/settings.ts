@@ -50,7 +50,7 @@ export class SettingTab extends PluginSettingTab {
 
 		new Setting(settingsExport)
 			.setName("Export Path")
-			.setDesc("Add relative path to the folder in your vault where the notes will be exported")
+			.setDesc("Add the relative path to the folder inside your vault where the notes will be exported")
 			.addText((text) =>
 				text
 					.setPlaceholder("/relativepath/to/Folder/Note/intheVault")
@@ -95,12 +95,12 @@ if (settings.exportMetadata) {
 			new Setting(settingsExport)
 				.setName("Select Template")
 				.setDesc(
-					"Select among two prepopulated templates (one in plain text and the other requiring the Admonition plugin) or provide a custom template."
+					"Select one of the default templates or provide a custom one."
 				)
 				.addDropdown((d) => {
 					d.addOption("Plain", "Plain");
 					d.addOption("Admonition", "Admonition");
-					d.addOption("Custom", "Custom");
+					d.addOption("Custom", "Custom Template");
 					//d.addOption("Import from Note", "Import from Note");
 					d.setValue(settings.templateType);
 					d.onChange(

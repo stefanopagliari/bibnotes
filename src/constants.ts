@@ -18,16 +18,15 @@ export const templatePlain = "# {{title}}\n" +
 "- **Translator**: {{translator}}\n"+
 "- **Publisher**: {{publisher}},\n"+
 "- **Location**: {{place}},\n"+
-"- **Series**: {{volume}},\n"+
+"- **Series**: {{series}}\n"+
+"- **Series Number**: {{seriesNumber}}\n"+
 "- **Journal**: {{publicationTitle}}, \n"+
 "- **Volume**: {{volume}},\n"+
 "- **Issue**: {{issue}}\n"+
 "- **Pages**: {{pages}}\n"+
 "- **Year**: {{year}} \n"+
-"- **Date Added**: {{dateAdded}}\n"+
-"- **Date Modified**: {{dateModified}}\n"+
 "- **DOI**: {{DOI}}\n"+
-"- **ISSN**: {{ISBN}}\n"+
+"- **ISSN**: {{ISSN}}\n"+
 "- **ISBN**: {{ISBN}}\n"+
 "\n"+
 "## Abstract\n" +
@@ -55,16 +54,15 @@ export const templateAdmonition = "# {{title}}\n" +
 "- **Translator**: {{translator}}\n"+
 "- **Publisher**: {{publisher}}\n"+
 "- **Location**: {{place}}\n"+
-"- **Series**: {{volume}}\n"+
+"- **Series**: {{series}}\n"+
+"- **Series Number**: {{seriesNumber}}\n"+
 "- **Journal**: {{publicationTitle}}\n"+
 "- **Volume**: {{volume}}\n"+
 "- **Issue**: {{issue}}\n"+
 "- **Pages**: {{pages}}\n"+
 "- **Year**: {{year}} \n"+
-"- **Date Added**: {{dateAdded}}\n"+
-"- **Date Modified**: {{dateModified}}\n"+
 "- **DOI**: {{DOI}}\n"+
-"- **ISSN**: {{ISBN}}\n"+
+"- **ISSN**: {{ISSN}}\n"+
 "- **ISBN**: {{ISBN}}\n"+
 "```\n" +
 "```ad-quote\n" +
