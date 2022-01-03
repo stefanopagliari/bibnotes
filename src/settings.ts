@@ -14,16 +14,22 @@ export class SettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		const settingHeader = containerEl.createEl("div");
-		settingHeader.createEl("div", { text: "Settings for the plugin" });
-		settingHeader.createEl("small", { text: "- - - -" });
+		containerEl.createEl('h1', {text: 'LitNotes Formatter (for Zotero) '});
+		containerEl.createEl('a', { text: 'Created by Stefano Pagliari', href: 'https://github.com/stefanopagliari/'});
+		containerEl.createEl('h2', {text: 'Import Library'});
+		
 
-		new Setting(containerEl)
+		const importLibrary: HTMLDetailsElement =
+		containerEl.createEl("details");
+		importLibrary.setAttribute("open", "");
+		importLibrary.createEl("summary", {text: "" });
+
+		new Setting(importLibrary)
 			.setName("Bibtex File")
-			.setDesc("Add Path to the bibtex (*.bib) to be imported")
+			.setDesc("Add Path to the *BetterBibTex Json* file to be imported")
 			.addText((text) =>
 				text
-					.setPlaceholder("/path/to/Zotero_export.bib")
+					.setPlaceholder("/path/to/BetterBibTex.json")
 					.setValue(settings.bibPath)
 					.onChange(async (value) => {
 						console.log("Path Bib: " + value);
@@ -31,13 +37,23 @@ export class SettingTab extends PluginSettingTab {
 						await plugin.saveSettings();
 					})
 			);
+		
 
-		new Setting(containerEl)
+		
+		containerEl.createEl('h2', {text: 'Export Notes'});
+
+		const settingsExport: HTMLDetailsElement =
+		containerEl.createEl("details");
+		settingsExport.setAttribute("open", "");
+		settingsExport.createEl("summary", {text: "" });
+//			containerEl.createEl('h3', {text: 'Export Notes'});
+
+		new Setting(settingsExport)
 			.setName("Export Path")
 			.setDesc("Add relative path to the folder in your vault where the notes will be exported")
 			.addText((text) =>
 				text
-					.setPlaceholder("/path/to/Folder/Note/")
+					.setPlaceholder("/relativepath/to/Folder/Note/intheVault")
 					.setValue(settings.exportPath)
 					.onChange(async (value) => {
 						settings.exportPath = value;
@@ -45,7 +61,7 @@ export class SettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl)
+		new Setting(settingsExport)
 		.setName("Note Title")
 		.setDesc("Select the format of the title of the note. Possible values include: {{citeKey}}, {{title}}, {{author}}, {{year}}")
 		.addText((text) =>
@@ -57,7 +73,7 @@ export class SettingTab extends PluginSettingTab {
 					await plugin.saveSettings();
 				})
 		);	
-		new Setting(containerEl)
+		new Setting(settingsExport)
 			.setName("Extract Metadata")
 			.setDesc(
 				'Select "Yes" to extract the metadata at the beginning of the note, "No" to extract only the title and the author/s'
@@ -72,17 +88,14 @@ export class SettingTab extends PluginSettingTab {
 					})
 			);
 		
-		if (settings.exportMetadata) {
-			const settingsTemplate: HTMLDetailsElement =
-				containerEl.createEl("details");
-				settingsTemplate.setAttribute("open", "");
-			settingsTemplate.createEl("summary", { text: "Template" });
 
 
-			new Setting(settingsTemplate)
+if (settings.exportMetadata) {
+
+			new Setting(settingsExport)
 				.setName("Select Template")
 				.setDesc(
-					"Select Template."
+					"Select among two prepopulated templates (one in plain text and the other requiring the Admonition plugin) or provide a custom template."
 				)
 				.addDropdown((d) => {
 					d.addOption("Plain", "Plain");
@@ -100,13 +113,14 @@ export class SettingTab extends PluginSettingTab {
  						) => {
  							settings.templateType = v;
  							await plugin.saveSettings();
+							this.display();
+
 						}
 						);
 					}
 				);
-
-				
-			new Setting(settingsTemplate)
+		if (settings.templateType==="Custom") {
+			new Setting(settingsExport)
 				.setName('Custom Template')
 				.addTextArea((text) =>
 					text
@@ -115,30 +129,14 @@ export class SettingTab extends PluginSettingTab {
 						settings.templateContent = value;
 						await plugin.saveSettings();
 						//this.display();
-					})
-				);
-				
-			new Setting(settingsTemplate)
-				.setName("Note Template")
-				.setDesc(
-					"Add Path to the template (*.md) to use in importing the note."
-				)
-				.addText((text) =>
-					text
-						.setPlaceholder("/path/to/Template.md")
-						.setValue(settings.templatePath)
-						.onChange(async (value) => {
-							console.log("Path Template: " + value);
-
-
-							settings.templatePath = value;
-							this.display();
-							await plugin.saveSettings();
 						}
 					)
+			
 				);
+				}
+			 
 					
-			new Setting(settingsTemplate)
+			new Setting(settingsExport)
 				.setName("Missing Fields")
 				.setDesc(
 					"Fields that are present in the template but missing from the selected field."
@@ -161,29 +159,10 @@ export class SettingTab extends PluginSettingTab {
 					);
 				});
 
-			// new Setting(settingsTemplate)
-			// .setName("Tags")
-			// .setDesc(
-			// 	"Formatting of the tags exported from the metadata."
-			// )
-			// .addDropdown((d) => {
-			// 	d.addOption("Brackets - [[tag]]", "Brackets - [[tag]]");
-			// 	d.addOption("Hashtag - #tag", "Hashtag - #tag");
-			// 	d.addOption("Plain - tag", "Plain - tag");
-			// 	d.setValue(settings.tagsFormat);
-			// 	d.onChange(
-			// 		async (
-			// 			v:
-			// 				| "Brackets - [[tag]]"
-			// 				| "Hashtag - #tag"
-			// 				| "Plain - tag"
-			// 		) => {
-			// 			settings.tagsFormat = v;
-			// 			await plugin.saveSettings();
-			// 		}
-			// 	);
-			// });	
 		}
+
+		containerEl.createEl('h2', {text: 'Format Annotations'});
+
 		new Setting(containerEl)
 		.setName("Extract Annotations")
 		.addToggle((text) =>
@@ -591,6 +570,149 @@ export class SettingTab extends PluginSettingTab {
 								}
 							})
 					);
+			
+				const settingsColour: HTMLDetailsElement =
+					containerEl.createEl("details");
+					//settingsColour.setAttribute("open", "");
+					settingsColour.createEl("summary", {
+					text: "Colour",
+				});
+				settingsColour.createEl('h6', {text: 'Select the transformation to be done to the highlights of different colour by adding one of the following options: {{highlight}} preceded or followed by custom text; H1 (transform into Level 1 Header); H2 (transform into Level 2 Header); H3 (transform into Level 3 Header); H4 (transform into Level 4 Header); H5 (transform into Level 5 Header); H6 (transform into Level 6 Header); AddToAbove (append the highlight to the previous one)'});
+				
+ 
+				new Setting(settingsColour) 
+				.setName("Yellow")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourYellowText)
+					.onChange(async (value) => {
+						settings.colourYellowText = value;
+						await plugin.saveSettings();
+					})
+					); 
+
+				new Setting(settingsColour) 
+				.setName("Red")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourRedText)
+					.onChange(async (value) => {
+						settings.colourRedText = value;
+						await plugin.saveSettings();
+
+					})); 
+
+				new Setting(settingsColour) 
+				.setName("Green")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourGreenText)
+					.onChange(async (value) => {
+						settings.colourGreenText = value;
+						await plugin.saveSettings();
+					})); 
+				new Setting(settingsColour) 
+				.setName("Blue")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourBlueText)
+					.onChange(async (value) => {
+						settings.colourBlueText = value;
+						await plugin.saveSettings();
+					})); 
+				
+				new Setting(settingsColour) 
+				.setName("Purple")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourPurpleText)
+					.onChange(async (value) => {
+						settings.colourPurpleText = value;
+						await plugin.saveSettings();
+					})); 
+
+				new Setting(settingsColour) 
+				.setName("Black")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourBlackText)
+					.onChange(async (value) => {
+						settings.colourBlackText = value;
+						await plugin.saveSettings();
+					})); 
+
+				new Setting(settingsColour) 
+				.setName("White")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourWhiteText)
+					.onChange(async (value) => {
+						settings.colourWhiteText = value;
+						await plugin.saveSettings();
+					})); 					
+
+				new Setting(settingsColour) 
+				.setName("Gray")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourGrayText)
+					.onChange(async (value) => {
+						settings.colourGrayText = value;
+						await plugin.saveSettings();
+					})); 	
+					
+				new Setting(settingsColour) 
+				.setName("Orange")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourOrangeText)
+					.onChange(async (value) => {
+						settings.colourOrangeText = value;
+						await plugin.saveSettings();
+					})); 
+
+				new Setting(settingsColour) 
+				.setName("Orange")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourOrangeText)
+					.onChange(async (value) => {
+						settings.colourOrangeText = value;
+						await plugin.saveSettings();
+					})); 	
+
+				new Setting(settingsColour) 
+				.setName("Cyan")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourCyanText)
+					.onChange(async (value) => {
+						settings.colourCyanText = value;
+						await plugin.saveSettings();
+					})); 	
+					
+				new Setting(settingsColour) 
+				.setName("Magenta")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourMagentaText)
+					.onChange(async (value) => {
+						settings.colourMagentaText = value;
+						await plugin.saveSettings();
+					})); 		
+ 
 			}
 		}
 	}

@@ -120,7 +120,18 @@ export interface MyPluginSettings {
 	isCommentQuote: boolean;
 	commentCustomTextBefore: string;
 	commentCustomTextAfter: string;
-	isDoubleSpaced: boolean;
+	isDoubleSpaced: boolean;	
+	colourYellowText: string;
+	colourPurpleText: string;
+	colourRedText: string;
+	colourGreenText: string;
+	colourBlueText: string; 
+	colourBlackText: string; 
+	colourWhiteText: string; 
+	colourGrayText: string; 
+	colourOrangeText: string; 
+	colourCyanText: string; 
+	colourMagentaText: string; 
 }
 
 export interface Reference {
@@ -184,6 +195,9 @@ export interface AnnotationElements {
 	rowEdited: string,
 	foundOld: boolean,
 	positionOld: number,
+	extractionSource: string,
+	colourTextBefore: string,
+	colourTextAfter: string,
 	}[]
 
 

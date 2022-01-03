@@ -122,6 +122,17 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	highlightCustomTextAfter: "",
 	commentCustomTextBefore: "",
 	commentCustomTextAfter: "",
+	colourYellowText: "{{highlight}}",
+	colourPurpleText: "{{highlight}}",
+	colourRedText: "{{highlight}}",
+	colourGreenText: "{{highlight}}",
+	colourBlueText: "{{highlight}}",
+	colourBlackText: "{{highlight}}",
+	colourWhiteText: "{{highlight}}",
+	colourGrayText: "{{highlight}}",
+	colourOrangeText: "{{highlight}}",
+	colourCyanText: "{{highlight}}",
+	colourMagentaText: "{{highlight}}",
 };
 
 export enum HeaderLevels {

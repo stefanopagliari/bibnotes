@@ -306,6 +306,8 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 	const positionOldNote: number[] = [0]
 
 
+	noteElements = noteElements.filter(x => x !== undefined);
+
 	//loop through each of the lines extracted in the note
 	for (let indexLines = 0; indexLines < noteElements.length ; indexLines++) {
 		//console.log("indexLines :" + indexLines)
@@ -322,6 +324,9 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 
 
 		//Calculate the length of the highlighted text
+		if(noteElements[indexLines]== undefined){continue}
+		
+		
 		const lengthExistingLineHighlight = noteElements[indexLines].highlightText.length
 		//Calculate the length of the comment text
 		const lengthExistingLineComment = noteElements[indexLines].commentText.length		
@@ -502,3 +507,12 @@ export function openSelectedNote(selectedEntry:Reference, exportTitle, exportPat
 	this.app.workspace.getUnpinnedLeaf().openFile(myFile);
 
 }
+
+
+
+
+//#ffd400 (yellow)
+//#ff6666 red
+//#5fb236 green
+//#2ea8e5 blue
+//#a28ae5 purple

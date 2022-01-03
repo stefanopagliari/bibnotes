@@ -45,8 +45,7 @@ import {
 	replaceAllTemplates, 
 	replaceMissingFields,
 	replaceTagList,
-	replaceTemplate,
-	
+	replaceTemplate,	
 } from "./utils"; 
 
 export { Entry } from "@retorquere/bibtex-parser";
@@ -272,8 +271,207 @@ export default class MyPlugin extends Plugin {
 
 	}
 // FUNCTION TO PARSE ANNOTATION
-	parseAnnotationLinesintoElements(selectedEntry: Reference, indexNote: number) {
-		let note = selectedEntry.notes[indexNote].note
+	parseAnnotationLinesintoElementsZotfile(note: string) {
+
+		//Split the note into lines
+		const lines = note.split(/<p>/gm)
+		const noteElements: AnnotationElements[] = []
+		for (let indexLines = 0; indexLines < lines.length; indexLines++) {
+
+            //Remote html tags
+            const selectedLine = lines[indexLines].replace(/<\/?[^>]+(>|$)/g, "");
+            
+            //Skip if empty
+            if(selectedLine===""){continue}
+
+            //Crety empty lineElements
+            const lineElements: AnnotationElements = {
+				highlightText: "",
+				highlightColour: "",
+				annotationType: "",
+				citeKey: "",
+				commentText: "",
+				rowOriginal: selectedLine,
+				rowEdited: selectedLine,
+				indexNote: undefined,
+				foundOld: undefined,
+				positionOld: undefined
+			}
+
+			//Record the extraction method
+			lineElements.extractionSource = "zotfile"
+            //Extract the citeKey
+            lineElements.citeKey = String(selectedLine.match(/\(([^)]+)\)+$/g))
+
+
+            const posCiteKeyBegins = selectedLine.indexOf(lineElements.citeKey)
+
+            let extractedText = ""
+            if (posCiteKeyBegins!== -1){
+                extractedText = selectedLine
+						.substring(0, posCiteKeyBegins- 1)
+						.trim();
+                    
+            
+            // Remove quotation marks from extractedText
+			["“", '"', "`", "'"].forEach(
+						(quote) =>
+						(extractedText = removeQuoteFromStart(
+							quote,
+							extractedText
+							))
+						);
+			["”", '"', "`", "'"].forEach(
+				(quote) =>
+				(extractedText = removeQuoteFromEnd(
+					quote,
+					extractedText
+					))
+					);
+            }
+            
+
+			//Extract the colour
+			if(extractedText.startsWith("(Yellow) - ")){
+				lineElements.highlightColour = "yellow";
+				extractedText = extractedText.replace("(Yellow) - ", "")
+			}
+
+			if(extractedText.startsWith("(Black) - ")){
+				lineElements.highlightColour = "black";
+				extractedText = extractedText.replace("(Black) - ", "")
+			}
+
+			if(extractedText.startsWith("(White) - ")){
+				lineElements.highlightColour = "white";
+				extractedText = extractedText.replace("(White) - ", "")
+			}
+
+			if(extractedText.startsWith("(Gray) - ")){
+				lineElements.highlightColour = "gray";
+				extractedText = extractedText.replace("(Gray) - ", "")
+			}
+			if(extractedText.startsWith("(Red) - ")){
+				lineElements.highlightColour = "red";
+				extractedText = extractedText.replace("(Red) - ", "")
+			}
+
+			if(extractedText.startsWith("(Orange) - ")){
+				lineElements.highlightColour = "orange";
+				extractedText = extractedText.replace("(Orange) - ", "")
+			}
+
+			if(extractedText.startsWith("(Green) - ")){
+				lineElements.highlightColour = "green";
+				extractedText = extractedText.replace("(Green) - ", "")
+			}
+
+			if(extractedText.startsWith("(Cyan) - ")){
+				lineElements.highlightColour = "cyan";
+				extractedText = extractedText.replace("(Cyan) - ", "")
+			}
+
+			if(extractedText.startsWith("(Blue) - ")){
+				lineElements.highlightColour = "blue";
+				extractedText = extractedText.replace("(Blue) - ", "")
+			}
+
+			if(extractedText.startsWith("(Magenta) - ")){
+				lineElements.highlightColour = "magenta";
+				extractedText = extractedText.replace("(Magenta) - ", "")
+			}
+					//{"Black": "#000000", 
+		//"White": "#FFFFFF", 
+		//"Gray": "#808080", 
+		//"Red": "#FF0000", 
+		//"Orange": "#FFA500",
+		 //"Yellow": "#FFFF00",
+		 // "Green": "#00FF00", 
+		 // "Cyan": "#00FFFF", 
+		 //"Blue": "#0000FF", 
+		 //"Magenta": "#FF00FF"}
+
+            //Identify if the text is highlight or comment. if it is a comment extract the type of comment
+            let annotationCommentAll = ""
+            if(lineElements.citeKey.includes("(note on p.")){
+                lineElements.commentText = extractedText;
+                lineElements.citeKey = ""} else {
+				lineElements.highlightText = extractedText;
+				} 
+            
+
+            // 	Extract the first word in the comment added to the annotation
+			let firstBlank = -1
+			let annotationCommentFirstWord = ""
+			//console.log("lineElements.commentText: "+ lineElements.commentText)
+			if (lineElements.commentText.length>0){
+				firstBlank = lineElements.commentText.indexOf(" ");
+				//if (firstBlank===-1){firstBlank = annotationCommentAll.length}
+				//console.log("firstBlank:  "+ firstBlank)
+				annotationCommentFirstWord = lineElements.commentText.substring(
+						0,
+						firstBlank
+					);
+				}
+			//console.log("annotationCommentFirstWord: "+ annotationCommentFirstWord)
+			//console.log("annotationCommentAll: "+ lineElements.commentText)
+            lineElements.annotationType = this.getAnnotationType(
+                    annotationCommentFirstWord,
+                    lineElements.commentText
+                );
+
+			if (firstBlank == -1){firstBlank = annotationCommentAll.length}
+			lineElements.commentText =
+				lineElements.annotationType === "noKey" || lineElements.annotationType === "typeComment"
+					? lineElements.commentText
+					: lineElements.commentText
+						.substring(
+                            firstBlank,
+                            lineElements.commentText.length
+                            )
+                        .trim();
+                        
+		//If a comment includes the key for a transformation, apply that to the previous element
+		
+		//console.log(lineElements.annotationType)
+			
+		if (noteElements.length>1){
+			if(lineElements.annotationType != "noKey" &&
+				noteElements[noteElements.length-1].annotationType === "noKey" &&
+				noteElements[noteElements.length-1].commentText === ""){
+					console.log(lineElements.commentText)
+					noteElements[noteElements.length-1].annotationType = lineElements.annotationType;
+					noteElements[noteElements.length-1].commentText = lineElements.commentText
+				continue 
+				}  
+			}  
+		
+		
+		// ) {
+		// 	annotationType = "typeMergeAbove";
+		// } else if (annotationCommentFirstWord === keyCommentPrepend) {
+		// 	annotationType = "typeCommentPrepend";
+		// } else if (annotationCommentFirstWord === keyH1) {
+		// 	annotationType = "typeH1";
+		// } else if (annotationCommentFirstWord === keyH2) {
+		// 	annotationType = "typeH2";
+		// } else if (annotationCommentFirstWord === keyH3) {
+		// 	annotationType = "typeH3";
+		// } else if (annotationCommentFirstWord === keyH4) {
+		// 	annotationType = "typeH4";
+		// } else if (annotationCommentFirstWord === keyH5) {
+		// 	annotationType = "typeH5";
+		// } else if (annotationCommentFirstWord === keyH6) {
+		// 	annotationType = "typeH6";
+		//Add the element to the array containing all the elements
+		noteElements.push(lineElements)			
+        }  
+	return noteElements
+ 
+	}
+
+
+	parseAnnotationLinesintoElementsZotero(note: string) {
 		
 		// clean the entire annotation
 		note = note
@@ -312,7 +510,7 @@ export default class MyPlugin extends Plugin {
 		
 
 
-			//console.log("Line n." +indexLines + ": " + selectedLine)
+			console.log("Line n." +indexLines + ": " + selectedLine)
 
 			const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -327,6 +525,9 @@ export default class MyPlugin extends Plugin {
 				positionOld: undefined
 			}
 
+			//Record the extraction method
+			lineElements.extractionSource = "zotero"
+
 			//Extract the colour of the highlight
 			if (/"color":"#......"/gm.test(selectedLineOriginal)){			
 				let highlightColour = String(selectedLineOriginal.match(/"color":"#......"/gm))
@@ -335,8 +536,10 @@ export default class MyPlugin extends Plugin {
 				highlightColour = highlightColour.replace("\"","")
 				lineElements.highlightColour = highlightColour
 			}
-
+  
 			//Extract the citation within bracket
+			//console.log("Line Original: " + selectedLineOriginal)
+			
 			if (/\(<span class="citation-item">.*<\/span>\)<\/span>/gm.test(selectedLineOriginal)){			
 
 				lineElements.citeKey = String(selectedLineOriginal.match(/\(<span class="citation-item">.*<\/span>\)<\/span>/gm))
@@ -379,7 +582,7 @@ export default class MyPlugin extends Plugin {
 					//console.log("annotationHighlight after removeQuoteFromEnd: "+ annotationHighlight);
 			
 			} 
-
+			
 
 
 			//Extract the comment made to an annotation (after the citeKey)
@@ -422,19 +625,97 @@ export default class MyPlugin extends Plugin {
 			else {lineElements.rowEdited = selectedLine }
 			
 		//Add the element to the array containing all the elements
+		
+		console.log(lineElements)
 		noteElements.push(lineElements)
+
 		}
 	return noteElements
 
 
 	}
 
- 
+	formatColourHighlight(lineElements: AnnotationElements) {
+		
+		//fix the label of the annotation colour - Zotero		
+		if (lineElements.highlightColour.includes("#ffd400")){lineElements.highlightColour = "yellow"}
+		if (lineElements.highlightColour.includes("#ff6666")){lineElements.highlightColour = "red"}
+		if (lineElements.highlightColour.includes("#5fb236")){lineElements.highlightColour = "green"}
+		if (lineElements.highlightColour.includes("#2ea8e5")){lineElements.highlightColour = "blue"}
+		if (lineElements.highlightColour.includes("#a28ae5")){lineElements.highlightColour = "purple"}
+
+
+		//fix the label of the annotation colour - Zotfile
+		if (lineElements.highlightColour.includes("#000000")){lineElements.highlightColour = "black"}
+		if (lineElements.highlightColour.includes("##FFFFFF")){lineElements.highlightColour = "white"}
+		if (lineElements.highlightColour.includes("##808080")){lineElements.highlightColour = "gray"}
+		if (lineElements.highlightColour.includes("##FF0000")){lineElements.highlightColour = "red"}
+		if (lineElements.highlightColour.includes("##FFA500")){lineElements.highlightColour = "orange"}
+		if (lineElements.highlightColour.includes("##FFFF00")){lineElements.highlightColour = "yellow"}
+		if (lineElements.highlightColour.includes("##00FF00")){lineElements.highlightColour = "green"}
+		if (lineElements.highlightColour.includes("##00FFFF")){lineElements.highlightColour = "cyan"}
+		if (lineElements.highlightColour.includes("##0000FF")){lineElements.highlightColour = "blue"}
+		if (lineElements.highlightColour.includes("##FF00FF")){lineElements.highlightColour = "magenta"}
+
+		//Zotfile Default		
+		//{"Black": "#000000", 
+		//"White": "#FFFFFF", 
+		//"Gray": "#808080", 
+		//"Red": "#FF0000", 
+		//"Orange": "#FFA500",
+		 //"Yellow": "#FFFF00",
+		 // "Green": "#00FF00", 
+		 // "Cyan": "#00FFFF", 
+		 //"Blue": "#0000FF", 
+		 //"Magenta": "#FF00FF"}
+		
+		//Extract the transformation text
+		let colourTransformation = ""
+		
+		if(lineElements.highlightColour == "yellow"){colourTransformation = this.settings.colourYellowText}
+		if(lineElements.highlightColour == "red"){colourTransformation = this.settings.colourRedText}
+		if(lineElements.highlightColour == "green"){colourTransformation = this.settings.colourGreenText}
+		if(lineElements.highlightColour == "blue"){colourTransformation = this.settings.colourBlueText}
+		if(lineElements.highlightColour == "purple"){colourTransformation = this.settings.colourPurpleText}
+		if(lineElements.highlightColour == "black"){colourTransformation = this.settings.colourBlackText}
+		if(lineElements.highlightColour == "white"){colourTransformation = this.settings.colourWhiteText}
+		if(lineElements.highlightColour == "gray"){colourTransformation = this.settings.colourGrayText}
+		if(lineElements.highlightColour == "orange"){colourTransformation = this.settings.colourOrangeText}
+		if(lineElements.highlightColour == "cyan"){colourTransformation = this.settings.colourCyanText}
+		if(lineElements.highlightColour == "magenta"){colourTransformation = this.settings.colourMagentaText}
+		//console.log("colourTransformation = "+ colourTransformation);
+		
+
+
+		//extract from the transformation from the highlight
+		if(lineElements.annotationType=="noKey"){
+			if(colourTransformation.toLowerCase() ==="h1"){lineElements.annotationType = "typeH1"}
+			else if(colourTransformation.toLowerCase()==="h2"){lineElements.annotationType = "typeH2"}
+			else if(colourTransformation.toLowerCase()==="h3"){lineElements.annotationType = "typeH3"}
+			else if(colourTransformation.toLowerCase()==="h4"){lineElements.annotationType = "typeH4"}
+			else if(colourTransformation.toLowerCase()==="h5"){lineElements.annotationType = "typeH5"}
+			else if(colourTransformation.toLowerCase()==="h6"){lineElements.annotationType = "typeH6"}
+			else if(colourTransformation.toLowerCase()==="addtoabove"){lineElements.annotationType = "typeMergeAbove"}
+		
+
+		//extract the text to be pre-pended/appended
+			else if (colourTransformation.includes("{{highlight}}")){
+				
+				lineElements.colourTextBefore =  String(colourTransformation.match(/.+?(?={{highlight}})/))
+				if(lineElements.colourTextBefore == "null"){lineElements.colourTextBefore = ""}
+				lineElements.colourTextAfter =  String(colourTransformation.match(/(?<={{highlight}}).*$/))
+				if(lineElements.colourTextAfter == "null"){lineElements.colourTextAfter = ""}
+
+			}
+		}	
+		return lineElements
+	}
+
+
+		
 	formatNoteElements(noteElements: AnnotationElements[]) {
 		const {
-			exportAnnotations,
 			isDoubleSpaced,
-			exportPath,
 		} = this.settings;
 
 		const {
@@ -453,20 +734,33 @@ export default class MyPlugin extends Plugin {
 		
 
 		
-
+		//Remove undefined elements
+		noteElements = noteElements.filter(x => x !== undefined);
 		//Run a loop, processing each annotation line one at the time
-		for (let i = 0; i < noteElements.length; i++) {
+		
+		
 
+		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
-			const lineElements = noteElements[i]
-			
+			let lineElements = noteElements[i]
+
+			//Run the function to extract the transformation associated with the highlighted colour
+			lineElements = this.formatColourHighlight(lineElements)
+
+			//Extract the custom language assocaited with the highlight colour
+			let colourTextBefore = lineElements.colourTextBefore
+			if(colourTextBefore == undefined){colourTextBefore = ""}
+			let colourTextAfter = lineElements.colourTextAfter
+			if(colourTextAfter == undefined){colourTextAfter = ""}
+
+
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
 				noteElements[i-1].rowEdited =
 					noteElements[i-1].rowEdited +
-					" ... " +
-					highlightFormatBefore + lineElements.highlightText + highlightFormatAfter +
-					lineElements.citeKey;
+					" ... " + colourTextBefore +
+					highlightFormatBefore + lineElements.highlightText + highlightFormatAfter + 
+					lineElements.citeKey + colourTextAfter;
 				
 				//Add the highlighted text to the previous one
 				indexRowsToBeRemoved.push(i);
@@ -478,9 +772,9 @@ export default class MyPlugin extends Plugin {
 				lineElements.rowEdited =
 					highlightPrepend +
 					commentFormatBefore + lineElements.commentText + commentFormatAfter +
-					": " +
+					": " + colourTextBefore +
 					highlightFormatBefore + lineElements.highlightText + highlightFormatAfter +
-					lineElements.citeKey;
+					lineElements.citeKey + colourTextAfter;
 			}
 
 			// 	FORMAT THE HEADERS
@@ -506,9 +800,9 @@ export default class MyPlugin extends Plugin {
 				//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
 			if (lineElements.annotationType ===  "noKey"){
 				if(lineElements.highlightText !== ""){
-					lineElements.rowEdited = highlightPrepend +
+					lineElements.rowEdited = highlightPrepend + colourTextBefore +
 						highlightFormatBefore + lineElements.highlightText + highlightFormatAfter +
-						lineElements.citeKey;
+						lineElements.citeKey + colourTextAfter;
 					if(lineElements.commentText !== ""){
 						lineElements.rowEdited = lineElements.rowEdited + 
 						commentFormatBefore + lineElements.commentText + commentFormatAfter
@@ -579,6 +873,7 @@ export default class MyPlugin extends Plugin {
 			keyKeyword,
 		} = this.settings;
 	
+
 		let annotationType = "noKey";
 		if (
 			annotationCommentFirstWord === keyMergeAbove ||
@@ -628,13 +923,32 @@ export default class MyPlugin extends Plugin {
 			//run the function to parse the annotation for each note (there could be more than one)
 			let noteElements:AnnotationElements[] = []
 			for (let indexNote = 0; indexNote < selectedEntry.notes.length; indexNote++) {
-				const noteElementsSingle = this.parseAnnotationLinesintoElements(selectedEntry, indexNote)
+				const note = selectedEntry.notes[indexNote].note
+
+				//Identify the extraction Type (Zotero vs. Zotfile)
+				let extractionType = undefined
+				
+				if (unescape(note).includes("<span class=")){extractionType = "Zotero"} 
+				else if (unescape(note).includes("<a href=\"zotero://open-pdf/library/")){extractionType = "Zotfile"}
+
+				
+				let noteElementsSingle:AnnotationElements
+				if(extractionType === "Zotero"){
+					noteElementsSingle  = this.parseAnnotationLinesintoElementsZotero(note)
+				} 
+
+				if(extractionType === "Zotfile"){
+					noteElementsSingle = this.parseAnnotationLinesintoElementsZotfile(note)
+				} 
+				
 				//concatenate the annotaiton element to the next one
 				noteElements = noteElements.concat(noteElementsSingle)
 				this.noteElements = noteElements
 				}
 
-			//Run the function to edit each line
+			
+			
+				//Run the function to edit each line
 			const resultsLineElements = this.formatNoteElements(noteElements)
 			this.keyWordArray = resultsLineElements.keywordArray
 
