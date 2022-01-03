@@ -69,7 +69,7 @@ Fields that can be added to the custom template include
     - {{collectionsParent}}: collections/folders where the entry is located, plus the parent folders to these
 
 
-## Annotations Formatting
+## Annotations Formatting 
  
 
 
