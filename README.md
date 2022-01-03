@@ -27,6 +27,7 @@ By default the plugin will export both the metadata and the notes stored in Zote
     - {{author}},
     - {{year}}
 - **Template**: It is possible to select among two existing templates, one presenting the metadata as a simple list and the other wrapping the information into boxes using the Admonition plugin. It is also possible to or provide a custom template (see below). 
+- **Missing Fields**: Fields that are present in the template but missing in the entry are deleted by default. This can be changed in the settings.
 
 ## Custom Template
 Fields that can be added to the custom template include
@@ -68,8 +69,30 @@ Fields that can be added to the custom template include
     - {{collections}}: collections/folders where the entry is located
     - {{collectionsParent}}: collections/folders where the entry is located, plus the parent folders to these
 
+It is also possible including additional fields found in the Better Bibtex json file.
+It is also possible to wrap the placeholders into [[ ]] in order to create notes or to preface them with :: in order to create Dataview fields.
 
-## Annotations Formatting 
+## Annotations Styling
+In the settings of the plugin, it is possible to select the formatting of the **highlights** and **comments** extracted from the text. These include:
+- Double Space
+- Italic
+- Bold
+- Quotation Marks
+- Highlight
+- Bullet Points
+- Blockquote
+- Custom Text before or after the highlight or comment
+
+## Highlight Transformations
+It is possible to perform additional transformations to the highlighted sentences by adding a dedicated "key" at the beginning of the comment to the specific highlight. This can be  a single character (e.g. #) or a single word (e.g. todo). When this character/word is found at the beginning of a comment, the text of the comment or the highlighted text will be reformatted. 
+Possible transformations include:
+- Turn highlighted text into heading (Level 1 to 6). Default key is "#/##/###/####/#####/######"
+- Append highlight to the previous one (e.g. to merge paragraph across two pages). Default key is "+"
+- Place the text of the comment at the beginning of the highlight. Default key is "%"
+- Add custom text before or after the highlight
+- Create todo
+
+
  
 
 
