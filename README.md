@@ -86,6 +86,10 @@ In the settings of the plugin, it is possible to select the formatting of the **
 ## Additional Highlight Formatting
 It is possible to perform additional transformations to designated highlighted sentences. The transformations currently included in the plugin are:
 - **Heading**: Turn highlighted text into a heading (Level 1 to 6). 
+
+![](/images/exampleHeading.png)
+
+
 - **MergeAbove**: Append highlight to the previous one (e.g. to merge paragraph across two pages). 
 
 ![](/images/exampleMergeAbove.jpg)
@@ -96,8 +100,13 @@ It is possible to perform additional transformations to designated highlighted s
 ![](/images/exampleCommentPrepend.jpg)
 
 
-- **Keyword**: Add the highlighted text to the list of keywords listed under the ({{keywords}}) placeholder in the template. 
+- **Keyword**: Add the highlighted text to the list of keywords listed under the ({{keywords}}) placeholder in the template.
+
+![](/images/exampleKeyword.png)
+
 - **Todo**: Transform the highlight or comments into a task ("- [ ]").
+![](/images/exampleToDo.png)
+
 - **Custom Text**: Add custom text before or after a specific highlight
 
 ### Keywords
