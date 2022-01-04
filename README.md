@@ -2,6 +2,9 @@
 
 This plugin generates literaure notes from the source stored in your Zotero library, including both the metadata and the annotations that are stored within Zotero (extracted using the native PDF Reader or the Zotfile plugin). The settings of the plugin provide different tools to customize the format of the literature notes, as well as to perform different transformations to the text of the annotations.
 
+![](/images/ExampleNote.jpg)
+
+
 ## Importing your Zotero Library into Obsidian
 In order to import your references and notes from Zotero, you need to export your library as a "BetterBibTex JSON" format and save this file inside your vualt. To do to follow these steps:
 - install within Zotero the plugin ["Better BibTex for Zotero"](https://retorque.re/zotero-better-bibtex/installation/). For more information on how to install the plugin see the instructions on the [website of the plugin](https://retorque.re/zotero-better-bibtex/installation/).
@@ -28,7 +31,7 @@ By default the plugin will export both the metadata and the notes stored in Zote
     - {{title}}, 
     - {{author}},
     - {{year}}
-- **Template**: It is possible to select among two existing templates, one presenting the metadata as a simple list and the other wrapping the information into boxes using the Admonition plugin. It is also possible to or provide a custom template (see below). 
+- **Template**: It is possible to select among two existing templates (one presenting the metadata as a simple list and the other wrapping the information into boxes using the Admonition plugin) or to or provide a custom template (see below). 
 - **Missing Fields**: Fields that are present in the template but missing in the entry are deleted by default. This can be changed in the settings.
 
 ## Fields
