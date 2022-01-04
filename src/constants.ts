@@ -41,7 +41,7 @@ export const templatePlain = "# {{title}}\n" +
 "\n"+
 "## Tags and Collections\n"+
 "- **Keywords**: {{keywords}}\n"+
-"- **Collections**: {{collections}} {{collectionsParent}}\n"
+"- **Collections**: {{collectionsParent}}\n"
 
 export const templateAdmonition = "# {{title}}\n" +
 "\n" + 
@@ -80,7 +80,7 @@ export const templateAdmonition = "# {{title}}\n" +
 "```ad-note\n" +
 "title: Tags and Collections\n" +
 "- **Keywords**: {{keywords}}\n"+
-"- **Collections**: {{collections}} {{collectionsParent}}\n"+
+"- **Collections**: {{collectionsParent}}\n"+
 "```\n" 
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {

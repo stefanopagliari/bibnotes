@@ -180,7 +180,7 @@ if (settings.exportMetadata) {
 				containerEl.createEl("details");
 
 			settingsHighlights.createEl("summary", { text: "Highlights" });
-			new Setting(settingsHighlights)
+			new Setting(containerEl)
 				.setName("Double Spaced")
 				.setDesc(
 					"Set toggle to on to add an empty space between different highlights"

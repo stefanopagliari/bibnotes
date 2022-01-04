@@ -1027,6 +1027,9 @@ export default class MyPlugin extends Plugin {
 			}
 		}
 
+		//Add Collection to Collection Parent
+		collectionParentArray = collectionParentArray.concat(collectionArray)
+		
 		//Sort the collections in alphabetical order
 		collectionArray = collectionArray.sort()
 		collectionParentArray = collectionParentArray.sort()

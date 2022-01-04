@@ -72,7 +72,7 @@ Fields that can be added to the custom template include
 It is also possible including additional fields found in the Better Bibtex json file.
 It is also possible to wrap the placeholders into [[ ]] in order to create notes or to preface them with :: in order to create Dataview fields.
 
-## Annotations Styling
+## Basic Formatting
 In the settings of the plugin, it is possible to select the formatting of the **highlights** and **comments** extracted from the text. These include:
 - Double Space
 - Italic
@@ -83,14 +83,27 @@ In the settings of the plugin, it is possible to select the formatting of the **
 - Blockquote
 - Custom Text before or after the highlight or comment
 
-## Highlight Transformations
-It is possible to perform additional transformations to the highlighted sentences by adding a dedicated "key" at the beginning of the comment to the specific highlight. This can be  a single character (e.g. #) or a single word (e.g. todo). When this character/word is found at the beginning of a comment, the text of the comment or the highlighted text will be reformatted. 
+## Additional Highlight Formatting
+It is possible to perform additional transformations to the highlighted sentences by adding a dedicated "keyword" at the beginning of the comment to the specific highlight. This can be  a single character (e.g. #) or a single word (e.g. todo). When this character/word is found at the beginning of a comment, the text of the comment or the highlighted text will be reformatted. 
 Possible transformations include:
 - Turn highlighted text into heading (Level 1 to 6). Default key is "#/##/###/####/#####/######"
 - Append highlight to the previous one (e.g. to merge paragraph across two pages). Default key is "+"
 - Place the text of the comment at the beginning of the highlight. Default key is "%"
 - Add custom text before or after the highlight
 - Create todo
+
+
+## Highlight Colour
+In addition to using dedicated keywords at the beginning of a comment, it is possible to apply specific styling or transformations to highlights based on the colour of highlight. 
+
+The plugin recognize the highlight colour extracted by:
+- **Zotero** native reader (yellow, red, green, blue, purple) 
+- **Zotfile** plugin (black, white, gray, red,orange, yellow, green, cyan, blue, magenta). In order to export the highlight colour you will need to activate this function by going to the main menu of Zoter and selecting Preferences --> Advanced --> Config Editor. Search for "extensions.zotfile.pdfExtraction.colorAnnotations" and turn the value to "true". It is also important that the value "extensions.zotfile.pdfExtraction.colorCategories" is restored to the default value.
+
+In the plugin setting you can formatting should be applied to the highlights by different colours by editing the text field next to the associated colour in the following way:
+- **Custom text**: add the text you would like to be included before and/or after the placeholder {{highlight}} without removing this
+- **Headers**: "**H1**" (transform into Level 1 Header); "**H2**" (transform into Level 2 Header); "**H3**" (transform into Level 3 Header); "**H4**" (transform into Level 4 Header); "**H5**" (transform into Level 5 Header); "**H6**" (transform into Level 6 Header); 
+- "**AddToAbove**" to append the highlight to the previous one);
 
 
  
