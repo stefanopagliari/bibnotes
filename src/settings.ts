@@ -577,7 +577,7 @@ if (settings.exportMetadata) {
 					settingsColour.createEl("summary", {
 					text: "Colour",
 				});
-				settingsColour.createEl('h6', {text: 'Select the transformation to be done to the highlights of different colour by adding one of the following options: {{highlight}} preceded or followed by custom text; H1 (transform into Level 1 Header); H2 (transform into Level 2 Header); H3 (transform into Level 3 Header); H4 (transform into Level 4 Header); H5 (transform into Level 5 Header); H6 (transform into Level 6 Header); AddToAbove (append the highlight to the previous one)'});
+				settingsColour.createEl('h6', {text: 'Select the transformation to be done to the highlights of different colour by adding one of the following options: {{highlight}} preceded or followed by custom text; "H1" (transform into Level 1 Header); "H2" (transform into Level 2 Header); "H3" (transform into Level 3 Header); "H4" (transform into Level 4 Header); "H5" (transform into Level 5 Header); "H6" (transform into Level 6 Header); "AddToAbove" (append the highlight to the previous one); "Keyword" (add the text to the list of keywords); "Todo" (transform the text of the highlight and associated comment into a task)'});
 				
  
 				new Setting(settingsColour) 
@@ -680,16 +680,6 @@ if (settings.exportMetadata) {
 						await plugin.saveSettings();
 					})); 
 
-				new Setting(settingsColour) 
-				.setName("Orange")
-				.setDesc("")
-				.addText((text) =>
-				text
-					.setValue(settings.colourOrangeText)
-					.onChange(async (value) => {
-						settings.colourOrangeText = value;
-						await plugin.saveSettings();
-					})); 	
 
 				new Setting(settingsColour) 
 				.setName("Cyan")

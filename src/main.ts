@@ -280,10 +280,11 @@ export default class MyPlugin extends Plugin {
 
             //Remote html tags
             const selectedLine = lines[indexLines].replace(/<\/?[^>]+(>|$)/g, "");
+			console.log(selectedLine)
             
             //Skip if empty
             if(selectedLine===""){continue}
-
+			
             //Crety empty lineElements
             const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -295,11 +296,12 @@ export default class MyPlugin extends Plugin {
 				rowEdited: selectedLine,
 				indexNote: undefined,
 				foundOld: undefined,
-				positionOld: undefined
+				positionOld: undefined,
+				extractionSource: "zotfile",
+				colourTextAfter: "",
+				colourTextBefore: "",
 			}
 
-			//Record the extraction method
-			lineElements.extractionSource = "zotfile"
             //Extract the citeKey
             lineElements.citeKey = String(selectedLine.match(/\(([^)]+)\)+$/g))
 
@@ -380,17 +382,7 @@ export default class MyPlugin extends Plugin {
 				lineElements.highlightColour = "magenta";
 				extractedText = extractedText.replace("(Magenta) - ", "")
 			}
-					//{"Black": "#000000", 
-		//"White": "#FFFFFF", 
-		//"Gray": "#808080", 
-		//"Red": "#FF0000", 
-		//"Orange": "#FFA500",
-		 //"Yellow": "#FFFF00",
-		 // "Green": "#00FF00", 
-		 // "Cyan": "#00FFFF", 
-		 //"Blue": "#0000FF", 
-		 //"Magenta": "#FF00FF"}
-
+  
             //Identify if the text is highlight or comment. if it is a comment extract the type of comment
             let annotationCommentAll = ""
             if(lineElements.citeKey.includes("(note on p.")){
@@ -432,38 +424,17 @@ export default class MyPlugin extends Plugin {
                         .trim();
                         
 		//If a comment includes the key for a transformation, apply that to the previous element
-		
-		//console.log(lineElements.annotationType)
 			
 		if (noteElements.length>1){
 			if(lineElements.annotationType != "noKey" &&
 				noteElements[noteElements.length-1].annotationType === "noKey" &&
 				noteElements[noteElements.length-1].commentText === ""){
-					console.log(lineElements.commentText)
 					noteElements[noteElements.length-1].annotationType = lineElements.annotationType;
 					noteElements[noteElements.length-1].commentText = lineElements.commentText
 				continue 
 				}  
 			}  
-		
-		
-		// ) {
-		// 	annotationType = "typeMergeAbove";
-		// } else if (annotationCommentFirstWord === keyCommentPrepend) {
-		// 	annotationType = "typeCommentPrepend";
-		// } else if (annotationCommentFirstWord === keyH1) {
-		// 	annotationType = "typeH1";
-		// } else if (annotationCommentFirstWord === keyH2) {
-		// 	annotationType = "typeH2";
-		// } else if (annotationCommentFirstWord === keyH3) {
-		// 	annotationType = "typeH3";
-		// } else if (annotationCommentFirstWord === keyH4) {
-		// 	annotationType = "typeH4";
-		// } else if (annotationCommentFirstWord === keyH5) {
-		// 	annotationType = "typeH5";
-		// } else if (annotationCommentFirstWord === keyH6) {
-		// 	annotationType = "typeH6";
-		//Add the element to the array containing all the elements
+		console.log(lineElements)
 		noteElements.push(lineElements)			
         }  
 	return noteElements
@@ -663,11 +634,11 @@ export default class MyPlugin extends Plugin {
 		//"Gray": "#808080", 
 		//"Red": "#FF0000", 
 		//"Orange": "#FFA500",
-		 //"Yellow": "#FFFF00",
-		 // "Green": "#00FF00", 
-		 // "Cyan": "#00FFFF", 
-		 //"Blue": "#0000FF", 
-		 //"Magenta": "#FF00FF"}
+		//"Yellow": "#FFFF00",
+		// "Green": "#00FF00", 
+		// "Cyan": "#00FFFF", 
+		//"Blue": "#0000FF", 
+		//"Magenta": "#FF00FF"}
 		
 		//Extract the transformation text
 		let colourTransformation = ""
@@ -696,6 +667,10 @@ export default class MyPlugin extends Plugin {
 			else if(colourTransformation.toLowerCase()==="h5"){lineElements.annotationType = "typeH5"}
 			else if(colourTransformation.toLowerCase()==="h6"){lineElements.annotationType = "typeH6"}
 			else if(colourTransformation.toLowerCase()==="addtoabove"){lineElements.annotationType = "typeMergeAbove"}
+			else if(colourTransformation.toLowerCase()==="keyword"){lineElements.annotationType = "typeKeyword"} 
+			else if(colourTransformation.toLowerCase()==="todo"){lineElements.annotationType = "typeTask"}
+			else if(colourTransformation.toLowerCase()==="task"){lineElements.annotationType = "typeTask"}
+
 		
 
 		//extract the text to be pre-pended/appended
@@ -708,6 +683,9 @@ export default class MyPlugin extends Plugin {
 
 			}
 		}	
+
+
+
 		return lineElements
 	}
 
@@ -731,9 +709,9 @@ export default class MyPlugin extends Plugin {
 		const indexRowsToBeRemoved: number[] = []
 		const keywordArray: string[] = []
 		const rowEditedArray: string[] = []
-		
+		console.log(noteElements)
 
-		
+
 		//Remove undefined elements
 		noteElements = noteElements.filter(x => x !== undefined);
 		//Run a loop, processing each annotation line one at the time
@@ -789,6 +767,42 @@ export default class MyPlugin extends Plugin {
 					lineElements.commentText;
 			}
  
+
+			//Create Task
+			if(lineElements.annotationType=="typeTask"){
+	
+				if(lineElements.commentText !== "" && lineElements.highlightColour!== ""){
+					lineElements.rowEdited =
+						`- [ ] ` +
+						commentFormatBefore +
+						lineElements.commentText + 
+						commentFormatAfter +
+						" - " +
+						colourTextBefore +
+						highlightFormatBefore +
+						lineElements.highlightText +
+						highlightFormatAfter + 
+						lineElements.citeKey + 
+						colourTextAfter;
+					}
+				else if(lineElements.commentText == "" && lineElements.highlightColour!== ""){ 
+					lineElements.rowEdited =
+						`- [ ] ` +
+						colourTextBefore +
+						highlightFormatBefore +
+						lineElements.highlightText +
+						highlightFormatAfter + 
+						lineElements.citeKey + 
+						colourTextAfter;
+					}
+				else if(lineElements.commentText !== "" && lineElements.highlightColour=== ""){
+					lineElements.rowEdited =
+						`- [ ] ` +
+						commentFormatBefore +
+						lineElements.commentText + 
+						commentFormatAfter 
+					}
+			}
 
 			//FORMAT KEYWORDS
 			// Add highlighted expression to KW
@@ -854,6 +868,7 @@ export default class MyPlugin extends Plugin {
 			rowEditedArray: rowEditedArray,
 			keywordArray: keywordArray
 		}
+
 		return resultsLineElements
 	}
 
@@ -871,6 +886,7 @@ export default class MyPlugin extends Plugin {
 			keyH5,
 			keyH6,
 			keyKeyword,
+			keyTask,
 		} = this.settings;
 	
 
@@ -912,6 +928,11 @@ export default class MyPlugin extends Plugin {
 			annotationCommentFirstWord === keyKeyword
 		) {
 			annotationType = "typeKeyword";
+		} else if (
+			annotationCommentAll === keyTask ||
+			annotationCommentFirstWord === keyTask
+		) {
+			annotationType = "typeTask";
 		} 
 		return annotationType;
 	}
@@ -943,10 +964,11 @@ export default class MyPlugin extends Plugin {
 				
 				//concatenate the annotaiton element to the next one
 				noteElements = noteElements.concat(noteElementsSingle)
-				this.noteElements = noteElements
+				console.log(noteElements)
+				this.noteElements = noteElements 
+
 				}
 
-			
 			
 				//Run the function to edit each line
 			const resultsLineElements = this.formatNoteElements(noteElements)
@@ -1029,7 +1051,7 @@ export default class MyPlugin extends Plugin {
 
 		//Add Collection to Collection Parent
 		collectionParentArray = collectionParentArray.concat(collectionArray)
-		
+
 		//Sort the collections in alphabetical order
 		collectionArray = collectionArray.sort()
 		collectionParentArray = collectionParentArray.sort()

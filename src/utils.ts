@@ -6,7 +6,6 @@ import {
 	CreatorArray,
 	Reference,
 	AnnotationElements,
-	AnnotationTypes
 		} from "./types"
 
 import {

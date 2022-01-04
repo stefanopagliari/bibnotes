@@ -103,6 +103,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	keyH5: "#####",
 	keyH6: "######",
 	keyKeyword: "=",
+	keyTask: "todo",
 	isHighlightItalic: true,
 	isHighlightBold: false,
 	isHighlightHighlighted: false,

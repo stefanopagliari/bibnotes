@@ -87,9 +87,10 @@ In the settings of the plugin, it is possible to select the formatting of the **
 It is possible to perform additional transformations to the highlighted sentences by adding a dedicated "keyword" at the beginning of the comment to the specific highlight. This can be  a single character (e.g. #) or a single word (e.g. todo). When this character/word is found at the beginning of a comment, the text of the comment or the highlighted text will be reformatted. 
 Possible transformations include:
 - Turn highlighted text into heading (Level 1 to 6). Default key is "#/##/###/####/#####/######"
-- Append highlight to the previous one (e.g. to merge paragraph across two pages). Default key is "+"
-- Place the text of the comment at the beginning of the highlight. Default key is "%"
+- Append highlight to the previous one (e.g. to merge paragraph across two pages). Default key is "**+**"
+- Place the text of the comment at the beginning of the highlight. Default key is "**%**"
 - Add custom text before or after the highlight
+- Add the highlighted text to the list of keywords/tags listed under the ({{keywords}}).  placeholder in the template. Default key is "**=**"
 - Create todo
 
 
@@ -104,6 +105,7 @@ In the plugin setting you can formatting should be applied to the highlights by 
 - **Custom text**: add the text you would like to be included before and/or after the placeholder {{highlight}} without removing this
 - **Headers**: "**H1**" (transform into Level 1 Header); "**H2**" (transform into Level 2 Header); "**H3**" (transform into Level 3 Header); "**H4**" (transform into Level 4 Header); "**H5**" (transform into Level 5 Header); "**H6**" (transform into Level 6 Header); 
 - "**AddToAbove**" to append the highlight to the previous one);
+- "**Keyword**" to add the text to the list of keywords.
 
 
  

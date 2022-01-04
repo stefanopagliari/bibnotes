@@ -71,18 +71,7 @@ export interface Name {
 // //     sentenceCased?: boolean
 // //   }
 
-export type AnnotationTypes =
-	| "noKey"
-	| "typeMergeAbove"
-	| "typeCommentPrepend"
-	| "typeH1"
-	| "typeH2"
-	| "typeH3"
-	| "typeH4"
-	| "typeH5"
-	| "typeH6"
-	| "typeKeyword"
-	| "typeComment";
+
 
 export interface MyPluginSettings {
 	bibPath: string;
@@ -103,6 +92,7 @@ export interface MyPluginSettings {
 	keyH5: string;
 	keyH6: string;
 	keyKeyword: string;
+	keyTask: string;
 	lastUpdateDate: Date;
 	isHighlightItalic: boolean;
 	isHighlightBold: boolean;
