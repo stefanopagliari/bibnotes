@@ -6,5 +6,6 @@
 	"description": "Plugin to import and format annotations from Zotero.",
 	"author": "Stefano Pagliari",
 	"authorUrl": "https://www.stefanopagliari.net",
-	"isDesktopOnly": true
+	"isDesktopOnly": true,
+	"repo": "stefanopagliari/bibnotes"
 }
