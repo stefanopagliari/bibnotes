@@ -1,12 +1,13 @@
 {
-	"name": "obsidian-sample-plugin",
-	"version": "0.12.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"name": "bibnotes",
+	"version": "0.8.0",
+	"description": "Plugin to export and format annotations from Zotero",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "node esbuild.config.mjs production"
 	},
+	
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
