@@ -1,14 +1,8 @@
-# BibNotes Formatter
+# BibNotes Formatter (for Zotero)
 
-This plugin generates literaure notes from the source stored in your Zotero library, including both the metadata and the annotations that are stored within Zotero (extracted using the native PDF Reader or the Zotfile plugin). The plugin is designed to provide with different tools to customize the format of the literature notes, the formatting of the annotations, as well as to introduced a number of custom transformations to the text of these annotations.
+This plugin generates literaure notes from the source stored in your Zotero library, including both the metadata and the annotations that are stored within Zotero (extracted using the native PDF Reader or the Zotfile plugin). The settings of the plugin provide different tools to customize the format of the literature notes, as well as to perform different transformations to the text of the annotations.
 
-
-
-## Commands
-- **Create/Update Literature Note**: when you select this command you will be prompted to chose one of references from the library you have imported. If the reference has not been imported yet in the specified folder, a new note will be generated. If a note already exists, its content will be updated without over-writing the existing annotation (e.g. comments added manually from within Obsidian and block-references will not be over-written). The first option ("Entire Library") can be selected to create/update all the notes from the imported library.
-- **Update Library**: when you select this command, the plugin will generate/update all the notes that have been modified from Zotero since the last time the same command was selected. If this is the first time that you select this command, then the plugin will create/update literature notes for all the entries in the imported bibliography.
-
-## Importing Zotero Library into Obsidian
+## Importing your Zotero Library into Obsidian
 In order to import your references and notes from Zotero, you need to export your library as a "BetterBibTex JSON" format and save this file inside your vualt. To do to follow these steps:
 - install within Zotero the plugin ["Better BibTex for Zotero"](https://retorque.re/zotero-better-bibtex/installation/). For more information on how to install the plugin see the instructions on the [website of the plugin](https://retorque.re/zotero-better-bibtex/installation/).
 - in the main menu of Zotero go to File > Export Library (to export the entire library). It is also possible to to export a specific collection or group of references by selecting these, right-click, and then selecting "export collection" (in the case of a folder) or "export items" (in the case of a collection of references.
@@ -17,6 +11,11 @@ In order to import your references and notes from Zotero, you need to export you
 - *(Optional)* select "Keep updated" to automatically update the exported library once an entry is added/deleted/amended
 - save the BetterBibTex JSON file in a folder **within** your Obsidian Vault
 - in the plugin settings within Obsidian add the relative path within your vault of the library to be imported, as well as the relative path within your vault of the folder where you would like the literature notes to be stored.
+
+## Commands
+The plugin introduces two commands into Obsidian:
+- **Create/Update Literature Note**: when you select this command you will be prompted to chose one of references from the library you have imported. If the reference has not been imported yet in the specified folder, a new note will be generated. If a note already exists, its content will be updated without over-writing the existing annotation (e.g. comments added manually from within Obsidian and block-references will not be over-written). The first option ("Entire Library") can be selected to create/update all the notes from the imported library.
+- **Update Library**: when you select this command, the plugin will generate/update all the notes that have been modified from Zotero since the last time the same command was selected. If this is the first time that you select this command, then the plugin will create/update literature notes for all the entries in the imported bibliography.
 
 ## Create Literature Notes
 By default the plugin will export both the metadata and the notes stored in Zotero for the selected reference. Both can be deselected in the plugin settings. The main configurations related to the format of the notes are the following:
@@ -29,8 +28,8 @@ By default the plugin will export both the metadata and the notes stored in Zote
 - **Template**: It is possible to select among two existing templates, one presenting the metadata as a simple list and the other wrapping the information into boxes using the Admonition plugin. It is also possible to or provide a custom template (see below). 
 - **Missing Fields**: Fields that are present in the template but missing in the entry are deleted by default. This can be changed in the settings.
 
-## Custom Template
-Fields that can be added to the custom template include
+## Fields
+Fields that can be added to the custom template include:
 
 - **Metadata**
     - {{title}}
@@ -74,45 +73,33 @@ It is also possible to wrap the placeholders into [[ ]] in order to create notes
 
 ## Basic Formatting
 In the settings of the plugin, it is possible to select the formatting of the **highlights** and **comments** extracted from the text. These include:
-- Double Space
-- Italic
-- Bold
-- Quotation Marks
-- Highlight
-- Bullet Points
-- Blockquote
-- Custom Text before or after the highlight or comment
+- **Double Space**
+- **Italic**
+- **Bold**
+- **Quotation Marks**
+- **Highlight**
+- **Bullet Points**
+- **Blockquote**
+- **Custom text before or after all highlights**
+- **Custom text before or after all comments**
+
 
 ## Additional Highlight Formatting
-It is possible to perform additional transformations to the highlighted sentences by adding a dedicated "keyword" at the beginning of the comment to the specific highlight. This can be  a single character (e.g. #) or a single word (e.g. todo). When this character/word is found at the beginning of a comment, the text of the comment or the highlighted text will be reformatted. 
-Possible transformations include:
-- Turn highlighted text into heading (Level 1 to 6). Default key is "#/##/###/####/#####/######"
-- Append highlight to the previous one (e.g. to merge paragraph across two pages). Default key is "**+**"
-- Place the text of the comment at the beginning of the highlight. Default key is "**%**"
-- Add custom text before or after the highlight
-- Add the highlighted text to the list of keywords/tags listed under the ({{keywords}}).  placeholder in the template. Default key is "**=**"
-- Create todo
+It is possible to perform additional transformations to designated highlighted sentences. The transformations currently included in the plugin are:
+- **Heading**: Turn highlighted text into a heading (Level 1 to 6). 
+- **MergeAbove**: Append highlight to the previous one (e.g. to merge paragraph across two pages). 
+- **Preprend Comment**: Place the text of the comment at the beginning of the highlight (rather than at the end as by default). 
+- **Keyword**: Add the highlighted text to the list of keywords listed under the ({{keywords}}) placeholder in the template. 
+- **Todo**: Transform the highlight or comments into a task ("- [ ]").
+- **Custom Text**: Add custom text before or after a specific highlight
 
 
-## Highlight Colour
-In addition to using dedicated keywords at the beginning of a comment, it is possible to apply specific styling or transformations to highlights based on the colour of highlight. 
+There are two ways to trigger the transformation: dedicated keywords and hi
 
-The plugin recognize the highlight colour extracted by:
+### Keywords
+Transformations can be triggered by adding a dedicated "keyword" at the beginning of the comment to the specific highlight. This can be a single character (e.g. #) or a single word (e.g. todo). When this character/word is found at the beginning of a comment, the text of the comment or the highlighted text will be reformatted. The keywords can be defined in the settings of the plugin
+
+### Highlight Colour
+In addition to using dedicated keywords at the beginning of a comment, it is possible to apply specific styling or transformations to highlights based on the colour of the highlight. The plugin recognize the highlight colour extracted by:
 - **Zotero** native reader (yellow, red, green, blue, purple) 
 - **Zotfile** plugin (black, white, gray, red,orange, yellow, green, cyan, blue, magenta). In order to export the highlight colour you will need to activate this function by going to the main menu of Zoter and selecting Preferences --> Advanced --> Config Editor. Search for "extensions.zotfile.pdfExtraction.colorAnnotations" and turn the value to "true". It is also important that the value "extensions.zotfile.pdfExtraction.colorCategories" is restored to the default value.
-
-In the plugin setting you can formatting should be applied to the highlights by different colours by editing the text field next to the associated colour in the following way:
-- **Custom text**: add the text you would like to be included before and/or after the placeholder {{highlight}} without removing this
-- **Headers**: "**H1**" (transform into Level 1 Header); "**H2**" (transform into Level 2 Header); "**H3**" (transform into Level 3 Header); "**H4**" (transform into Level 4 Header); "**H5**" (transform into Level 5 Header); "**H6**" (transform into Level 6 Header); 
-- "**AddToAbove**" to append the highlight to the previous one);
-- "**Keyword**" to add the text to the list of keywords.
-
-
- 
-
-
-
-
-
-
- 
