@@ -9,36 +9,10 @@ import {
 		} from "./types"
 
 import {
-		TEMPLATE_BRACKET_REG,
-		TEMPLATE_REG,
-		} from "./constants";
-import { Plugin, Setting } from "obsidian";
+	TEMPLATE_BRACKET_REG,
+	TEMPLATE_REG,
+	} from "./constants";
 
-
-export function buildAuthorKey(authors: BibTeXParser.Name[]) {
-	if (authors.length == 1) return authors[0].lastName;
-	else if (authors.length == 2) {
-		return authors[0].lastName + " and " + authors[1].lastName;
-	} else if (authors.length > 2) {
-		return authors[0].lastName + " et al.";
-	} else return null;
-}
-
-export function buildInTextCite(
-	entry: BibTeXParser.Entry,
-	pageNumberKey: number
-) {
-	let inTextCite = "";
-	const authors = entry.creators.author;
-	inTextCite += buildAuthorKey(authors);
-
-	const { year } = entry.fields;
-	inTextCite += ", " + year;
-
-	if (pageNumberKey) inTextCite += ": " + pageNumberKey;
-
-	return "(" + inTextCite + ")";
-}
 
 export function replaceAllTemplates(
 	entriesArray: string[],
@@ -72,12 +46,6 @@ export function replaceTemplate(
 	return stringAdd.replace(new RegExp(escapeRegExp(find), "g"), replace);
 }
 
-export const getNameStr = (name: BibTeXParser.Name) => {
-	const { firstName, lastName } = name;
-	if (!firstName) return lastName;
-	if (!lastName) return firstName;
-	return lastName + ", " + firstName;
-};
 
 export const makeWiki = (str: string) => "[[" + str + "]]";
 
@@ -435,20 +403,6 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 // 	return ZOTERO_REG 
 // }
 
-export function loadLibrarySynch(filepath: string) {
-	console.log("Loading library at " + filepath);
-
-	// Read the bib/Json file
-	const bibAll = fs.readFileSync(filepath);
-
-	// Parse the bib file using BibTexParser
-	const bibParsed = BibTeXParser.parse(bibAll.toString().substring(0));
-
-	//Check the number of references
-	console.log("Bib file has " + bibParsed.entries.length + " entries");
-	return bibParsed;
-}
-
 
 export function replaceTagList(selectedEntry:Reference, arrayExtractedKeywords:string[], metadata:string){
 	// Copy the keywords extracted by Zotero and store them in an array
@@ -492,8 +446,8 @@ export function addNewAnnotationToOldAnnotation (existingAnnotation:string, note
 	return existingAnnotation
 }
 
-export function openSelectedNote(selectedEntry:Reference, exportTitle, exportPath){
-	 
+export function openSelectedNote(selectedEntry:Reference, exportTitle:string, exportPath:string){
+
 	const noteTitleFull = createNoteTitle(selectedEntry, exportTitle, exportPath);
 	
 	//remove from the path of the note to be exported the path of the vault

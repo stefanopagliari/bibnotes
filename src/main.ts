@@ -2,16 +2,13 @@
 // Import fs 
 import * as fs from "fs";
 //import { info, setLevel } from "loglevel";
-import {Plugin, Notice, normalizePath } from "obsidian";
+import {Plugin, Notice} from "obsidian";
 
 
 import {
 	DEFAULT_SETTINGS,
 	templateAdmonition,
 	templatePlain,
-	HTML_TAG_REG,
-	PAGE_NUM_REG,
-	ZOTFILE_REG,
 } from "./constants";
 
 //Import modals from /modal.ts
@@ -384,7 +381,7 @@ export default class MyPlugin extends Plugin {
 			}
   
             //Identify if the text is highlight or comment. if it is a comment extract the type of comment
-            let annotationCommentAll = ""
+            const annotationCommentAll = ""
             if(lineElements.citeKey.includes("(note on p.")){
                 lineElements.commentText = extractedText;
                 lineElements.citeKey = ""} else {
@@ -462,7 +459,7 @@ export default class MyPlugin extends Plugin {
 			.trim()
 
 		// Split the annotations into an array where each row is an entry 
-		let lines = note.split(/<\/h1>|<\/p>/gm)
+		const lines = note.split(/<\/h1>|<\/p>/gm)
 		
 		const noteElements: AnnotationElements[] = []
 
@@ -481,7 +478,7 @@ export default class MyPlugin extends Plugin {
 		
 
 
-			console.log("Line n." +indexLines + ": " + selectedLine)
+			//console.log("Line n." +indexLines + ": " + selectedLine)
 
 			const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -493,8 +490,11 @@ export default class MyPlugin extends Plugin {
 				rowEdited: selectedLine,
 				indexNote: undefined,
 				foundOld: undefined,
-				positionOld: undefined
-			}
+				positionOld: undefined,
+				extractionSource: "zotero",
+				colourTextBefore: "",
+				colourTextAfter: "",
+			}  
 
 			//Record the extraction method
 			lineElements.extractionSource = "zotero"
@@ -515,7 +515,7 @@ export default class MyPlugin extends Plugin {
 
 				lineElements.citeKey = String(selectedLineOriginal.match(/\(<span class="citation-item">.*<\/span>\)<\/span>/gm))
 				lineElements.citeKey = lineElements.citeKey.replace("(<span class=\"citation-item\">", "")
-				lineElements.citeKey = lineElements.citeKey.replace("<\/span>\)<\/span>", "")
+				lineElements.citeKey = lineElements.citeKey.replace("</span>)</span>", "")
 				lineElements.citeKey = "("+lineElements.citeKey+")"
 			
 			}
@@ -597,7 +597,6 @@ export default class MyPlugin extends Plugin {
 			
 		//Add the element to the array containing all the elements
 		
-		console.log(lineElements)
 		noteElements.push(lineElements)
 
 		}
@@ -709,7 +708,6 @@ export default class MyPlugin extends Plugin {
 		const indexRowsToBeRemoved: number[] = []
 		const keywordArray: string[] = []
 		const rowEditedArray: string[] = []
-		console.log(noteElements)
 
 
 		//Remove undefined elements
@@ -964,7 +962,6 @@ export default class MyPlugin extends Plugin {
 				
 				//concatenate the annotaiton element to the next one
 				noteElements = noteElements.concat(noteElementsSingle)
-				console.log(noteElements)
 				this.noteElements = noteElements 
 
 				}
@@ -999,7 +996,7 @@ export default class MyPlugin extends Plugin {
 	return(extractedNote)
 	}
 
-	parseCollection(selectedEntry: Reference, data:{}, metadata:string){
+	parseCollection(selectedEntry: Reference, data, metadata:string){
 
 		//Create object with all the collections
 		const exportedCollections:Collection[] = data.collections;
@@ -1106,7 +1103,7 @@ export default class MyPlugin extends Plugin {
 
 	}
 
-	createNote(selectedEntry: Reference, data:{}){
+	createNote(selectedEntry: Reference, data){
 		
 		console.log("Bibnotes Importing reference: " + selectedEntry.citationKey)
 

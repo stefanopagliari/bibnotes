@@ -1,12 +1,5 @@
 import { MyPluginSettings } from "./types";
 
-export const HTML_TAG_REG = new RegExp(/<\/?[^>]+(>|$)/g);
-export const PAGE_NUM_REG = new RegExp(/([0-9]+)\)/);
-
-export const ZOTFILE_REG = new RegExp(
-	"\\(zotero://open-pdf/library/items/\\w+\\?page=\\d+\\)"
-);
-
 export const templatePlain = "# {{title}}\n" +
 "\n" + 
 "## Metadata\n" +
@@ -145,5 +138,3 @@ export enum HeaderLevels {
 
 export const TEMPLATE_REG = /\{\{[^}]+\}\}/g;
 export const TEMPLATE_BRACKET_REG = /\[\[\{\{[^}]+\}\}\]\]/g;
-
-

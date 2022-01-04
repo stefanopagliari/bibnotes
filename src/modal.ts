@@ -1,6 +1,5 @@
 import MyPlugin from "./main";
 import { App, Modal, FuzzySuggestModal, Notice} from "obsidian";
-import * as fs from "fs";
 
 
 import { Reference,
@@ -12,8 +11,7 @@ import {
 	openSelectedNote,
 	orderByDateModified,
 	} from "./utils";
-import { DEFAULT_SETTINGS } from "./constants";
-import { SettingTab } from "./settings"; 
+
 
 
 export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
@@ -166,7 +164,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 			//if the note is the last one to be processed, then open it
 			if(indexNoteToBeProcessed == citeKeyToBeProcessed.length-1){
 				openSelectedNote(selectedEntry, this.plugin.settings.exportTitle, this.plugin.settings.exportPath);
-			}
+			} 
 
 		}
 
@@ -215,7 +213,7 @@ export class updateLibrary extends Modal {
 
 				bibtexArray.push(selectedEntry.citationKey)
 			}
-    	}
+		}
 
 	//Console.log the number of items updated
 	new Notice("Updated " + bibtexArray.length + " entries")
