@@ -15,6 +15,10 @@ In order to import your references and notes from Zotero, you need to export you
 - save the BetterBibTex JSON file in a folder **within** your Obsidian Vault
 - in the plugin settings within Obsidian add the relative path within your vault of the library to be imported, as well as the relative path within your vault of the folder where you would like the literature notes to be stored.
 
+![](/images/Export_Zotero.jpg)
+
+
+
 ## Commands
 The plugin introduces two commands into Obsidian:
 - **Create/Update Literature Note**: when you select this command you will be prompted to chose one of references from the library you have imported. If the reference has not been imported yet in the specified folder, a new note will be generated. If a note already exists, its content will be updated without over-writing the existing annotation (e.g. comments added manually from within Obsidian and block-references will not be over-written). The first option ("Entire Library") can be selected to create/update all the notes from the imported library.
