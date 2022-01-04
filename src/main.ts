@@ -719,6 +719,7 @@ export default class MyPlugin extends Plugin {
 		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
 			let lineElements = noteElements[i]
+			console.log(lineElements)
 
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements)
@@ -875,6 +876,9 @@ export default class MyPlugin extends Plugin {
 		annotationCommentFirstWord: string,
 		annotationCommentAll: string,
 	) {
+
+		console.log("annotationCommentFirstWord =" + annotationCommentFirstWord)
+		console.log("annotationCommentAll =" + annotationCommentAll)
 		const {
 			keyMergeAbove,
 			keyCommentPrepend,
@@ -887,49 +891,54 @@ export default class MyPlugin extends Plugin {
 			keyKeyword,
 			keyTask,
 		} = this.settings;
+
+		//Take the lower cap version
+		annotationCommentFirstWord = annotationCommentFirstWord.toLowerCase()
+
+		console.log("keyTask = "+ keyTask)
 	
 
 		let annotationType = "noKey";
 		if (
-			annotationCommentFirstWord === keyMergeAbove ||
+			annotationCommentFirstWord === keyMergeAbove.toLowerCase() ||
 			annotationCommentAll === keyMergeAbove
 		) {
 			annotationType = "typeMergeAbove";
-		} else if (annotationCommentFirstWord === keyCommentPrepend) {
+		} else if (annotationCommentFirstWord === keyCommentPrepend.toLowerCase()) {
 			annotationType = "typeCommentPrepend";
-		} else if (annotationCommentFirstWord === keyH1) {
+		} else if (annotationCommentFirstWord === keyH1.toLowerCase()) {
 			annotationType = "typeH1";
-		} else if (annotationCommentFirstWord === keyH2) {
+		} else if (annotationCommentFirstWord === keyH2.toLowerCase()) {
 			annotationType = "typeH2";
-		} else if (annotationCommentFirstWord === keyH3) {
+		} else if (annotationCommentFirstWord === keyH3.toLowerCase()) {
 			annotationType = "typeH3";
-		} else if (annotationCommentFirstWord === keyH4) {
+		} else if (annotationCommentFirstWord === keyH4.toLowerCase()) {
 			annotationType = "typeH4";
-		} else if (annotationCommentFirstWord === keyH5) {
+		} else if (annotationCommentFirstWord === keyH5.toLowerCase()) {
 			annotationType = "typeH5";
-		} else if (annotationCommentFirstWord === keyH6) {
+		} else if (annotationCommentFirstWord === keyH6.toLowerCase()) {
 			annotationType = "typeH6";
 		}
-		if (annotationCommentAll === keyH1) {
+		if (annotationCommentAll === keyH1.toLowerCase()) {
 			annotationType = "typeH1";
-		} else if (annotationCommentAll === keyH2) {
+		} else if (annotationCommentAll === keyH2.toLowerCase()) {
 			annotationType = "typeH2";
-		} else if (annotationCommentAll === keyH3) {
+		} else if (annotationCommentAll === keyH3.toLowerCase()) {
 			annotationType = "typeH3";
-		} else if (annotationCommentAll === keyH4) {
+		} else if (annotationCommentAll === keyH4.toLowerCase()) {
 			annotationType = "typeH4";
-		} else if (annotationCommentAll === keyH5) {
+		} else if (annotationCommentAll === keyH5.toLowerCase()) {
 			annotationType = "typeH5";
-		} else if (annotationCommentAll === keyH6) {
+		} else if (annotationCommentAll === keyH6.toLowerCase()) {
 			annotationType = "typeH6";
 		} else if (
-			annotationCommentAll === keyKeyword ||
-			annotationCommentFirstWord === keyKeyword
+			annotationCommentAll === keyKeyword.toLowerCase() ||
+			annotationCommentFirstWord === keyKeyword.toLowerCase()
 		) {
 			annotationType = "typeKeyword";
 		} else if (
-			annotationCommentAll === keyTask ||
-			annotationCommentFirstWord === keyTask
+			annotationCommentAll === keyTask.toLowerCase() ||
+			annotationCommentFirstWord === keyTask.toLowerCase()
 		) {
 			annotationType = "typeTask";
 		} 
