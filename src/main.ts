@@ -277,7 +277,7 @@ export default class MyPlugin extends Plugin {
 
             //Remote html tags
             const selectedLine = lines[indexLines].replace(/<\/?[^>]+(>|$)/g, "");
-			console.log(selectedLine)
+			//console.log(selectedLine)
             
             //Skip if empty
             if(selectedLine===""){continue}
@@ -431,7 +431,7 @@ export default class MyPlugin extends Plugin {
 				continue 
 				}  
 			}  
-		console.log(lineElements)
+		
 		noteElements.push(lineElements)			
         }  
 	return noteElements
@@ -732,14 +732,15 @@ export default class MyPlugin extends Plugin {
 
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
-				noteElements[i-1].rowEdited =
+				noteElements[i].rowEdited =
 					noteElements[i-1].rowEdited +
 					" ... " + colourTextBefore +
 					highlightFormatBefore + lineElements.highlightText + highlightFormatAfter + 
 					lineElements.citeKey + colourTextAfter;
-				
+
+
 				//Add the highlighted text to the previous one
-				indexRowsToBeRemoved.push(i);
+				indexRowsToBeRemoved.push(i-1);
 			}
 
 			//PREPEND COMMENT TO THE HIGHLIGHTED SENTENCE

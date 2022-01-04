@@ -87,6 +87,10 @@ In the settings of the plugin, it is possible to select the formatting of the **
 It is possible to perform additional transformations to designated highlighted sentences. The transformations currently included in the plugin are:
 - **Heading**: Turn highlighted text into a heading (Level 1 to 6). 
 - **MergeAbove**: Append highlight to the previous one (e.g. to merge paragraph across two pages). 
+
+![](/images/exampleMergeAbove.jpg)
+
+
 - **Preprend Comment**: Place the text of the comment at the beginning of the highlight (rather than at the end as by default). 
 
 ![](/images/exampleCommentPrepend.jpg)
