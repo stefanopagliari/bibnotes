@@ -350,9 +350,9 @@ if (settings.exportMetadata) {
 				.setName("Blockquote")
 				.addToggle((text) =>
 					text
-						.setValue(settings.isHighlightBlockquote)
+						.setValue(settings.isCommentBlockquote)
 						.onChange(async (value) => {
-							settings.isHighlightBlockquote = value;
+							settings.isCommentBlockquote = value;
 							await plugin.saveSettings();
 							this.display();
 						})
