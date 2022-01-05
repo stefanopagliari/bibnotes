@@ -176,11 +176,13 @@ if (settings.exportMetadata) {
 		containerEl.createEl('h2', {text: 'Format Annotations'});
 
 
-
+		containerEl.createEl('h3', {text: 'Highlights'});
 			const settingsHighlights: HTMLDetailsElement =
 				containerEl.createEl("details");
+				settingsHighlights.setAttribute("open", "");
+				settingsHighlights.createEl("summary", {text: "" });
 
-			settingsHighlights.createEl("summary", { text: "Highlights" });
+
 			new Setting(settingsHighlights)
 				.setName("Double Spaced")
 				.setDesc(
@@ -288,9 +290,12 @@ if (settings.exportMetadata) {
 				);
 		}
 		if (settings.exportAnnotations) {
+			containerEl.createEl('h3', {text: 'Comments'});
 			const settingsComments: HTMLDetailsElement =
 				containerEl.createEl("details");
-			settingsComments.createEl("summary", { text: "Comments" });
+				settingsComments.setAttribute("open", "");
+				settingsComments.createEl("summary", {text: "" });
+
 
 			new Setting(settingsComments)
 				.setName("Quotation Marks")
@@ -383,11 +388,12 @@ if (settings.exportMetadata) {
 				);
 
 			if (settings.exportAnnotations) {
+				containerEl.createEl('h3', {text: 'Additional Transformations'});
 				const settingsAdvanced: HTMLDetailsElement =
 					containerEl.createEl("details");
-				settingsAdvanced.createEl("summary", {
-					text: "Transformations",
-				});
+					settingsAdvanced.setAttribute("open", "");
+					settingsAdvanced.createEl("summary", {text: "" });
+	
 				new Setting(settingsAdvanced).setDesc(
 					"Add a single character (e.g. #) or a single word (e.g. todo). When this character/word is found at the beginning of a comment, the text of the comment or the highlighted text will be transformed"
 				);
@@ -438,7 +444,6 @@ if (settings.exportMetadata) {
 					);
 				new Setting(settingsAdvanced)
 					.setName("Heading Level 3")
-					//.setDesc('Add a single character or word (e.g. ###). When this character/word is found at the beginning of a comment to a highlight, the highlight will be transformed into a level 1 heading')
 					.addText((text) =>
 						text
 							.setPlaceholder("###")
@@ -460,7 +465,6 @@ if (settings.exportMetadata) {
 					);
 				new Setting(settingsAdvanced)
 					.setName("Heading Level 4")
-					//.setDesc('Add a single character or word (e.g. ####). When this character/word is found at the beginning of a comment to a highlight, the highlight will be transformed into a level 1 heading')
 					.addText((text) =>
 						text
 							// .setPlaceholder('####')
@@ -482,7 +486,6 @@ if (settings.exportMetadata) {
 					);
 				new Setting(settingsAdvanced)
 					.setName("Heading Level 5")
-					//	.setDesc('Add a single character or word (e.g. ####). When this character/word is found at the beginning of a comment to a highlight, the highlight will be transformed into a level 1 heading')
 					.addText((text) =>
 						text
 							// .setPlaceholder('#####')
@@ -505,7 +508,6 @@ if (settings.exportMetadata) {
 
 				new Setting(settingsAdvanced)
 					.setName("Heading Level 6")
-					//		.setDesc('Add a single character or word (e.g. ####). When this character/word is found at the beginning of a comment to a highlight, the highlight will be transformed into a level 1 heading')
 					.addText((text) =>
 						text
 							// .setPlaceholder('######')
@@ -528,7 +530,6 @@ if (settings.exportMetadata) {
 
 				new Setting(settingsAdvanced)
 					.setName("Append highlight to the end of the previous one")
-					//.setDesc('Add a single character or word (e.g. +). When this character/word is found at the beginning of a comment to a highlight, the highlight will be attached at the end of the previous one. THis can be used to combine two sentences found respectively at the end of a page and at the beginning of the next one')
 					.addText((text) =>
 						text
 							// .setPlaceholder('+')
@@ -551,7 +552,6 @@ if (settings.exportMetadata) {
 
 				new Setting(settingsAdvanced)
 					.setName("Place comment before the highlight")
-					//.setDesc('Add a single character or word (e.g. +). When this character/word is found at the beginning of a comment to a highlight, the highlight will be attached at the end of the previous one. THis can be used to combine two sentences found respectively at the end of a page and at the beginning of the next one')
 					.addText((text) =>
 						text
 							// .setPlaceholder('%')
@@ -593,14 +593,13 @@ if (settings.exportMetadata) {
 							})
 					);	
 			
-				const settingsColour: HTMLDetailsElement =
-					containerEl.createEl("details");
-					//settingsColour.setAttribute("open", "");
-					settingsColour.createEl("summary", {
-					text: "Highlight colours",
-				});
-				settingsColour.createEl('h6', {text: 'Select the transformation to be done to the highlights of different colour by adding one of the following options: {{highlight}} preceded or followed by custom text; "H1" (transform into Level 1 Header); "H2" (transform into Level 2 Header); "H3" (transform into Level 3 Header); "H4" (transform into Level 4 Header); "H5" (transform into Level 5 Header); "H6" (transform into Level 6 Header); "AddToAbove" (append the highlight to the previous one); "Keyword" (add the text to the list of keywords); "Todo" (transform the text of the highlight and associated comment into a task)'});
-				
+			containerEl.createEl('h3', {text: 'Highlight Color'});
+			const settingsColour: HTMLDetailsElement =
+				containerEl.createEl("details");
+				settingsColour.setAttribute("open", "");
+				settingsColour.createEl("summary", {text: "" });
+				new Setting(settingsColour).setDesc(
+					'Select the transformation to be done to the highlights of different colour by adding one of the following options: {{highlight}} preceded or followed by custom text; "H1" (transform into Level 1 Header); "H2" (transform into Level 2 Header); "H3" (transform into Level 3 Header); "H4" (transform into Level 4 Header); "H5" (transform into Level 5 Header); "H6" (transform into Level 6 Header); "AddToAbove" (append the highlight to the previous one); "Keyword" (add the text to the list of keywords); "Todo" (transform the text of the highlight and associated comment into a task)')
  
 				new Setting(settingsColour) 
 				.setName("Yellow")
