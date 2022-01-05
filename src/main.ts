@@ -25,7 +25,7 @@ import {AnnotationElements,
 		Collection
 	} from "./types";
 
-import {
+import { 
 	addNewAnnotationToOldAnnotation,
 	compareNewOldNotes,
 	createLocalFileLink,

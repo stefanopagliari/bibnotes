@@ -14,7 +14,7 @@ export class SettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h1', {text: 'LitNotes Formatter (for Zotero) '});
+		containerEl.createEl('h1', {text: 'BibNotes Formatter (for Zotero) '});
 		containerEl.createEl('a', { text: 'Created by Stefano Pagliari', href: 'https://github.com/stefanopagliari/'});
 		containerEl.createEl('h2', {text: 'Import Library'});
 		
@@ -88,6 +88,17 @@ export class SettingTab extends PluginSettingTab {
 					})
 			);
 		
+			new Setting(containerEl)
+			.setName("Extract Annotations")
+			.addToggle((text) =>
+				text
+					.setValue(settings.exportAnnotations)
+					.onChange(async (value) => {
+						settings.exportAnnotations = value;
+						await plugin.saveSettings();
+						this.display();
+					})
+			);
 
 
 if (settings.exportMetadata) {
@@ -110,9 +121,9 @@ if (settings.exportMetadata) {
 								| "Admonition"
 								| "Custom"
 								//| "Import from Note"
- 						) => {
- 							settings.templateType = v;
- 							await plugin.saveSettings();
+						) => {
+						settings.templateType = v;
+						await plugin.saveSettings();
 							this.display();
 
 						}
@@ -134,7 +145,7 @@ if (settings.exportMetadata) {
 			
 				);
 				}
-			 
+			
 					
 			new Setting(settingsExport)
 				.setName("Missing Fields")
@@ -160,22 +171,12 @@ if (settings.exportMetadata) {
 				});
 
 		}
+		if (settings.exportAnnotations) {
 
 		containerEl.createEl('h2', {text: 'Format Annotations'});
 
-		new Setting(containerEl)
-		.setName("Extract Annotations")
-		.addToggle((text) =>
-			text
-				.setValue(settings.exportAnnotations)
-				.onChange(async (value) => {
-					settings.exportAnnotations = value;
-					await plugin.saveSettings();
-					this.display();
-				})
-		);
 
-		if (settings.exportAnnotations) {
+
 			const settingsHighlights: HTMLDetailsElement =
 				containerEl.createEl("details");
 
@@ -596,7 +597,7 @@ if (settings.exportMetadata) {
 					containerEl.createEl("details");
 					//settingsColour.setAttribute("open", "");
 					settingsColour.createEl("summary", {
-					text: "Colour",
+					text: "Highlight colours",
 				});
 				settingsColour.createEl('h6', {text: 'Select the transformation to be done to the highlights of different colour by adding one of the following options: {{highlight}} preceded or followed by custom text; "H1" (transform into Level 1 Header); "H2" (transform into Level 2 Header); "H3" (transform into Level 3 Header); "H4" (transform into Level 4 Header); "H5" (transform into Level 5 Header); "H6" (transform into Level 6 Header); "AddToAbove" (append the highlight to the previous one); "Keyword" (add the text to the list of keywords); "Todo" (transform the text of the highlight and associated comment into a task)'});
 				

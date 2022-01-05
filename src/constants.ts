@@ -6,8 +6,8 @@ export const templatePlain = "# {{title}}\n" +
 "- **CiteKey**: {{citekey}}\n " +
 "- **Type**: {{itemType}}\n " +
 "- **Title**: {{title}}, \n " +
-"- **Author**:: [[{{author}}]];  \n"+
-"- **Editor**:: [[{{editor}}]];  \n"+
+"- **Author**: {{author}};  \n"+
+"- **Editor**: {{editor}};  \n"+
 "- **Translator**: {{translator}}\n"+
 "- **Publisher**: {{publisher}},\n"+
 "- **Location**: {{place}},\n"+
@@ -42,8 +42,8 @@ export const templateAdmonition = "# {{title}}\n" +
 "title: Metadata\n" +
 "- **CiteKey**: {{citekey}}\n" +
 "- **Type**: {{itemType}}\n" +
-"- **Author**:: [[{{author}}]]\n"+
-"- **Editor**:: [[{{editor}}]]\n"+
+"- **Author**: {{author}}\n"+
+"- **Editor**: {{editor}}\n"+
 "- **Translator**: {{translator}}\n"+
 "- **Publisher**: {{publisher}}\n"+
 "- **Location**: {{place}}\n"+
