@@ -45,8 +45,6 @@ import {
 	replaceTemplate,	
 } from "./utils"; 
 
-export { Entry } from "@retorquere/bibtex-parser";
-
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 	keyWordArray: string[];
