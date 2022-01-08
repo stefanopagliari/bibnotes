@@ -717,7 +717,7 @@ export default class MyPlugin extends Plugin {
 		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
 			let lineElements = noteElements[i]
-			console.log(lineElements)
+			
 
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements)
@@ -727,6 +727,14 @@ export default class MyPlugin extends Plugin {
 			if(colourTextBefore == undefined){colourTextBefore = ""}
 			let colourTextAfter = lineElements.colourTextAfter
 			if(colourTextAfter == undefined){colourTextAfter = ""}
+
+			//Identify the headings exported by Zotero
+			if(lineElements.highlightText=== "Extracted Annotations"){lineElements.annotationType="typeExtractedHeading"}
+
+			//FORMAT THE HEADINGS IDENTIFIED BY ZOTERO
+			//Transforms headings exported by Zotero into H3 (this could be changed later)
+			if(lineElements.annotationType==="typeExtractedHeading"){
+				lineElements.rowEdited = "**" + lineElements.rowOriginal.toUpperCase() + "**"}
 
 
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
@@ -981,19 +989,22 @@ export default class MyPlugin extends Plugin {
 			this.keyWordArray = resultsLineElements.keywordArray
 
 			//Create the annotation by merging the individial 
-			extractedAnnotations = "\n" + "\n" + "## Extracted Annotations" + "\n" + resultsLineElements.rowEditedArray.join("\n");}			
+			extractedAnnotations = "\n" + "\n" + "## Notes" + "\n" + resultsLineElements.rowEditedArray.join("\n");}			
 
 			
 			//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
-			console.log(this.settings.saveManualEdits===true)
 			if (this.settings.saveManualEdits===true){
 			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
 				if (fs.existsSync(noteTitleFull)) {
-					const existingNoteAll = fs.readFileSync(noteTitleFull)
+					console.log("I'm comparing with the old note")
+					let existingNoteAll = String(fs.readFileSync(noteTitleFull))
+					//Replace ## Extracted Annotations with Notes to deal with a change introduced in Beta
+					existingNoteAll.replace("## Extracted Annotations", "## Notes")
+
+
 					console.log(existingNoteAll)
-					const positionBeginningOldNotes = existingNoteAll.indexOf("## Extracted Annotations")
+					const positionBeginningOldNotes = existingNoteAll.indexOf("## Notes")+"## Notes\n".length
 					console.log(positionBeginningOldNotes)
-						//if the existing note does not have "## Extracted Annotations""
 	
 						if (positionBeginningOldNotes !== -1){
 						const existingAnnotation = String(existingNoteAll).substring(positionBeginningOldNotes)
@@ -1006,6 +1017,10 @@ export default class MyPlugin extends Plugin {
 							console.log(extractedAnnotations)
 						}
 				}
+
+				//Add "## Notes" at the beginning if these have been removed in the process of comparing with the old
+				if (!extractedAnnotations.startsWith("\n\n## Notes")){extractedAnnotations = "\n" + "\n" + "## Notes" + "\n" + extractedAnnotations}
+
 			}
 		
 		//Export both the annotations and the keywords extracted in the object extractedNote	
@@ -1144,7 +1159,11 @@ export default class MyPlugin extends Plugin {
 			
 		//Extract the annotation and the keyword from the text
 		const resultAnnotations = this.extractAnnotation (selectedEntry, noteTitleFull)
+
+
 		const extractedAnnotations = resultAnnotations.extractedAnnotations
+
+
 		let extractedKeywords = resultAnnotations.extractedKeywords
 		if(extractedKeywords== undefined){extractedKeywords = []}
 

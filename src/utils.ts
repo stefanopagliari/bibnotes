@@ -287,11 +287,6 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 		let segmentFourthQuarter = ""
 		//Create an array to record where in the old note the matches with the new note are found
 		const positionArray: number[] = [-1]
-
-		// If the annotationType is a keyword then delete the content from the rowEdited since the value has already been extracted
-		// if(noteElements[indexLines].annotationType === "typeKeyword"){
-		// 	noteElements[indexLines].rowEdited = ""
-		// }
 		
 		
 		//Calculate the length of the highlighted text
