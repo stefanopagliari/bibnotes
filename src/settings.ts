@@ -93,7 +93,7 @@ export class SettingTab extends PluginSettingTab {
 					})
 			);
 		
-			new Setting(containerEl)
+			new Setting(settingsExport)
 			.setName("Extract Annotations")
 			.addToggle((text) =>
 				text
@@ -177,6 +177,23 @@ if (settings.exportMetadata) {
 
 		}
 		if (settings.exportAnnotations) {
+
+			new Setting(settingsExport)
+			.setName("Save Manual Edits")
+			.setDesc(
+				'Select "Yes" to preserve the manual edits made to the previously extracted note (e.g. block references, comments added manually, fixed typos) when this is updated. Select "No" to overwrite any manual change to the extracted annotation when this is updated.'
+			)
+			.addToggle((text) =>
+				text
+					.setValue(settings.saveManualEdits)
+					.onChange(async (value) => {
+						settings.saveManualEdits = value;
+						await plugin.saveSettings();
+
+					})
+			);
+
+			//overwriteNotes
 
 		containerEl.createEl('h2', {text: 'Format Annotations'});
 

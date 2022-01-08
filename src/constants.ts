@@ -87,6 +87,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	exportPath: "",
 	exportTitle: "{{citeKey}}",
 	missingfield: "Leave placeholder",
+	saveManualEdits: true,
 	keyMergeAbove: "+",
 	keyCommentPrepend: "%",
 	keyH1: "#",

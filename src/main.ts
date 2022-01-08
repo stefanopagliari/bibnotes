@@ -806,6 +806,11 @@ export default class MyPlugin extends Plugin {
 			// Add highlighted expression to KW
 			if (lineElements.annotationType === "typeKeyword") {
 				keywordArray.push(lineElements.highlightText);
+
+				//remove the text of the line
+				lineElements.rowEdited=""
+
+				//Add the line to an index of lines to be removed
 				indexRowsToBeRemoved.push(i);
 			}
 			
@@ -875,8 +880,6 @@ export default class MyPlugin extends Plugin {
 		annotationCommentAll: string,
 	) {
 
-		console.log("annotationCommentFirstWord =" + annotationCommentFirstWord)
-		console.log("annotationCommentAll =" + annotationCommentAll)
 		const {
 			keyMergeAbove,
 			keyCommentPrepend,
@@ -892,8 +895,6 @@ export default class MyPlugin extends Plugin {
 
 		//Take the lower cap version
 		annotationCommentFirstWord = annotationCommentFirstWord.toLowerCase()
-
-		console.log("keyTask = "+ keyTask)
 	
 
 		let annotationType = "noKey";
@@ -982,20 +983,32 @@ export default class MyPlugin extends Plugin {
 			//Create the annotation by merging the individial 
 			extractedAnnotations = "\n" + "\n" + "## Extracted Annotations" + "\n" + resultsLineElements.rowEditedArray.join("\n");}			
 
+			
+			//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
+			console.log(this.settings.saveManualEdits===true)
+			if (this.settings.saveManualEdits===true){
 			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
-			if (fs.existsSync(noteTitleFull)) {
-				const existingNoteAll = fs.readFileSync(noteTitleFull)
-				const positionBeginningOldNotes = existingNoteAll.indexOf("## Extracted Annotations")
-					//if the existing note does not have "## Extracted Annotations""
-				if (positionBeginningOldNotes !== -1){
-					const existingAnnotation = String(existingNoteAll).substring(positionBeginningOldNotes)
-						this.noteElements  = compareNewOldNotes(existingAnnotation, this.noteElements)
-
-						let doubleSpaceAdd = ""
-						if(this.settings.isDoubleSpaced){doubleSpaceAdd = "\n"}
-						extractedAnnotations = addNewAnnotationToOldAnnotation (existingAnnotation, this.noteElements, doubleSpaceAdd)
-					}
+				if (fs.existsSync(noteTitleFull)) {
+					const existingNoteAll = fs.readFileSync(noteTitleFull)
+					console.log(existingNoteAll)
+					const positionBeginningOldNotes = existingNoteAll.indexOf("## Extracted Annotations")
+					console.log(positionBeginningOldNotes)
+						//if the existing note does not have "## Extracted Annotations""
+	
+						if (positionBeginningOldNotes !== -1){
+						const existingAnnotation = String(existingNoteAll).substring(positionBeginningOldNotes)
+							this.noteElements  = compareNewOldNotes(existingAnnotation, this.noteElements)
+							console.log(this.noteElements) 
+							let doubleSpaceAdd = ""
+							if(this.settings.isDoubleSpaced){doubleSpaceAdd = "\n"}
+							console.log(existingAnnotation)
+							extractedAnnotations = addNewAnnotationToOldAnnotation (existingAnnotation, this.noteElements, doubleSpaceAdd)
+							console.log(extractedAnnotations)
+						}
 				}
+			}
+		
+		//Export both the annotations and the keywords extracted in the object extractedNote	
 		const extractedNote = {
 			extractedAnnotations: extractedAnnotations,
 			extractedKeywords: this.keyWordArray 

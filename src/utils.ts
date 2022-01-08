@@ -288,7 +288,12 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 		//Create an array to record where in the old note the matches with the new note are found
 		const positionArray: number[] = [-1]
 
-
+		// If the annotationType is a keyword then delete the content from the rowEdited since the value has already been extracted
+		// if(noteElements[indexLines].annotationType === "typeKeyword"){
+		// 	noteElements[indexLines].rowEdited = ""
+		// }
+		
+		
 		//Calculate the length of the highlighted text
 		if(noteElements[indexLines]== undefined){continue}
 		
@@ -372,9 +377,12 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 			//Find the index in positionNewLine that comes after the selected number and store it in the element
 			noteElements[indexLines].positionOld = positionNewLine.filter(pos => pos >positionOldNoteMax)[0]
 		}
-
+		console.log(indexLines)
+		console.log(noteElements[indexLines])
 	}
+	console.log(noteElements)
 	return noteElements
+	
 }
  
 
