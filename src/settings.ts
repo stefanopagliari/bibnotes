@@ -1,5 +1,7 @@
 import MyPlugin from "./main";
 import { App, PluginSettingTab, Setting } from "obsidian";
+import { FolderSuggest } from "src/suggesters/FolderSuggester"
+
 
 export class SettingTab extends PluginSettingTab {
 	plugin: MyPlugin;
@@ -49,17 +51,18 @@ export class SettingTab extends PluginSettingTab {
 //			containerEl.createEl('h3', {text: 'Export Notes'});
 
 		new Setting(settingsExport)
-			.setName("Export Path")
-			.setDesc("Add the relative path to the folder inside your vault where the notes will be exported")
-			.addText((text) =>
-				text
-					.setPlaceholder("/relativepath/to/Folder/Note/intheVault")
-					.setValue(settings.exportPath)
-					.onChange(async (value) => {
-						settings.exportPath = value;
-						await plugin.saveSettings(); 
-					})
-			);
+		.setName("Export Path")
+		.setDesc("Add the relative path to the folder inside your vault where the notes will be exported")
+		.addSearch((cb) => {
+			new FolderSuggest(this.app, cb.inputEl);
+			cb.setPlaceholder("Example: folder1/folder2")
+				.setValue(this.plugin.settings.exportPath)
+				.onChange(async (new_folder) => {
+					settings.exportPath = new_folder;
+					await plugin.saveSettings();
+				});
+			// @ts-ignore
+		})
 
 		new Setting(settingsExport)
 		.setName("Note Title")
@@ -73,6 +76,8 @@ export class SettingTab extends PluginSettingTab {
 					await plugin.saveSettings();
 				})
 		);	
+
+		
 		new Setting(settingsExport)
 			.setName("Extract Metadata")
 			.setDesc(

@@ -7,7 +7,6 @@
 		"dev": "node esbuild.config.mjs",
 		"build": "node esbuild.config.mjs production"
 	},
-	
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
@@ -22,6 +21,7 @@
 		"typescript": "^4.4.4"
 	},
 	"dependencies": {
+		"@popperjs/core": "^2.11.2",
 		"loglevel": "^1.8.0",
 		"node": "^17.2.0",
 		"tslint": "^6.1.3"

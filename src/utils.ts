@@ -1,5 +1,4 @@
-import { normalizePath } from "obsidian";
-import * as fs from "fs";
+import { App, normalizePath } from "obsidian";
 import { 
 	//Reference,
 	Creator,
@@ -245,7 +244,7 @@ export function createNoteTitle(selectedEntry: Reference, exportTitle: string, e
 	exportTitle = exportTitle.replace("{{date}}", selectedEntry.year)
 
 	//Remove special characters from the name of the file
-	exportTitle = exportTitle.replace(/[^0-9a-z-A-Z]/g, "")
+	exportTitle = exportTitle.replace(/[/\\?%*:|"<>]/g, "")  
 
 	//Get the path of the vault
 	const vaultPath = this.app.vault.adapter.getBasePath()
@@ -270,7 +269,7 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 	//Sort the array numerically
 
 	//Create an array to record where in the old note the matches with the new note are found
-	const positionOldNote: number[] = [0]
+	const positionOldNote: number[] = [0] 
 
 
 	noteElements = noteElements.filter(x => x !== undefined);
@@ -461,11 +460,3 @@ export function openSelectedNote(selectedEntry:Reference, exportTitle:string, ex
 
 }
 
-
-
-
-//#ffd400 (yellow)
-//#ff6666 red
-//#5fb236 green
-//#2ea8e5 blue
-//#a28ae5 purple
