@@ -49,6 +49,8 @@ export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 	keyWordArray: string[];
 	noteElements: AnnotationElements[];
+	extractedNoteElements: AnnotationElements[];
+	userNoteElements: AnnotationElements[];
 
 	async onload() {
 		await this.loadSettings();
@@ -436,7 +438,69 @@ export default class MyPlugin extends Plugin {
  
 	}
 
+	parseAnnotationLinesintoElementsUserNote(note: string) {
+		note = note
+		// 	// 	// // Replace backticks
+			.replace(
+				/`/g, "'"
+				)
+				// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
+			.replace(
+				/, p. p. /g,
+				", p. "
+			)
+			.trim()
 
+			// Split the annotations into an array where each row is an entry 
+		const lines = note.split(/<\/h1>|<\/p>/gm)
+
+		const noteElements: AnnotationElements[] = []
+
+		//Loop through the lines
+		const lengthLines = Object.keys(lines).length
+		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
+			const selectedLineOriginal = unescape(lines[indexLines]);
+			//Remove HTML tags
+			let selectedLine = String(selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, ""))
+		// 	// Replace backticks with single quote
+			selectedLine = replaceTemplate(selectedLine, "`", "'");
+			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
+			// 	// Correct encoding issues
+			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
+		
+		
+
+
+			//console.log("Line n." +indexLines + ": " + selectedLine)
+
+			const lineElements: AnnotationElements = {
+				highlightText: "",
+				highlightColour: "",
+				annotationType: "",
+				citeKey: "",
+				commentText: "",
+				rowOriginal: selectedLine,
+				rowEdited: selectedLine,
+				indexNote: undefined,
+				foundOld: undefined,
+				positionOld: undefined,
+				extractionSource: "userNote",
+				colourTextBefore: "",
+				colourTextAfter: "",
+			}  
+
+			
+			lineElements.rowEdited = selectedLine 
+			
+		//Add the element to the array containing all the elements
+		
+		noteElements.push(lineElements)
+
+		}
+	return noteElements
+	
+
+	}
 	parseAnnotationLinesintoElementsZotero(note: string) {
 		
 		// clean the entire annotation
@@ -958,74 +1022,100 @@ export default class MyPlugin extends Plugin {
 
 			//run the function to parse the annotation for each note (there could be more than one)
 			let noteElements:AnnotationElements[] = []
+			let userNoteElements:AnnotationElements[] = []
+
+
+			console.log(selectedEntry.notes.length)
 			for (let indexNote = 0; indexNote < selectedEntry.notes.length; indexNote++) {
 				const note = selectedEntry.notes[indexNote].note
-
+				//console.log(note)
+				
 				//Identify the extraction Type (Zotero vs. Zotfile)
 				let extractionType = undefined
 				
 				if (unescape(note).includes("<span class=")){extractionType = "Zotero"} 
 				else if (unescape(note).includes("<a href=\"zotero://open-pdf/library/")){extractionType = "Zotfile"}
+				//Identify manual notes (not extracted from PDF) extracted from zotero
+				else if (unescape(note).includes("div data-schema-version")){extractionType = "UserNote"}
+				else {extractionType = "Other"}
+				
+
+
+				console.log(extractionType)
+				
 
 				
 				let noteElementsSingle:AnnotationElements
 				if(extractionType === "Zotero"){
 					noteElementsSingle  = this.parseAnnotationLinesintoElementsZotero(note)
+					noteElements = noteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
 				} 
 
 				if(extractionType === "Zotfile"){
 					noteElementsSingle = this.parseAnnotationLinesintoElementsZotfile(note)
+					noteElements = noteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
+				} 
+
+				if(extractionType === "UserNote"){
+					noteElementsSingle = this.parseAnnotationLinesintoElementsUserNote(note)
+					userNoteElements = userNoteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
+					
 				} 
 				
-				//concatenate the annotaiton element to the next one
-				noteElements = noteElements.concat(noteElementsSingle)
-				this.noteElements = noteElements 
+				
+				this.noteElements = noteElements
+				this.userNoteElements = userNoteElements
 
 				}
-
+				
 			
 				//Run the function to edit each line
-			const resultsLineElements = this.formatNoteElements(noteElements)
+			const resultsLineElements = this.formatNoteElements(this.noteElements)
 			this.keyWordArray = resultsLineElements.keywordArray
 
 			//Create the annotation by merging the individial 
 			extractedAnnotations = "\n" + "\n" + "## Notes" + "\n" + resultsLineElements.rowEditedArray.join("\n");}			
 
+			//Creates an array with the notes from the user 		
+			//const extractedUserNote = this.userNoteElements.join(("\n"))
+			const extractedUserNoteArray = Array.from(Object.values(this.userNoteElements), note => note.rowEdited)
+			const extractedUserNote = "\n" + "\n" + "## Comments" + "\n" + extractedUserNoteArray.join("\n")
+			
+
+			// userAnnotations = "\n" + "\n" + "## Notes" + "\n" + this.userNoteElements. join("\n");}			
 			
 			//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
-			if (this.settings.saveManualEdits===true){
 			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
-				if (fs.existsSync(noteTitleFull)) {
-					console.log("I'm comparing with the old note")
+			if (this.settings.saveManualEdits===true && fs.existsSync(noteTitleFull)){
+			
 					let existingNoteAll = String(fs.readFileSync(noteTitleFull))
 					//Replace ## Extracted Annotations with Notes to deal with a change introduced in Beta
 					existingNoteAll.replace("## Extracted Annotations", "## Notes")
 
 
-					console.log(existingNoteAll)
+					
 					const positionBeginningOldNotes = existingNoteAll.indexOf("## Notes")+"## Notes\n".length
-					console.log(positionBeginningOldNotes)
+					//console.log(positionBeginningOldNotes)
 	
 						if (positionBeginningOldNotes !== -1){
 						const existingAnnotation = String(existingNoteAll).substring(positionBeginningOldNotes)
-							this.noteElements  = compareNewOldNotes(existingAnnotation, this.noteElements)
-							console.log(this.noteElements) 
+							this.extractedNoteElements  = compareNewOldNotes(existingAnnotation, this.noteElements)
 							let doubleSpaceAdd = ""
 							if(this.settings.isDoubleSpaced){doubleSpaceAdd = "\n"}
-							console.log(existingAnnotation)
 							extractedAnnotations = addNewAnnotationToOldAnnotation (existingAnnotation, this.noteElements, doubleSpaceAdd)
-							console.log(extractedAnnotations)
+					
 						}
-				}
+				
 
 				//Add "## Notes" at the beginning if these have been removed in the process of comparing with the old
 				if (!extractedAnnotations.startsWith("\n\n## Notes")){extractedAnnotations = "\n" + "\n" + "## Notes" + "\n" + extractedAnnotations}
 
 			}
 		
-		//Export both the annotations and the keywords extracted in the object extractedNote	
+		//Export both the extracted annotations, user annotation, and the keywords extracted in the object extractedNote	
 		const extractedNote = {
 			extractedAnnotations: extractedAnnotations,
+			extractedUserNote: extractedUserNote,
 			extractedKeywords: this.keyWordArray 
 
 		}
@@ -1123,6 +1213,13 @@ export default class MyPlugin extends Plugin {
 		
 
 	}
+
+	// Function to extract the notes added manually
+
+	
+
+
+	// Function to import the right template
 
 	importTemplate(){
 		let template = templatePlain

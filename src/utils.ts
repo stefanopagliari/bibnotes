@@ -372,8 +372,8 @@ export function compareNewOldNotes(existingNoteNote:String, noteElements: Annota
 			//Find the index in positionNewLine that comes after the selected number and store it in the element
 			noteElements[indexLines].positionOld = positionNewLine.filter(pos => pos >positionOldNoteMax)[0]
 		}
-		console.log(indexLines)
-		console.log(noteElements[indexLines])
+		// console.log(indexLines)
+		// console.log(noteElements[indexLines])
 	}
 	console.log(noteElements)
 	return noteElements
