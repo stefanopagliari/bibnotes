@@ -34,7 +34,18 @@ export const templatePlain = "# {{title}}\n" +
 "\n"+
 "## Tags and Collections\n"+
 "- **Keywords**: {{keywords}}\n"+
-"- **Collections**: {{collectionsParent}}\n"
+"- **Collections**: {{collectionsParent}}\n"+
+"\n" +
+"\n" +
+"---"+
+"\n" +
+"## Comments\n" +
+"{{UserNotes}}\n"
+"\n" +
+"---"+
+"\n" +
+"## Extracted Annotations\n" +
+"{{PDFNotes}}\n"
 
 export const templateAdmonition = "# {{title}}\n" +
 "\n" + 
@@ -74,7 +85,17 @@ export const templateAdmonition = "# {{title}}\n" +
 "title: Tags and Collections\n" +
 "- **Keywords**: {{keywords}}\n"+
 "- **Collections**: {{collectionsParent}}\n"+
-"```\n" 
+"```\n" +
+"\n" +
+"---"+
+"\n" +
+"## Comments\n" +
+"{{UserNotes}}\n"
+"\n" +
+"---"+
+"\n" +
+"## Extracted Annotations\n" +
+"{{PDFNotes}}\n"
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	bibPath: "",
@@ -87,7 +108,9 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	exportPath: "",
 	exportTitle: "{{citeKey}}",
 	missingfield: "Leave placeholder",
-	saveManualEdits: true,
+	saveManualEdits: "Save Entire Note",
+	saveManualEditsStart: "",
+	saveManualEditsEnd: "",
 	keyMergeAbove: "+",
 	keyCommentPrepend: "%",
 	keyH1: "#",

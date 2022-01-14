@@ -183,15 +183,57 @@ if (settings.exportMetadata) {
 			.setDesc(
 				'Select "Yes" to preserve the manual edits made to the previously extracted note (e.g. block references, comments added manually, fixed typos) when this is updated. Select "No" to overwrite any manual change to the extracted annotation when this is updated.'
 			)
-			.addToggle((text) =>
-				text
-					.setValue(settings.saveManualEdits)
-					.onChange(async (value) => {
-						settings.saveManualEdits = value;
+			.addDropdown((d) => {
+				d.addOption("Save Entire Note", "Save Entire Note");
+				d.addOption("Select Section", "Select Section");
+				d.addOption("Overwrite Entire Note", "Overwrite Entire Note");
+				d.setValue(settings.saveManualEdits);
+				d.onChange(
+					async (
+						v:
+							| "Save Entire Note"
+							| "Select Section"
+							| "Overwrite Entire Note"
+					) => {
+						settings.saveManualEdits = v;
 						await plugin.saveSettings();
+						this.display();
+					}
+				);
+			});
 
-					})
-			);
+			if(settings.saveManualEdits == "Select Section"){
+				new Setting(settingsExport)
+				.setName("Start - Save Manual Edits")
+				.setDesc(
+					"Define string (e.g. '## Notes') in the template starting from where updating the note will not overwrite the existing text. If field is left empty, the value will be set to the beginning of the note"
+				)
+				.addText((text) =>
+					text
+						.setValue(settings.saveManualEditsStart)
+						.onChange(async (value) => {
+							settings.saveManualEditsStart = value;
+							await plugin.saveSettings();
+						})
+				); 
+			
+
+			if(settings.saveManualEdits){
+				new Setting(settingsExport)
+				.setName("End - Save Manual Edits")
+				.setDesc(
+					"Define string (e.g. '## Notes') in the template until where updating the note will not overwrite the existing text. If field is left empty, the value will be set to the end of the note"
+				)
+				.addText((text) =>
+					text
+						.setValue(settings.saveManualEditsEnd)
+						.onChange(async (value) => {
+							settings.saveManualEditsEnd = value;
+							await plugin.saveSettings();
+						})
+				);
+			}
+		}
 
 			//overwriteNotes
 

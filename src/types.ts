@@ -83,7 +83,9 @@ export interface MyPluginSettings {
 	exportPath: string;
 	exportTitle: string;
 	missingfield: string;
-	saveManualEdits: boolean;
+	saveManualEdits: string;
+	saveManualEditsStart: string;
+	saveManualEditsEnd: string;
 	keyMergeAbove: string;
 	keyCommentPrepend: string;
 	keyH1: string;

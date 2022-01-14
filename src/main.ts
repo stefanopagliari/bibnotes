@@ -26,8 +26,7 @@ import {AnnotationElements,
 	} from "./types";
 
 import { 
-	addNewAnnotationToOldAnnotation,
-	compareNewOldNotes,
+	createAuthorKey,
 	createLocalFileLink,
 	createCreatorList,
 	createNoteTitle,
@@ -1018,6 +1017,9 @@ export default class MyPlugin extends Plugin {
 
 	extractAnnotation(selectedEntry:Reference, noteTitleFull:string){
 		let extractedAnnotations = ""
+		let extractedUserNote = ""
+		console.log(selectedEntry.notes.length)
+
 		if(this.settings.exportAnnotations && selectedEntry.notes.length>0){
 
 			//run the function to parse the annotation for each note (there could be more than one)
@@ -1025,7 +1027,6 @@ export default class MyPlugin extends Plugin {
 			let userNoteElements:AnnotationElements[] = []
 
 
-			console.log(selectedEntry.notes.length)
 			for (let indexNote = 0; indexNote < selectedEntry.notes.length; indexNote++) {
 				const note = selectedEntry.notes[indexNote].note
 				//console.log(note)
@@ -1038,11 +1039,7 @@ export default class MyPlugin extends Plugin {
 				//Identify manual notes (not extracted from PDF) extracted from zotero
 				else if (unescape(note).includes("div data-schema-version")){extractionType = "UserNote"}
 				else {extractionType = "Other"}
-				
-
-
-				console.log(extractionType)
-				
+								
 
 				
 				let noteElementsSingle:AnnotationElements
@@ -1074,43 +1071,15 @@ export default class MyPlugin extends Plugin {
 			this.keyWordArray = resultsLineElements.keywordArray
 
 			//Create the annotation by merging the individial 
-			extractedAnnotations = "\n" + "\n" + "## Notes" + "\n" + resultsLineElements.rowEditedArray.join("\n");}			
-
+			extractedAnnotations = resultsLineElements.rowEditedArray.join("\n");
 			//Creates an array with the notes from the user 		
 			//const extractedUserNote = this.userNoteElements.join(("\n"))
 			const extractedUserNoteArray = Array.from(Object.values(this.userNoteElements), note => note.rowEdited)
-			const extractedUserNote = "\n" + "\n" + "## Comments" + "\n" + extractedUserNoteArray.join("\n")
+			extractedUserNote = extractedUserNoteArray.join("\n")
+		}			
+ 
 			
-
-			// userAnnotations = "\n" + "\n" + "## Notes" + "\n" + this.userNoteElements. join("\n");}			
 			
-			//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
-			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
-			if (this.settings.saveManualEdits===true && fs.existsSync(noteTitleFull)){
-			
-					let existingNoteAll = String(fs.readFileSync(noteTitleFull))
-					//Replace ## Extracted Annotations with Notes to deal with a change introduced in Beta
-					existingNoteAll.replace("## Extracted Annotations", "## Notes")
-
-
-					
-					const positionBeginningOldNotes = existingNoteAll.indexOf("## Notes")+"## Notes\n".length
-					//console.log(positionBeginningOldNotes)
-	
-						if (positionBeginningOldNotes !== -1){
-						const existingAnnotation = String(existingNoteAll).substring(positionBeginningOldNotes)
-							this.extractedNoteElements  = compareNewOldNotes(existingAnnotation, this.noteElements)
-							let doubleSpaceAdd = ""
-							if(this.settings.isDoubleSpaced){doubleSpaceAdd = "\n"}
-							extractedAnnotations = addNewAnnotationToOldAnnotation (existingAnnotation, this.noteElements, doubleSpaceAdd)
-					
-						}
-				
-
-				//Add "## Notes" at the beginning if these have been removed in the process of comparing with the old
-				if (!extractedAnnotations.startsWith("\n\n## Notes")){extractedAnnotations = "\n" + "\n" + "## Notes" + "\n" + extractedAnnotations}
-
-			}
 		
 		//Export both the extracted annotations, user annotation, and the keywords extracted in the object extractedNote	
 		const extractedNote = {
@@ -1236,6 +1205,174 @@ export default class MyPlugin extends Plugin {
 
 	}
 
+	compareOldNewNote(existingNote: string, newNote: string, authorKey: string){
+		//Find the position of the line breaks in the old note
+		const newLineRegex = RegExp (/\n/gm)
+		const positionNewLine: number[] = []
+		let match = undefined
+		while(match = newLineRegex.exec(existingNote)){
+		positionNewLine.push(match.index); 
+		}
+
+		//Create an array to record where in the old note the matches with the new note are found
+		const positionOldNote: number[] = [0] 
+		//Create an array to record which sentences of the new note need to be stored in the old note and their position in the old note
+		const newNoteInsertText: string[] = []
+		const newNoteInsertPosition: number[] = []
+		
+
+		//Split the new note into sentences
+		const newNoteArray = newNote.split("\n")
+
+		//Remove markdown formatting from the beginning and end of each line
+
+
+		//loop through each of the lines extracted in the note
+	for (let indexLines = 0; indexLines < newNoteArray.length ; indexLines++) {
+
+		let segmentWhole = ""
+		let segmentFirstHalf = ""
+		let segmentSecondHalf = ""
+		let segmentFirstQuarter = ""
+		let segmentSecondQuarter = ""
+		let segmentThirdQuarter = ""
+		let segmentFourthQuarter = ""
+		//Create an array to record where in the old note the matches with the new note are found
+		const positionArray: number[] = [-1]
+		
+		// Select the line to be searched
+
+		//Remove formatting added by bibnotes at the beginning of the line
+		let selectedNewLine = newNoteArray[indexLines]
+		selectedNewLine = selectedNewLine.trim()
+		selectedNewLine = selectedNewLine.replace(/^- /mg, "")
+		selectedNewLine = selectedNewLine.replace(/^> /mg, "")
+		selectedNewLine = selectedNewLine.replace(/^=/mg, "")
+		selectedNewLine = selectedNewLine.replace(/^\**/mg, "")
+		selectedNewLine = selectedNewLine.replace(/^\*/mg, "")
+		selectedNewLine = selectedNewLine.replace(/^"/mg, "")
+
+		//Remove the authorkey at the end of the line
+		const authorKey_Zotero = new RegExp("\\(" + authorKey + ", \\d+, p. \\d+\\)$")
+		const authorKey_Zotfile = new RegExp("\\(" + authorKey + " \\d+:\\d+\\)$")
+		selectedNewLine = selectedNewLine.replace(authorKey_Zotero, "")
+		selectedNewLine = selectedNewLine.replace(authorKey_Zotfile, "")
+
+		//Remove formatting added by bibnotes at the end of the line
+		selectedNewLine = selectedNewLine.replace(/=$/mg, "")
+		selectedNewLine = selectedNewLine.replace(/\**$/mg, "")
+		selectedNewLine = selectedNewLine.replace(/\*$/mg, "")
+		selectedNewLine = selectedNewLine.replace(/"$/mg, "")
+
+
+
+		
+		//Calculate the length of the highlighted text
+		if(selectedNewLine== undefined){continue}
+		
+		
+		const lengthExistingLine = selectedNewLine.length
+		//Calculate the length of the comment text
+		if(lengthExistingLine === 0) { continue; }
+
+
+		//CHECK THE PRESENCE OF THE HIGHLIGHTED TEXT IN THE EXISTING ONE
+
+		//Check if the entire line (or part of the line for longer lines) are found in the existing note
+		if(lengthExistingLine>1 && lengthExistingLine<30){
+			segmentWhole = selectedNewLine
+			positionArray.push(existingNote.indexOf(segmentWhole))
+			}
+		else if(lengthExistingLine>=30 && lengthExistingLine<150){
+			segmentFirstHalf = selectedNewLine.substring(0, lengthExistingLine/2)
+			positionArray.push(existingNote.indexOf(segmentFirstHalf))
+			
+			segmentSecondHalf = selectedNewLine.substring((lengthExistingLine/2)+1, lengthExistingLine)
+			positionArray.push(existingNote.indexOf(segmentSecondHalf))}
+
+		else if(lengthExistingLine>=150){
+			segmentFirstQuarter = selectedNewLine.substring(0, lengthExistingLine/4)
+			positionArray.push(existingNote.indexOf(segmentFirstQuarter))
+			
+			segmentSecondQuarter = selectedNewLine.substring((lengthExistingLine/4)+1, lengthExistingLine/2)
+			positionArray.push(existingNote.indexOf(segmentSecondQuarter))
+			
+			segmentThirdQuarter = selectedNewLine.substring((lengthExistingLine/2)+1, 3*lengthExistingLine/4)
+			positionArray.push(existingNote.indexOf(segmentThirdQuarter))
+
+			segmentFourthQuarter = selectedNewLine.substring((3*lengthExistingLine/4)+1, lengthExistingLine)
+			positionArray.push(existingNote.indexOf(segmentFourthQuarter))
+		}
+		
+		// if a match if found with the old note, set foundOld to TRUE
+		if(Math.max(...positionArray)> -1){
+
+			//record the position of the found line in the old note
+			const positionOldNoteMax = Math.max(...positionArray)
+			positionOldNote.push(positionOldNoteMax)
+		}
+		// if a match if not found with the old note, set foundOld to FALSE and set positionOld to the position in the old note where the line break is found
+		if(Math.max(...positionArray)=== -1){
+			const positionOldNoteMax = Math.max(...positionOldNote)
+			newNoteInsertText.push(newNoteArray[indexLines])
+			newNoteInsertPosition.push(positionNewLine.filter(pos => pos >positionOldNoteMax)[0])
+		}
+	}
+	
+	let doubleSpaceAdd = ""
+	if(this.settings.isDoubleSpaced){doubleSpaceAdd = "\n"}
+
+	//Add the new annotations into the old note
+	for (let indexNoteElements = newNoteInsertText.length-1; indexNoteElements >=0; indexNoteElements--) {const insertText = newNoteInsertText[indexNoteElements]
+		const insertPosition = newNoteInsertPosition[indexNoteElements]		
+		existingNote = existingNote.slice(0, insertPosition) + doubleSpaceAdd + insertText + existingNote.slice(insertPosition)
+		}
+	if(this.settings.saveManualEdits=="Save Entire Note"){return existingNote}
+	if(this.settings.saveManualEdits=="Select Section"){
+		//identify the keyword marking the beginning and the end of the section not to be overwritten
+		const startSave = this.settings.saveManualEditsStart
+		const endSave = this.settings.saveManualEditsEnd
+
+	//identify the keyword identifying the beginning of the section to be preserved is empty, the position is the beginning of the string. Otherwise find the match in the text
+		let startSaveOld: number = 0
+		if (startSave !== ""){startSaveOld = existingNote.indexOf(startSave)}
+		if (startSaveOld<0){startSaveOld = 0}
+
+		//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
+		let endSaveOld: number = existingNote.length-1
+		if (endSave !== ""){endSaveOld = existingNote.indexOf(endSave)-1}
+		if (endSaveOld<0){endSaveOld = existingNote.length-1}	
+
+		//Find the sections of the existing note to be preserved
+		const existingNotePreserved = existingNote.substring(startSaveOld, endSaveOld)
+		
+
+		 //identify the keyword identifying the beginning of the section to be preserved is empty, the position is the beginning of the string. Otherwise find the match in the text
+		let startSaveNew: number = 0
+		if (startSave !== ""){startSaveNew = newNote.indexOf(startSave)}
+		if (startSaveNew<0){startSaveNew = 0}
+
+		//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
+		let endSaveNew: number = newNote.length-1
+		if (endSave !== ""){endSaveNew = newNote.indexOf(endSave)-1}
+		if (endSaveNew<0){endSaveNew = newNote.length-1}	
+
+		
+		//Find the sections of the existing note before the one to be preserved
+		const newNotePreservedBefore = newNote.substring(0, startSaveNew)
+		//Find the sections of the existing note after the one to be preserved
+		const newNotePreservedAfter = newNote.substring(endSaveNew, newNote.length-1)
+		
+		const newNoteCombined = newNotePreservedBefore + existingNotePreserved + newNotePreservedAfter
+
+		return newNoteCombined
+
+		}
+
+
+	}
+	
+
 	createNote(selectedEntry: Reference, data){
 		
 		console.log("Bibnotes Importing reference: " + selectedEntry.citationKey)
@@ -1244,10 +1381,10 @@ export default class MyPlugin extends Plugin {
 		const templateNote = this.importTemplate()
 
 		//Create the metadata
-		let metadata:string = this.parseMetadata(selectedEntry, templateNote);
+		let litnote:string = this.parseMetadata(selectedEntry, templateNote);
 
 		//Extract the list of collections
-		metadata = this.parseCollection(selectedEntry, data, metadata);
+		litnote = this.parseCollection(selectedEntry, data, litnote);
 		//console.log(metadata)
 
 		
@@ -1257,28 +1394,35 @@ export default class MyPlugin extends Plugin {
 		//Extract the annotation and the keyword from the text
 		const resultAnnotations = this.extractAnnotation (selectedEntry, noteTitleFull)
 
-
+		//Replace annotations in the template
 		const extractedAnnotations = resultAnnotations.extractedAnnotations
+		litnote = litnote.replace("{{PDFNotes}}", extractedAnnotations)
 
+		const extractedUserNotes = resultAnnotations.extractedUserNote
+		litnote = litnote.replace("{{UserNotes}}", extractedUserNotes)
 
 		let extractedKeywords = resultAnnotations.extractedKeywords
 		if(extractedKeywords== undefined){extractedKeywords = []}
 
 		// Join the tags in the metadata with the tags extracted in the text and replace them in the text
-		metadata = replaceTagList(selectedEntry, extractedKeywords, metadata)
+		litnote = replaceTagList(selectedEntry, extractedKeywords, litnote)
 
 		//delete the missing fields in the metadata
 		const missingFieldSetting = this.settings.missingfield
-		metadata = replaceMissingFields(metadata, missingFieldSetting);
+		litnote = replaceMissingFields(litnote, missingFieldSetting);
 
-		// Add metadata in front of the annotations
-		const finalNote = metadata + 
-			"\n" +
-			extractedAnnotations
+		// Compare old note and new note
+		if (this.settings.saveManualEdits!=="Overwrite Entire Note" && fs.existsSync(noteTitleFull)){	//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
+			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
 
-		
+			//Extract the reference within bracket to faciliate comparison
+			const authorKey = createAuthorKey(selectedEntry.creators)
+			const existingNoteAll = String(fs.readFileSync(noteTitleFull))
+			litnote = this.compareOldNewNote(existingNoteAll, litnote, authorKey)
+		}
+
 		//Export the file
-		fs.writeFile(noteTitleFull, finalNote, function (err) {
+		fs.writeFile(noteTitleFull, litnote, function (err) {
 				if (err) console.log(err);
 			});
 		new Notice(`Imported ${selectedEntry.citationKey}!`);
