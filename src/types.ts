@@ -86,6 +86,10 @@ export interface MyPluginSettings {
 	saveManualEdits: string;
 	saveManualEditsStart: string;
 	saveManualEditsEnd: string;
+	imagesImport: boolean;
+	imagesCopy: boolean;
+	imagesPath: string;
+	imagesCommentPosition: string;
 	keyMergeAbove: string;
 	keyCommentPrepend: string;
 	keyH1: string;
@@ -191,6 +195,7 @@ export interface AnnotationElements {
 	extractionSource: string,
 	colourTextBefore: string,
 	colourTextAfter: string,
+	imagePath: string,
 	}[]
 
 

@@ -2,7 +2,7 @@
 // Import fs 
 import * as fs from "fs";
 //import { info, setLevel } from "loglevel";
-import {Plugin, Notice} from "obsidian";
+import {App, Plugin, Notice, normalizePath, Vault} from "obsidian";
 
 
 import {
@@ -47,6 +47,7 @@ import {
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 	keyWordArray: string[];
+	pathZoteroStorage: string;
 	noteElements: AnnotationElements[];
 	extractedNoteElements: AnnotationElements[];
 	userNoteElements: AnnotationElements[];
@@ -410,7 +411,9 @@ export default class MyPlugin extends Plugin {
 
 			if (firstBlank == -1){firstBlank = annotationCommentAll.length}
 			lineElements.commentText =
-				lineElements.annotationType === "noKey" || lineElements.annotationType === "typeComment"
+				lineElements.annotationType === "noKey" || 
+				lineElements.annotationType === "typeComment" 
+
 					? lineElements.commentText
 					: lineElements.commentText
 						.substring(
@@ -528,16 +531,17 @@ export default class MyPlugin extends Plugin {
 		const lengthLines = Object.keys(lines).length
 		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
 			const selectedLineOriginal = unescape(lines[indexLines]);
+			console.log(indexLines)
+			console.log(selectedLineOriginal)
+			
 			//Remove HTML tags
 			let selectedLine = String(selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, ""))
+
 		// 	// Replace backticks with single quote
 			selectedLine = replaceTemplate(selectedLine, "`", "'");
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
 			// 	// Correct encoding issues
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
-		
-		
-
 
 			//console.log("Line n." +indexLines + ": " + selectedLine)
 
@@ -555,11 +559,18 @@ export default class MyPlugin extends Plugin {
 				extractionSource: "zotero",
 				colourTextBefore: "",
 				colourTextAfter: "",
+				imagePath: ""
 			}  
 
 			//Record the extraction method
 			lineElements.extractionSource = "zotero"
 
+			//Identify images
+			if (/<img data-attachment-key=/gm.test(selectedLineOriginal)){			
+				lineElements.annotationType = "typeImage"
+				lineElements.imagePath =  String(selectedLineOriginal.match(/"([^"]*)"/g)[0]).replaceAll("\"","")
+			}
+			
 			//Extract the colour of the highlight
 			if (/"color":"#......"/gm.test(selectedLineOriginal)){			
 				let highlightColour = String(selectedLineOriginal.match(/"color":"#......"/gm))
@@ -568,17 +579,13 @@ export default class MyPlugin extends Plugin {
 				highlightColour = highlightColour.replace("\"","")
 				lineElements.highlightColour = highlightColour
 			}
-  
-			//Extract the citation within bracket
-			//console.log("Line Original: " + selectedLineOriginal)
 			
+			//Extract the citation within bracket			
 			if (/\(<span class="citation-item">.*<\/span>\)<\/span>/gm.test(selectedLineOriginal)){			
-
 				lineElements.citeKey = String(selectedLineOriginal.match(/\(<span class="citation-item">.*<\/span>\)<\/span>/gm))
 				lineElements.citeKey = lineElements.citeKey.replace("(<span class=\"citation-item\">", "")
 				lineElements.citeKey = lineElements.citeKey.replace("</span>)</span>", "")
 				lineElements.citeKey = "("+lineElements.citeKey+")"
-			
 			}
 			//Find the position where the CiteKey begins
 			const beginningCiteKey = selectedLine.indexOf(lineElements.citeKey)
@@ -635,17 +642,20 @@ export default class MyPlugin extends Plugin {
 					);
 				//console.log("annotationCommentFirstWord : " + annotationCommentFirstWord)
 				// Identify what type of annotation is based on the first word
+				if(lineElements.annotationType!=="typeImage"){
 				lineElements.annotationType = this.getAnnotationType(
 					annotationCommentFirstWord,
 					annotationCommentAll
-				);
+				)};
 				//console.log(lineElements.annotationType)
 		
 				// Extract the comment without the initial key and store it in  
 				lineElements.commentText = ""	
 				if (firstBlank == -1){firstBlank = annotationCommentAll.length}
 				lineElements.commentText =
-					lineElements.annotationType === "noKey" || lineElements.annotationType === "typeComment"
+					lineElements.annotationType === "noKey" || 
+					lineElements.annotationType === "typeComment" ||
+					lineElements.annotationType === "typeImage"
 						? annotationCommentAll
 						: annotationCommentAll
 								.substring(
@@ -657,7 +667,7 @@ export default class MyPlugin extends Plugin {
 			else {lineElements.rowEdited = selectedLine }
 			
 		//Add the element to the array containing all the elements
-		
+		//console.log(lineElements)
 		noteElements.push(lineElements)
 
 		}
@@ -780,6 +790,7 @@ export default class MyPlugin extends Plugin {
 		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
 			let lineElements = noteElements[i]
+			console.log(lineElements)
 			
 
 			//Run the function to extract the transformation associated with the highlighted colour
@@ -799,6 +810,54 @@ export default class MyPlugin extends Plugin {
 			if(lineElements.annotationType==="typeExtractedHeading"){
 				lineElements.rowEdited = "**" + lineElements.rowOriginal.toUpperCase() + "**"}
 
+
+			//FORMAT IMAGES
+			if (lineElements.annotationType === "typeImage") {
+				lineElements.rowEdited = ""
+
+				console.log("this.settings.imagesImport: " + this.settings.imagesImport)
+				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
+					//find the folder the Zotero/storage is kept
+					const pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
+
+					//if the settings is to link to the image in teh zotero folder
+					console.log("this.settings.imagesCopy: "+ this.settings.imagesCopy)
+					if (this.settings.imagesCopy === false){lineElements.rowEdited = "![](file:///"+pathImageOld+")"}
+					//if the settings is to copy the image from Zotero to the Obsidian vault
+					else{ 
+						const pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + lineElements.imagePath + ".png"
+						console.log(pathImageNew)
+						//if the file has not already been copied
+						if(!fs.existsSync(pathImageNew)){
+							fs.copyFile(pathImageOld, pathImageNew, (err) => {if (err) throw err;})
+						}
+						lineElements.rowEdited = "![[" + lineElements.imagePath + ".png" + "]] " + lineElements.citeKey
+					}
+				}
+
+				console.log(lineElements.commentText.length)
+				//Add the comment after the image
+				if(lineElements.commentText.length>0){
+					console.log(this.settings.imagesCommentPosition)
+					if(this.settings.imagesCommentPosition == "Below the image"){
+						console.log("I'm editing below the text")
+						lineElements.rowEdited = lineElements.rowEdited +
+						"\n" + "\n" + commentPrepend +
+						commentFormatBefore +
+						lineElements.commentText +
+						commentFormatAfter 
+						} else {
+						console.log("I'm editing above the text")
+						lineElements.rowEdited = 
+						commentPrepend +
+						commentFormatBefore +
+						lineElements.commentText +
+						commentFormatAfter + "\n" + "\n" + 
+						lineElements.rowEdited 
+						}
+					console.log("lineElements.rowEdited of image: " + lineElements.rowEdited)
+				}
+			}
 
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
@@ -1026,10 +1085,13 @@ export default class MyPlugin extends Plugin {
 			let noteElements:AnnotationElements[] = []
 			let userNoteElements:AnnotationElements[] = []
 
+			//store the folder on the local computer where zotero/storage is found
+			const pathZoteroStorage = selectedEntry.attachments[0].path.match(/.+?(?=Zotero\/storage)/) + "zotero/storage"
+			this.pathZoteroStorage = pathZoteroStorage
+
 
 			for (let indexNote = 0; indexNote < selectedEntry.notes.length; indexNote++) {
 				const note = selectedEntry.notes[indexNote].note
-				//console.log(note)
 				
 				//Identify the extraction Type (Zotero vs. Zotfile)
 				let extractionType = undefined
@@ -1058,7 +1120,6 @@ export default class MyPlugin extends Plugin {
 					userNoteElements = userNoteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
 					
 				} 
-				
 				
 				this.noteElements = noteElements
 				this.userNoteElements = userNoteElements

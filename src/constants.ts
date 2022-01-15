@@ -45,7 +45,7 @@ export const templatePlain = "# {{title}}\n" +
 "---"+
 "\n" +
 "## Extracted Annotations\n" +
-"{{PDFNotes}}\n"
+"{{PDFNotes}}"
 
 export const templateAdmonition = "# {{title}}\n" +
 "\n" + 
@@ -95,7 +95,8 @@ export const templateAdmonition = "# {{title}}\n" +
 "---"+
 "\n" +
 "## Extracted Annotations\n" +
-"{{PDFNotes}}\n"
+"{{PDFNotes}}"
+
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	bibPath: "",
@@ -111,6 +112,10 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	saveManualEdits: "Save Entire Note",
 	saveManualEditsStart: "",
 	saveManualEditsEnd: "",
+	imagesImport: true,
+	imagesCopy: false,
+	imagesPath: "",
+	imagesCommentPosition: "Above the image",
 	keyMergeAbove: "+",
 	keyCommentPrepend: "%",
 	keyH1: "#",

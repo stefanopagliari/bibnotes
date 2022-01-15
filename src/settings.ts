@@ -106,7 +106,7 @@ export class SettingTab extends PluginSettingTab {
 			);
 
 
-if (settings.exportMetadata) {
+		if (settings.exportMetadata) {
 
 			new Setting(settingsExport)
 				.setName("Select Template")
@@ -789,6 +789,82 @@ if (settings.exportMetadata) {
 					})); 		
  
 			}
+			containerEl.createEl('h2', {text: 'Import Images'});
+		
+
+			const importImages: HTMLDetailsElement =
+			containerEl.createEl("details");
+			importImages.setAttribute("open", "");
+			importImages.createEl("summary", {text: "" });
+			
+			new Setting(importImages)
+				.setName("Import Images")
+				.setDesc("This option is available only for notes extracted using the Zotero native PDF reader")
+				.addToggle((text) =>
+					text
+						.setValue(settings.imagesImport)
+						.onChange(async (value) => {
+							settings.imagesImport = value;
+							await plugin.saveSettings();
+							this.display();
+						})
+				);
+			
+
+			if(settings.imagesImport){
+				new Setting(importImages)
+					.setName("Copy File of the Image into the Obsidian Vault")
+					.setDesc("If this option is selected, images selected through the Zotero reader will be copied into the Vault. If this option is not selected, the note will link to the file stored in Zotero/storage")					.addToggle((text) =>
+						text
+							.setValue(settings.imagesCopy)
+							.onChange(async (value) => {
+								settings.imagesCopy = value;
+								await plugin.saveSettings();
+								this.display();
+							})
+					);
+					if(settings.imagesCopy){
+						new Setting(importImages)
+						.setName("Image Import Path")
+						.setDesc("Add the relative path to the folder inside your vault where the image will be copied")
+						.addSearch((cb) => {
+							new FolderSuggest(this.app, cb.inputEl);
+							cb.setPlaceholder("Example: folder1/folder2")
+								.setValue(this.plugin.settings.imagesPath)
+								.onChange(async (new_folder) => {
+									settings.imagesPath = new_folder;
+									await plugin.saveSettings();
+								});
+							})
+						}
+					}
+					new Setting(importImages)
+						.setName("Position of Comment to an Image")
+						//.setDesc("")
+						.addDropdown((d) => {
+							d.addOption("Above the image", "Above the image");
+							d.addOption("Below the image", "Below the image");
+							//d.addOption("Import from Note", "Import from Note");
+							d.setValue(settings.imagesCommentPosition);
+							d.onChange(
+								async (
+									v:
+										| "Above the image"
+										| "Below the image"
+										//| "Import from Note"
+								) => {
+								settings.imagesCommentPosition = v;
+								await plugin.saveSettings();
+									this.display();
+								}
+								);
+							}
+						);
+			}	
+
+			
 		}
 	}
-}
+
+		
+
