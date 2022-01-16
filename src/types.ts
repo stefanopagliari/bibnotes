@@ -101,6 +101,7 @@ export interface MyPluginSettings {
 	keyKeyword: string;
 	keyTask: string;
 	lastUpdateDate: Date;
+	updateLibrary: string;
 	isHighlightItalic: boolean;
 	isHighlightBold: boolean;
 	isHighlightHighlighted: boolean;
@@ -129,6 +130,8 @@ export interface MyPluginSettings {
 	colourOrangeText: string; 
 	colourCyanText: string; 
 	colourMagentaText: string; 
+	multipleFieldsDivider: string;
+	nameFormat: string;
 }
 
 export interface Reference {

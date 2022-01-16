@@ -47,6 +47,10 @@ export function replaceTemplate(
 
 
 export const makeWiki = (str: string) => "[[" + str + "]]";
+export const makeQuotes = (str: string) => '"' + str + '"';
+export const makeTags = (str: string) => '#' + str;
+
+
 
 export 	const createAuthorKey = (creators: CreatorArray) => {
 	const authorKey: string[] = []
@@ -118,37 +122,88 @@ export function orderByDateModified( a:Reference, b:Reference ) {
   }
 
   //Function that create an array with the creators of a given type (e.g. author, editor)
-  export const createCreatorList = (creators: CreatorArray, typeCreator: string, note:string) => {
+  export const createCreatorList = (creators: CreatorArray, typeCreator: string, note:string, divider:string, nameFormat: string) => {
+	
 	const creatorList: string[] = []
 	for (let creatorindex = 0; creatorindex < creators.length ; creatorindex++) {
-	const creator:Creator = creators[creatorindex]; //select the author
-	if (creator.creatorType === typeCreator){
-		if(creator.hasOwnProperty('name')){
-			creatorList.push(creator.name)
-			} else   
-		if (creator.hasOwnProperty('lastName')&& creator.hasOwnProperty('firstName')){
-			creatorList.push(creator.lastName + ", " + creator.firstName)
-			} else 
-		if (creator.hasOwnProperty('lastName')&& !creator.hasOwnProperty('firstName')){
-			creatorList.push(creator.lastName)
-			} else 
-		if (!creator.hasOwnProperty('lastName')&& creator.hasOwnProperty('firstName')){
-			creatorList.push(creator.firstName)
-			}} 
+		const creator:Creator = creators[creatorindex]; //select the author
+		let nameCustom:string = nameFormat
+ 
+
+		if (creator.creatorType === typeCreator){
+			// if(creator.hasOwnProperty('name')){
+			// 	creatorList.push(creator.name)
+			// 	} else   
+			// if (creator.hasOwnProperty('lastName')&& creator.hasOwnProperty('firstName')){
+			// 	creatorList.push(creator.lastName + ", " + creator.firstName)
+			// 	} else 
+			// if (creator.hasOwnProperty('lastName')&& !creator.hasOwnProperty('firstName')){
+			// 	creatorList.push(creator.lastName)
+			// 	} else 
+			// if (!creator.hasOwnProperty('lastName')&& creator.hasOwnProperty('firstName')){
+			// 	creatorList.push(creator.firstName)
+			// 	}
+			if(creator.hasOwnProperty('name')){
+				nameCustom = nameCustom.replace("{{lastName}}", creator.name)
+				nameCustom = nameCustom.replace("; {{firstName}}", creator.firstName)
+				nameCustom = nameCustom.replace(", {{firstName}}", creator.firstName)
+				nameCustom = nameCustom.replace("{{firstName}}", creator.firstName)
+				nameCustom = nameCustom.trim()
+				creatorList.push(nameCustom)				} else   
+			if (creator.hasOwnProperty('lastName')&& creator.hasOwnProperty('firstName')){
+				nameCustom = nameCustom.replace("{{lastName}}", creator.lastName)
+				nameCustom = nameCustom.replace("{{firstName}}", creator.firstName)
+				nameCustom = nameCustom.trim()
+				creatorList.push(nameCustom)
+				} else 
+			if (creator.hasOwnProperty('lastName')&& !creator.hasOwnProperty('firstName')){
+				creatorList.push(creator.lastName)
+				nameCustom = nameCustom.replace("{{lastName}}", creator.lastName)
+				nameCustom = nameCustom.replace("; {{firstName}}", creator.firstName)
+				nameCustom = nameCustom.replace(", {{firstName}}", creator.firstName)
+				nameCustom = nameCustom.replace("{{firstName}}", "")
+				nameCustom = nameCustom.trim()
+				creatorList.push(nameCustom)
+				} else 
+			if (!creator.hasOwnProperty('lastName')&& creator.hasOwnProperty('firstName')){
+				nameCustom = nameCustom.replace("; {{lastName}}", creator.firstName)
+				nameCustom = nameCustom.replace(", {{lastName}}", creator.firstName)
+				nameCustom = nameCustom.replace("{{lastName}}", "")
+				nameCustom = nameCustom.replace("{{firstName}}", creator.firstName)
+				nameCustom = nameCustom.trim()
+				creatorList.push(nameCustom)
+
+				}		
+			
+			} 
 	}
-	
+	console.log(creatorList)
+
 	const creatorListBracket = creatorList.map(makeWiki);
+	const creatorListQuotes = creatorList.map(makeQuotes);
+
+
+	//add a space after the divided if it is not present
+	if (divider.slice(-1) !== " "){divider = divider + " "}
+
 	if (creatorList.length == 0){return note} else {
 		note = replaceTemplate(
 			note,
 				`[[{{${typeCreator}}}]]`,
-				creatorListBracket.join("; ")
+				creatorListBracket.join(divider)
 			);
-			note = replaceTemplate(
-				note,
-				`{{${typeCreator}}}`,
-				creatorList.join("; ")
+		note = replaceTemplate(
+			note,
+			`"{{${typeCreator}}}"`,
+			creatorListQuotes.join(divider)
+			);	
+		note = replaceTemplate(
+			note,
+			`{{${typeCreator}}}`,
+			creatorList.join(divider)
 			);
+
+
 		return note
 		}
 		
@@ -212,13 +267,20 @@ export function createLocalFileLink(reference: Reference)  {
 		//if there is no attachment, return placeholder
 		if(reference.attachments.length ==0) return "{{localFile}}"; 
 		const filesList: string[] = []
+
 		for (let attachmentindex = 0; attachmentindex < reference.attachments.length ; attachmentindex++) {
+
 			if(reference.attachments[attachmentindex].itemType !== "attachment") continue
+
+			//remove white spaces from file name
+			const attachmentPathCorrected = reference.attachments[attachmentindex].path.replaceAll(" ", "%20")
+
 			const selectedfile:string = "[" +
 				reference.attachments[attachmentindex].title +
 				"](file:/" +
-				reference.attachments[attachmentindex].path +
+				attachmentPathCorrected +
 				")"; //select the author
+				
 			filesList.push(selectedfile)
 		}
 		//turn the array into a string
@@ -282,7 +344,7 @@ export function createNoteTitle(selectedEntry: Reference, exportTitle: string, e
 // }
 
 
-export function replaceTagList(selectedEntry:Reference, arrayExtractedKeywords:string[], metadata:string){
+export function replaceTagList(selectedEntry:Reference, arrayExtractedKeywords:string[], metadata:string, divider: string){
 	// Copy the keywords extracted by Zotero and store them in an array
 	selectedEntry.zoteroTags = []; 
 	if(selectedEntry.tags.length>0){
@@ -290,13 +352,131 @@ export function replaceTagList(selectedEntry:Reference, arrayExtractedKeywords:s
 			selectedEntry.zoteroTags.push(selectedEntry.tags[indexTag].tag)
 		}}
 	
-	//Add to the array the tags extracted by the text
-	selectedEntry.zoteroTags = selectedEntry.zoteroTags.concat(arrayExtractedKeywords)
 
-	//Sort the tags in alphabetical order	
-	selectedEntry.zoteroTags = selectedEntry.zoteroTags.sort()
-	//console.log("Tags = " + selectedEntry.zoteroTags)
-	metadata = createTagList(selectedEntry.zoteroTags, metadata)
+	//add a space after the divided if it is not present
+	if (divider.slice(-1) !== " "){divider = divider + " "}
+
+	//Create three arrays for the tags from the metadata, tags exported from the text and tags combined
+	const tagsZotero = selectedEntry.zoteroTags.sort()
+	const tagsPDF = arrayExtractedKeywords.sort()
+	const tagsCombined = tagsZotero.concat(tagsPDF).sort()
+	
+
+	//metadata = createTagList(selectedEntry.zoteroTags, metadata)
+
+	//Replace in the text the tags extracted by Zotero
+	if (tagsZotero.length > 0){
+		
+		const tagsZoteroBracket = 	tagsZotero.map(makeWiki);
+		metadata = replaceTemplate(
+			metadata,
+				`[[{{keywordsZotero}}]]`,
+				String(tagsZoteroBracket.join(divider))
+			);
+		const tagsZoteroQuotes = 	tagsZotero.map(makeQuotes);
+		metadata = replaceTemplate(
+			metadata,
+				`"{{keywordsZotero}}"`,
+				String(tagsZoteroQuotes.join(divider))
+			);
+		const tagsZoteroTags = 	tagsZotero.map(makeTags);
+			metadata = replaceTemplate(
+				metadata,
+					`#{{keywordsZotero}}`,
+					String(tagsZoteroTags.join(divider))
+				);			
+
+		metadata = replaceTemplate(
+			metadata,
+				`{{keywordsZotero}}`,
+				String(tagsZotero.join(divider))
+			);
+
+		}
+
+		//Replace in the text the tags extracted from the PDF
+	if (tagsPDF.length > 0){
+		
+		const tagsPDFBracket = 	tagsPDF.map(makeWiki);
+		metadata = replaceTemplate(
+			metadata,
+				`[[{{keywordsPDF}}]]`,
+				String(tagsPDFBracket.join(divider))
+			);
+		const tagsPDFQuotes = 	tagsPDF.map(makeQuotes);
+		metadata = replaceTemplate(
+			metadata,
+				`"{{keywordsPDF}}"`,
+				String(tagsPDFQuotes.join(divider))
+			);	
+		const tagsPDFTags = tagsPDF.map(makeTags);
+		metadata = replaceTemplate(
+			metadata,
+				`#{{keywordsPDF}}`,
+				String(tagsPDFTags.join(divider))
+			);	
+		metadata = replaceTemplate(
+			metadata,
+				`{{keywordsPDF}}`,
+				String(tagsPDF.join(divider))
+			);
+			
+		}
+
+	//Replace in the text the tags extracted from the PDF combined with those extracted from the metadata
+	if (tagsCombined.length > 0){
+		
+		const tagsCombinedBracket = 	tagsCombined.map(makeWiki);
+		metadata = replaceTemplate(
+			metadata,
+				`[[{{keywords}}]]`,
+				String(tagsCombinedBracket.join(divider))
+			);
+		metadata = replaceTemplate(
+			metadata,
+				`[[{{keywordsAll}}]]`,
+				String(tagsCombinedBracket.join(divider))
+			);	
+
+		const tagsCombinedQuotes = 	tagsCombined.map(makeQuotes);
+		metadata = replaceTemplate(
+			metadata,
+				`"{{keywordsAll}}"`,
+				String(tagsCombinedQuotes.join(divider))
+			);	
+
+		metadata = replaceTemplate(
+			metadata,
+				`"{{keywords}}"`,
+				String(tagsCombinedQuotes.join(divider))
+			);	
+
+		const tagsCombinedTags = 	tagsCombined.map(makeTags);
+		metadata = replaceTemplate(
+			metadata,
+				`#{{keywordsAll}}`,
+				String(tagsCombinedTags.join(divider))
+			);	
+
+		metadata = replaceTemplate(
+			metadata,
+				`#{{keywords}}`,
+				String(tagsCombinedTags.join(divider))
+			);	
+		metadata = replaceTemplate(
+			metadata,
+				`{{keywordsAll}}`,
+				String(tagsCombined.join(divider))
+			);
+
+		metadata = replaceTemplate(
+			metadata,
+				`{{keywords}}`,
+				String(tagsCombined.join(divider))
+			);	
+			
+		}
+
 
 	if(selectedEntry.zoteroTags.length==0){
 		metadata = metadata.replace("# Tags\n", "");

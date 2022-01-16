@@ -33,14 +33,14 @@ export const templatePlain = "# {{title}}\n" +
 "- **Local Library**: {{localLibrary}}\n"+
 "\n"+
 "## Tags and Collections\n"+
-"- **Keywords**: {{keywords}}\n"+
+"- **Keywords**: {{keywordsAll}}\n"+
 "- **Collections**: {{collectionsParent}}\n"+
 "\n" +
 "\n" +
 "---"+
 "\n" +
 "## Comments\n" +
-"{{UserNotes}}\n"
+"{{UserNotes}}\n" +
 "\n" +
 "---"+
 "\n" +
@@ -83,14 +83,14 @@ export const templateAdmonition = "# {{title}}\n" +
 "```\n" +
 "```ad-note\n" +
 "title: Tags and Collections\n" +
-"- **Keywords**: {{keywords}}\n"+
+"- **Keywords**: {{keywordsAll}}\n"+
 "- **Collections**: {{collectionsParent}}\n"+
 "```\n" +
 "\n" +
 "---"+
 "\n" +
 "## Comments\n" +
-"{{UserNotes}}\n"
+"{{UserNotes}}\n"+
 "\n" +
 "---"+
 "\n" +
@@ -106,6 +106,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	templatePath: "",
 	templateType: "Admonition",
 	lastUpdateDate: new Date('1995-12-17T03:24:00'),
+	updateLibrary: "Only update existing notes",
 	exportPath: "",
 	exportTitle: "{{citeKey}}",
 	missingfield: "Leave placeholder",
@@ -154,6 +155,9 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	colourOrangeText: "{{highlight}}",
 	colourCyanText: "{{highlight}}",
 	colourMagentaText: "{{highlight}}",
+	multipleFieldsDivider: ";",
+	nameFormat: "{{lastName}}, {{firstName}}"
+
 };
 
 export enum HeaderLevels {

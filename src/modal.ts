@@ -1,5 +1,6 @@
 import MyPlugin from "./main";
-import { App, Modal, FuzzySuggestModal, Notice} from "obsidian";
+import * as fs from "fs";
+import { App, Modal, FuzzySuggestModal, Notice, Platform} from "obsidian";
 
 
 import { Reference,
@@ -8,9 +9,11 @@ import { Reference,
 		
 import {
 	createAuthorKey,
+	createNoteTitle,
 	openSelectedNote,
 	orderByDateModified,
 	} from "./utils";
+import { toEditorSettings } from "typescript";
 
 
 
@@ -33,8 +36,15 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 		super(app);
 		this.plugin = plugin;
 	}
-
+	// Function used to move the cursor in the search bar when the modal is launched
+	focusInput() {
+		//@ts-ignore
+		document.getElementsByClassName('prompt-input')[0].focus();
+	}
 	async onOpen() {
+
+		if (Platform.isDesktopApp) {
+			this.focusInput()}
  
 		//Load the Json file
 
@@ -206,13 +216,21 @@ export class updateLibrary extends Modal {
 
 			//Extract the date the entry was modified
 			const datemodified = new Date(selectedEntry.dateModified)
+			if(datemodified<lastUpdate) continue //skip if it was modified before the last update
 			//console.log(datemodified>lastUpdate)
-			if(datemodified>lastUpdate){
-				//Create and export Note for select reference
-				this.plugin.createNote(selectedEntry, data)
+			
+			
+			
+			//skip if the setting is to update only existing note and th enote is not found at the give folder
+			if(this.plugin.settings.updateLibrary === "Only update existing notes" &&
+				!fs.existsSync(createNoteTitle(selectedEntry, this.plugin.settings.exportTitle, this.plugin.settings.exportPath))) continue
 
-				bibtexArray.push(selectedEntry.citationKey)
-			}
+			//Create and export Note for select reference
+			this.plugin.createNote(selectedEntry, data)
+
+			bibtexArray.push(selectedEntry.citationKey)
+			
+
 		}
 
 	//Console.log the number of items updated
@@ -220,6 +238,7 @@ export class updateLibrary extends Modal {
 	//Update the date when the update was last done
 	this.plugin.settings.lastUpdateDate = new Date()
 	this.plugin.saveSettings()
+
 	//console.log(this.plugin.settings.lastUpdateDate)
     
   }

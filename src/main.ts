@@ -30,18 +30,15 @@ import {
 	createLocalFileLink,
 	createCreatorList,
 	createNoteTitle,
-	//getZoteroRegex,
-	//getFormattingType,
-	//handleFormattingType,
-	//removeFakeNewlines,
-	//oadLibrarySynch,
 	makeWiki, 
+	makeQuotes,
 	removeQuoteFromEnd,
 	removeQuoteFromStart,
 	replaceAllTemplates, 
 	replaceMissingFields,
 	replaceTagList,
-	replaceTemplate,	
+	replaceTemplate,
+	makeTags,	
 } from "./utils"; 
 
 export default class MyPlugin extends Plugin {
@@ -207,9 +204,10 @@ export default class MyPlugin extends Plugin {
 		let note = template
 
 		//Replace the author/s
-		note = createCreatorList (selectedEntry.creators, "author", note) 
+		
+		note = createCreatorList (selectedEntry.creators, "author", note, this.settings.multipleFieldsDivider, this.settings.nameFormat) 
 		//Replace the editor/s
-		note = createCreatorList (selectedEntry.creators, "editor", note) 
+		note = createCreatorList (selectedEntry.creators, "editor", note, this.settings.multipleFieldsDivider, this.settings.nameFormat) 
 
 
 
@@ -531,8 +529,8 @@ export default class MyPlugin extends Plugin {
 		const lengthLines = Object.keys(lines).length
 		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
 			const selectedLineOriginal = unescape(lines[indexLines]);
-			console.log(indexLines)
-			console.log(selectedLineOriginal)
+			//console.log(indexLines)
+			//console.log(selectedLineOriginal)
 			
 			//Remove HTML tags
 			let selectedLine = String(selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, ""))
@@ -579,7 +577,7 @@ export default class MyPlugin extends Plugin {
 				highlightColour = highlightColour.replace("\"","")
 				lineElements.highlightColour = highlightColour
 			}
-			
+
 			//Extract the citation within bracket			
 			if (/\(<span class="citation-item">.*<\/span>\)<\/span>/gm.test(selectedLineOriginal)){			
 				lineElements.citeKey = String(selectedLineOriginal.match(/\(<span class="citation-item">.*<\/span>\)<\/span>/gm))
@@ -777,8 +775,25 @@ export default class MyPlugin extends Plugin {
 
 		//Create an index of rows to be removed
 		const indexRowsToBeRemoved: number[] = []
+		const noteElementsArray: AnnotationElements[] = []
 		const keywordArray: string[] = []
 		const rowEditedArray: string[] = []
+		//Create vector with annotation highlighted in different colour
+		const highlightsYellow: string[] = []
+		const highlightsRed: string[] = []
+		const highlightsGreen: string[] = []
+		const highlightsPurple: string[] = []
+		const highlightsBlack: string[] = []
+		const highlightsWhite: string[] = []
+		const highlightsGray: string[] = []
+		const highlightsCyan: string[] = []
+		const highlightsOrange: string[] = []
+		const highlightsBlue: string[] = []
+		const highlightsMagenta: string[] = []
+		const imagesArray: string[] = []
+		 
+
+		
 
 
 		//Remove undefined elements
@@ -790,9 +805,7 @@ export default class MyPlugin extends Plugin {
 		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
 			let lineElements = noteElements[i]
-			console.log(lineElements)
 			
-
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements)
 
@@ -815,18 +828,17 @@ export default class MyPlugin extends Plugin {
 			if (lineElements.annotationType === "typeImage") {
 				lineElements.rowEdited = ""
 
-				console.log("this.settings.imagesImport: " + this.settings.imagesImport)
+				//console.log("this.settings.imagesImport: " + this.settings.imagesImport)
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
 					//find the folder the Zotero/storage is kept
 					const pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
 
 					//if the settings is to link to the image in teh zotero folder
-					console.log("this.settings.imagesCopy: "+ this.settings.imagesCopy)
+					
 					if (this.settings.imagesCopy === false){lineElements.rowEdited = "![](file:///"+pathImageOld+")"}
 					//if the settings is to copy the image from Zotero to the Obsidian vault
 					else{ 
 						const pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + lineElements.imagePath + ".png"
-						console.log(pathImageNew)
 						//if the file has not already been copied
 						if(!fs.existsSync(pathImageNew)){
 							fs.copyFile(pathImageOld, pathImageNew, (err) => {if (err) throw err;})
@@ -835,19 +847,16 @@ export default class MyPlugin extends Plugin {
 					}
 				}
 
-				console.log(lineElements.commentText.length)
 				//Add the comment after the image
 				if(lineElements.commentText.length>0){
-					console.log(this.settings.imagesCommentPosition)
+				
 					if(this.settings.imagesCommentPosition == "Below the image"){
-						console.log("I'm editing below the text")
 						lineElements.rowEdited = lineElements.rowEdited +
 						"\n" + "\n" + commentPrepend +
 						commentFormatBefore +
 						lineElements.commentText +
 						commentFormatAfter 
 						} else {
-						console.log("I'm editing above the text")
 						lineElements.rowEdited = 
 						commentPrepend +
 						commentFormatBefore +
@@ -855,7 +864,6 @@ export default class MyPlugin extends Plugin {
 						commentFormatAfter + "\n" + "\n" + 
 						lineElements.rowEdited 
 						}
-					console.log("lineElements.rowEdited of image: " + lineElements.rowEdited)
 				}
 			}
 
@@ -898,8 +906,8 @@ export default class MyPlugin extends Plugin {
 
 			//Create Task
 			if(lineElements.annotationType=="typeTask"){
-	
-				if(lineElements.commentText !== "" && lineElements.highlightColour!== ""){
+				
+				if(lineElements.commentText !== "" && lineElements.highlightText!== ""){
 					lineElements.rowEdited =
 						`- [ ] ` +
 						commentFormatBefore +
@@ -972,10 +980,14 @@ export default class MyPlugin extends Plugin {
 					lineElements.commentText +
 					commentFormatAfter 
 				}
-		rowEditedArray.push(lineElements.rowEdited)
+
+		//Copy the edited text into an array to be exported		
+		noteElementsArray.push(lineElements)
+
+	
 		}
 
-		// // //PERFORM THE FOLLOWING OPERATIONS ON THE WHOLE ARRAY
+		// PERFORM THE FOLLOWING OPERATIONS ON THE WHOLE ARRAY
 
 		// Remove the rows with the keywords and other rows to be removed
 		if (indexRowsToBeRemoved.length) {
@@ -985,8 +997,35 @@ export default class MyPlugin extends Plugin {
 				index--
 			) { 
 				//console.log("indexRowsToBeRemoved : "+ index)
-				rowEditedArray.splice(indexRowsToBeRemoved[index], 1);
+				noteElementsArray.splice(indexRowsToBeRemoved[index], 1);
+
 			}
+		}
+
+		//Add rowEdited into different arrays for the export
+		for (let index = 0; index < noteElementsArray.length; index++) {
+				const selectedLine = noteElementsArray[index]
+
+
+				rowEditedArray.push(selectedLine.rowEdited)
+
+				// Copy the rows highlighted in a certain colour into colour-specific arrays 
+				if(selectedLine.highlightColour === "yellow"){highlightsYellow.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "red"){highlightsRed.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "green"){highlightsGreen.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "purple"){highlightsPurple.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "black"){highlightsBlack.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "white"){highlightsWhite.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "gray"){highlightsGray.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "cyan"){highlightsCyan.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "orange"){highlightsOrange.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "blue"){highlightsBlue.push(selectedLine.rowEdited)}
+				else if(selectedLine.highlightColour === "magenta"){highlightsMagenta.push(selectedLine.rowEdited)}
+
+				//Copy the images in a specific array
+				if(selectedLine.annotationType === "typeImage"){imagesArray.push(selectedLine.rowEdited)}
+			
+			
 		}
 
 		// Add empty row in between rows if selected in the settings
@@ -997,9 +1036,22 @@ export default class MyPlugin extends Plugin {
 			}
 		}
 
+		//Export the different arrays with the rowEdited
 		const resultsLineElements = {
 			rowEditedArray: rowEditedArray,
-			keywordArray: keywordArray
+			keywordArray: keywordArray,
+			highlightsYellow: highlightsYellow,
+			highlightsRed: highlightsRed,
+			highlightsGreen: highlightsGreen,
+			highlightsPurple: highlightsPurple,
+			highlightsBlack: highlightsBlack,
+			highlightsWhite: highlightsWhite,
+			highlightsGray: highlightsGray,
+			highlightsCyan: highlightsCyan,
+			highlightsOrange: highlightsOrange,
+			highlightsBlue: highlightsBlue,
+			highlightsMagenta: highlightsMagenta,
+			imagesArray: imagesArray
 		}
 
 		return resultsLineElements
@@ -1075,9 +1127,20 @@ export default class MyPlugin extends Plugin {
 	}
 
 	extractAnnotation(selectedEntry:Reference, noteTitleFull:string){
-		let extractedAnnotations = ""
-		let extractedUserNote = ""
-		console.log(selectedEntry.notes.length)
+		let extractedAnnotations = "";
+		let extractedAnnotationsYellow = "";
+		let extractedAnnotationsRed = "";
+		let extractedAnnotationsGreen = "";
+		let extractedAnnotationsPurple = "";
+		let extractedAnnotationsBlack = "";
+		let extractedAnnotationsWhite = "";
+		let extractedAnnotationsGray = "";
+		let extractedAnnotationsCyan = "";
+		let extractedAnnotationsOrange = "";
+		let extractedAnnotationsMagenta = "";
+		let extractedImages = "";
+		let extractedUserNote = "";
+		//console.log(selectedEntry.notes.length)
 
 		if(this.settings.exportAnnotations && selectedEntry.notes.length>0){
 
@@ -1120,6 +1183,7 @@ export default class MyPlugin extends Plugin {
 					userNoteElements = userNoteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
 					
 				} 
+
 				
 				this.noteElements = noteElements
 				this.userNoteElements = userNoteElements
@@ -1131,12 +1195,25 @@ export default class MyPlugin extends Plugin {
 			const resultsLineElements = this.formatNoteElements(this.noteElements)
 			this.keyWordArray = resultsLineElements.keywordArray
 
-			//Create the annotation by merging the individial 
+			//Create the annotation by merging the individial elements of rowEditedArray. Do the same for the colour
 			extractedAnnotations = resultsLineElements.rowEditedArray.join("\n");
+			extractedAnnotationsYellow = resultsLineElements.highlightsYellow.join("\n");
+			extractedAnnotationsRed = resultsLineElements.highlightsRed.join("\n");
+			extractedAnnotationsGreen = resultsLineElements.highlightsGreen.join("\n");
+			extractedAnnotationsPurple = resultsLineElements.highlightsPurple.join("\n");
+			extractedAnnotationsBlack = resultsLineElements.highlightsBlack.join("\n");
+			extractedAnnotationsWhite = resultsLineElements.highlightsWhite.join("\n");
+			extractedAnnotationsGray = resultsLineElements.highlightsGray.join("\n");
+			extractedAnnotationsCyan = resultsLineElements.highlightsCyan.join("\n");
+			extractedAnnotationsOrange = resultsLineElements.highlightsOrange.join("\n");
+			extractedAnnotationsMagenta = resultsLineElements.highlightsMagenta.join("\n");
+			extractedImages = resultsLineElements.imagesArray.join("\n");
 			//Creates an array with the notes from the user 		
-			//const extractedUserNote = this.userNoteElements.join(("\n"))
 			const extractedUserNoteArray = Array.from(Object.values(this.userNoteElements), note => note.rowEdited)
 			extractedUserNote = extractedUserNoteArray.join("\n")
+
+			//	
+
 		}			
  
 			
@@ -1146,8 +1223,18 @@ export default class MyPlugin extends Plugin {
 		const extractedNote = {
 			extractedAnnotations: extractedAnnotations,
 			extractedUserNote: extractedUserNote,
-			extractedKeywords: this.keyWordArray 
-
+			extractedKeywords: this.keyWordArray, 
+			extractedAnnotationsYellow: extractedAnnotationsYellow,
+			extractedAnnotationsRed: extractedAnnotationsRed,
+			extractedAnnotationsGreen: extractedAnnotationsGreen,
+			extractedAnnotationsPurple: extractedAnnotationsPurple,
+			extractedAnnotationsBlack: extractedAnnotationsBlack,
+			extractedAnnotationsWhite: extractedAnnotationsWhite,
+			extractedAnnotationsGray: extractedAnnotationsGray,
+			extractedAnnotationsCyan: extractedAnnotationsCyan,
+			extractedAnnotationsOrange: extractedAnnotationsOrange,
+			extractedAnnotationsMagenta: extractedAnnotationsMagenta,
+			extractedImages: extractedImages
 		}
 	return(extractedNote)
 	}
@@ -1210,34 +1297,67 @@ export default class MyPlugin extends Plugin {
 		collectionParentArray = collectionParentArray.sort()
 
 		
-		//console.log("Tags = " + selectedEntry.zoteroTags)
-		//metadata = createTagList(selectedEntry.zoteroTags, metadata)
+		
+		//add a space after the divided if it is not present
+		let divider = this.settings.multipleFieldsDivider
+		if (divider.slice(-1) !== " "){divider = divider + " "}
+
 		//Replace the keywords in the metadata
 		if (collectionArray.length > 0) {
 			const collectionArrayBraket = 	collectionArray.map(makeWiki);
 			metadata = replaceTemplate(
 				metadata,
 					`[[{{collections}}]]`,
-					String(collectionArrayBraket.join("; "))
+					String(collectionArrayBraket.join(divider))
 				);
-				metadata = replaceTemplate(
-					metadata,
-					`{{collections}}`,
-					String(collectionArray.join("; "))
-				);
+
+			const collectionArrayQuotes = collectionArray.map(makeQuotes);
+			metadata = replaceTemplate(
+				metadata,
+				`"{{collections}}"`,
+				String(collectionArrayQuotes.join(divider))
+			);
+
+			const collectionArrayTags = collectionArray.map(makeTags);
+			metadata = replaceTemplate(
+				metadata,
+				`#{{collections}}`,
+				String(collectionArrayTags.join(divider))
+			);
+
+			metadata = replaceTemplate(
+				metadata,
+				`{{collections}}`,
+				String(collectionArray.join(divider))
+			);
 			}
+
 		if (collectionParentArray.length > 0) {
 			const collectionParentArrayBraket = collectionParentArray.map(makeWiki);
-				metadata = replaceTemplate(
-					metadata,
-						`[[{{collectionsParent}}]]`,
-						String(collectionParentArrayBraket.join("; "))
-					);
-					metadata = replaceTemplate(
-						metadata,
-						`{{collectionsParent}}`,
-						String(collectionParentArray.join("; "))
-					);
+			metadata = replaceTemplate(
+				metadata,
+					`[[{{collectionsParent}}]]`,
+					String(collectionParentArrayBraket.join(divider))
+				);
+
+			const collectionParentArrayQuotes = collectionParentArray.map(makeQuotes);
+			metadata = replaceTemplate(
+			metadata,
+				`"{{collectionsParent}}"`,
+				String(collectionParentArrayQuotes.join(divider))
+			);	
+
+			const collectionParentArrayTags = collectionParentArray.map(makeTags);
+			metadata = replaceTemplate(
+			metadata,
+				`#{{collectionsParent}}`,
+				String(collectionParentArrayTags.join(divider))
+			);	
+			metadata = replaceTemplate(
+				metadata,
+				`{{collectionsParent}}`,
+				String(collectionParentArray.join(divider))
+			);
 				}
 		return metadata
 		
@@ -1455,18 +1575,28 @@ export default class MyPlugin extends Plugin {
 		//Extract the annotation and the keyword from the text
 		const resultAnnotations = this.extractAnnotation (selectedEntry, noteTitleFull)
 
-		//Replace annotations in the template
-		const extractedAnnotations = resultAnnotations.extractedAnnotations
-		litnote = litnote.replace("{{PDFNotes}}", extractedAnnotations)
 
-		const extractedUserNotes = resultAnnotations.extractedUserNote
-		litnote = litnote.replace("{{UserNotes}}", extractedUserNotes)
+		//Replace annotations in the template
+		litnote = litnote.replace("{{PDFNotes}}", resultAnnotations.extractedAnnotations)
+		litnote = litnote.replace("{{UserNotes}}", resultAnnotations.extractedUserNote)
+		litnote = litnote.replace("{{Yellow}}", resultAnnotations.extractedAnnotationsYellow)
+		litnote = litnote.replace("{{Red}}", resultAnnotations.extractedAnnotationsRed)
+		litnote = litnote.replace("{{Green}}", resultAnnotations.extractedAnnotationsGreen)
+		litnote = litnote.replace("{{Purple}}", resultAnnotations.extractedAnnotationsPurple)
+		litnote = litnote.replace("{{Black}}", resultAnnotations.extractedAnnotationsBlack)
+		litnote = litnote.replace("{{White}}", resultAnnotations.extractedAnnotationsWhite)
+		litnote = litnote.replace("{{Gray}}", resultAnnotations.extractedAnnotationsGray)
+		litnote = litnote.replace("{{Cyan}}", resultAnnotations.extractedAnnotationsCyan)
+		litnote = litnote.replace("{{Orange}}", resultAnnotations.extractedAnnotationsOrange)
+		litnote = litnote.replace("{{Magenta}}", resultAnnotations.extractedAnnotationsMagenta)
+		litnote = litnote.replace("{{Images}}", resultAnnotations.extractedImages)
+
 
 		let extractedKeywords = resultAnnotations.extractedKeywords
 		if(extractedKeywords== undefined){extractedKeywords = []}
 
 		// Join the tags in the metadata with the tags extracted in the text and replace them in the text
-		litnote = replaceTagList(selectedEntry, extractedKeywords, litnote)
+		litnote = replaceTagList(selectedEntry, extractedKeywords, litnote, this.settings.multipleFieldsDivider)
 
 		//delete the missing fields in the metadata
 		const missingFieldSetting = this.settings.missingfield

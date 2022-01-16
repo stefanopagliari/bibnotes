@@ -175,6 +175,34 @@ export class SettingTab extends PluginSettingTab {
 					);
 				});
 
+			new Setting(settingsExport)
+			.setName("Multiple Entries Divider")
+			.setDesc('Type the character or expression that should separate multiple values when found in the same field (e.g. authors, editors, tags, collections).')
+			.addTextArea((text) =>
+				text
+				.setValue(settings.multipleFieldsDivider)
+				.onChange(async (value) => {
+					settings.multipleFieldsDivider = value;
+					await plugin.saveSettings();
+					//this.display();
+					}
+				)
+			)
+
+			new Setting(settingsExport)
+			.setName("Format Names")
+			.setDesc('Specify how the names of the authors/editors should be exported.')
+			.addTextArea((text) =>
+				text
+				.setValue(settings.nameFormat)
+				.onChange(async (value) => {
+					settings.nameFormat = value;
+					await plugin.saveSettings();
+					//this.display();
+					}
+				)
+			)
+
 		}
 		if (settings.exportAnnotations) {
 
@@ -235,7 +263,32 @@ export class SettingTab extends PluginSettingTab {
 			}
 		}
 
-			//overwriteNotes
+
+		containerEl.createEl('h2', {text: 'Update Library'});
+		const settingsUpdate: HTMLDetailsElement =
+				containerEl.createEl("details");
+				settingsUpdate.setAttribute("open", "");
+		new Setting(settingsUpdate)
+				.setName("Update Existing/All Notes")
+				.setDesc(
+					"Select whether to create new notes that are missing from Obsidian but present/modified within Zotero when runing the Update Library command"
+				)
+				.addDropdown((d) => {
+					d.addOption("Only update existing notes", "Only existing notes");
+					d.addOption("Create new notes when missing", "Create new notes when missing");
+					d.setValue(settings.updateLibrary);
+					d.onChange(
+						async (
+							v:
+								| "Only update existing notes"
+								| "Create new notes when missing"
+						) => {
+							settings.updateLibrary = v;
+							await plugin.saveSettings();
+						}
+					);
+				});
+
 
 		containerEl.createEl('h2', {text: 'Format Annotations'});
 
