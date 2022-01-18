@@ -156,7 +156,9 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	colourCyanText: "{{highlight}}",
 	colourMagentaText: "{{highlight}}",
 	multipleFieldsDivider: ";",
-	nameFormat: "{{lastName}}, {{firstName}}"
+	nameFormat: "{{lastName}}, {{firstName}}",
+	highlightCitationsFormat: "Author, year, page number",
+	highlightCitationsLink: true,
 
 };
 

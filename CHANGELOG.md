@@ -27,10 +27,14 @@ If the "start" field is left empty, the existing text will be preserved from to 
 - Introduced the possibility of wrapping fields with multiple values (authors, editors, keywords, collections) in quotation marks (e.g. by adding "{{author}}" in the template)
 - Introduced the possibility of adding a tag(#) in front of  fields with multiple values (authors, editors, keywords, collections). For instance,  adding #{{keywordsZotero}} in the template will result in #Keyword1, #Keyword2
 - Introduced three different template fields to add to your note the keywords/tags extracted by zotero ({{keywordsZotero}}), the tags/keywords extracted from the PDF ({{keywordsPDF}}), and both sets of keywords/tags ({{keywords}} or {{keywordsAll}
+- Introduced the setting to control the format of the in-line reference at the end of a highlight extracted from the PDF. Three default options are provided: "Author, year, page number", "Only page number", "Empty"
+- Introduced the setting to control whether to include next to each extracted highlight, comment, and figure a link opening within the Zotero reader the page of the pdf file where this element is extracted from.
  
 
 ### Debugging
 - Fixed bug where the code exporting notes did not allow for underscores and other non-alphanumeric characters in the title of the exported notes
 - Fixed bug in the function creating tasks when both a comment and a highlight are present.
 - Move the cursor to the search bar when launching the "Create/Update Literature Note" command
+- Changes to the json file exported by Zotero are ready by Obsidian without having to restart the application
+
  

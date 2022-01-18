@@ -132,6 +132,8 @@ export interface MyPluginSettings {
 	colourMagentaText: string; 
 	multipleFieldsDivider: string;
 	nameFormat: string;
+	highlightCitationsFormat: string;
+	highlightCitationsLink: boolean;
 }
 
 export interface Reference {
@@ -199,6 +201,10 @@ export interface AnnotationElements {
 	colourTextBefore: string,
 	colourTextAfter: string,
 	imagePath: string,
+	pagePDF: number,
+	pageLabel: number,
+	attachmentURI: string,
+	zoteroBackLink: string,
 	}[]
 
 

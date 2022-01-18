@@ -177,7 +177,7 @@ export function orderByDateModified( a:Reference, b:Reference ) {
 			
 			} 
 	}
-	console.log(creatorList)
+	//console.log(creatorList)
 
 	const creatorListBracket = creatorList.map(makeWiki);
 	const creatorListQuotes = creatorList.map(makeQuotes);

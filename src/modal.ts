@@ -54,8 +54,9 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 	
 	//Create the full path
 	
-		const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
-		
+		//const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
+		const rawdata = fs.readFileSync(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath);
+		const data = JSON.parse(rawdata);
 
 		//const checkAdmonition  = this.app.plugins.getPlugin("obsidian-admonition")._loaded
 		
@@ -196,7 +197,10 @@ export class updateLibrary extends Modal {
 	onOpen() {
 		
 		console.log("Updating Zotero library")
-		const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
+		//const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
+
+		const rawdata = fs.readFileSync(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath);
+		const data = JSON.parse(rawdata);
 		
 		const bibtexArray: string[] = [] 
 

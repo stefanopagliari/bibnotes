@@ -291,6 +291,49 @@ export class SettingTab extends PluginSettingTab {
 
 
 		containerEl.createEl('h2', {text: 'Format Annotations'});
+			
+		containerEl.createEl('h3', {text: 'In-text citations'});
+		const settingsCitations: HTMLDetailsElement =
+				containerEl.createEl("details");
+				settingsCitations.setAttribute("open", "");
+				settingsCitations.createEl("summary", {text: "" });
+		
+			new Setting(settingsCitations)
+				.setName("End of Highlight Citation Format")
+				.setDesc(
+					"Select the style of the reference added next to the highlights and figures extracted from the PDF"
+				)
+				.addDropdown((d) => {
+					d.addOption("Author, year, page number", "Author, year, page number");
+					d.addOption("Only page number", "Only page number");
+					d.addOption("Empty", "Empty");
+					d.setValue(settings.highlightCitationsFormat);
+					d.onChange(
+						async (
+							v:
+								| "Author, year, page number"
+								| "Only page number"
+								| "Empty"
+						) => {
+							settings.highlightCitationsFormat = v;
+							await plugin.saveSettings();
+						}
+					);
+				});
+			new Setting(settingsCitations)
+				.setName("Create Link to the Highlight Page in the PDF")
+				.setDesc(
+					"If enabled, a link will be created at the end of the extracted highlights or figures to the original page of the PDF in the Zotero reader"
+				)
+				.addToggle((text) =>
+					text
+						.setValue(settings.highlightCitationsLink)
+						.onChange(async (value) => {
+							settings.highlightCitationsLink = value;
+							await plugin.saveSettings();
+							this.display();
+						})
+				);		
 
 
 		containerEl.createEl('h3', {text: 'Highlights'});
@@ -890,7 +933,7 @@ export class SettingTab extends PluginSettingTab {
 								});
 							})
 						}
-					}
+					
 					new Setting(importImages)
 						.setName("Position of Comment to an Image")
 						//.setDesc("")
@@ -913,6 +956,7 @@ export class SettingTab extends PluginSettingTab {
 								);
 							}
 						);
+					}
 			}	
 
 			

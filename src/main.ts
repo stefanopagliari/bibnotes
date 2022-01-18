@@ -274,8 +274,11 @@ export default class MyPlugin extends Plugin {
 		for (let indexLines = 0; indexLines < lines.length; indexLines++) {
 
             //Remote html tags
-            const selectedLine = lines[indexLines].replace(/<\/?[^>]+(>|$)/g, "");
-			//console.log(selectedLine)
+			const selectedLineOriginal = lines[indexLines]
+
+
+            const selectedLine = selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, "");
+
             
             //Skip if empty
             if(selectedLine===""){continue}
@@ -377,6 +380,35 @@ export default class MyPlugin extends Plugin {
 				lineElements.highlightColour = "magenta";
 				extractedText = extractedText.replace("(Magenta) - ", "")
 			}
+
+			
+			
+
+
+
+			//Extracte the Zotero backlink
+			lineElements.zoteroBackLink = ""
+			if (/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g.test(selectedLineOriginal)){
+				const zoteroBackLink = String(selectedLineOriginal.match(/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g))
+				lineElements.zoteroBackLink = zoteroBackLink
+				}
+ 
+			//Extracte the page of the annotation in the publication
+			if (/(\d+)(?!.*\d)/g.test(selectedLineOriginal)){
+				let pageLabel = String(selectedLineOriginal.match(/(\d+)(?!.*\d)/g))
+				if (pageLabel == null){lineElements.pageLabel = null} else{
+					lineElements.pageLabel = Number(pageLabel)
+				}
+			}
+
+			// //Extract the attachment URI
+			// if (/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(selectedLineOriginal)){
+			// 	let attachmentURI = String(selectedLineOriginal.match(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm))
+			// 	if (attachmentURI === null){lineElements.attachmentURI = null} else{
+			// 		attachmentURI = attachmentURI.replace(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\//gm, "")
+			// 		lineElements.attachmentURI = attachmentURI
+			// 	}
+			// }
   
             //Identify if the text is highlight or comment. if it is a comment extract the type of comment
             const annotationCommentAll = ""
@@ -385,28 +417,23 @@ export default class MyPlugin extends Plugin {
                 lineElements.citeKey = ""} else {
 				lineElements.highlightText = extractedText;
 				} 
-            
 
             // 	Extract the first word in the comment added to the annotation
 			let firstBlank = -1
 			let annotationCommentFirstWord = ""
-			//console.log("lineElements.commentText: "+ lineElements.commentText)
 			if (lineElements.commentText.length>0){
 				firstBlank = lineElements.commentText.indexOf(" ");
-				//if (firstBlank===-1){firstBlank = annotationCommentAll.length}
-				//console.log("firstBlank:  "+ firstBlank)
+				if (firstBlank===-1){firstBlank = lineElements.commentText.length}
 				annotationCommentFirstWord = lineElements.commentText.substring(
 						0,
 						firstBlank
 					);
 				}
-			//console.log("annotationCommentFirstWord: "+ annotationCommentFirstWord)
-			//console.log("annotationCommentAll: "+ lineElements.commentText)
+
             lineElements.annotationType = this.getAnnotationType(
                     annotationCommentFirstWord,
                     lineElements.commentText
                 );
-
 			if (firstBlank == -1){firstBlank = annotationCommentAll.length}
 			lineElements.commentText =
 				lineElements.annotationType === "noKey" || 
@@ -419,6 +446,7 @@ export default class MyPlugin extends Plugin {
                             lineElements.commentText.length
                             )
                         .trim();
+	
                         
 		//If a comment includes the key for a transformation, apply that to the previous element
 			
@@ -428,10 +456,13 @@ export default class MyPlugin extends Plugin {
 				noteElements[noteElements.length-1].commentText === ""){
 					noteElements[noteElements.length-1].annotationType = lineElements.annotationType;
 					noteElements[noteElements.length-1].commentText = lineElements.commentText
+				console.log(lineElements.annotationType)
+				console.log(lineElements.commentText)
+
 				continue 
 				}  
 			}  
-		
+		console.log(lineElements)
 		noteElements.push(lineElements)			
         }  
 	return noteElements
@@ -528,13 +559,14 @@ export default class MyPlugin extends Plugin {
 		//Loop through the lines
 		const lengthLines = Object.keys(lines).length
 		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
+
 			const selectedLineOriginal = unescape(lines[indexLines]);
-			//console.log(indexLines)
-			//console.log(selectedLineOriginal)
+			// console.log(indexLines)
+			// console.log(selectedLineOriginal)
 			
 			//Remove HTML tags
 			let selectedLine = String(selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, ""))
-
+			// console.log(selectedLine)
 		// 	// Replace backticks with single quote
 			selectedLine = replaceTemplate(selectedLine, "`", "'");
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
@@ -557,16 +589,23 @@ export default class MyPlugin extends Plugin {
 				extractionSource: "zotero",
 				colourTextBefore: "",
 				colourTextAfter: "",
-				imagePath: ""
+				imagePath: "",
+				pagePDF: undefined,
+				pageLabel: undefined,
+				zoteroBackLink: "",
+				attachmentURI: "",
+
 			}  
 
 			//Record the extraction method
 			lineElements.extractionSource = "zotero"
 
 			//Identify images
-			if (/<img data-attachment-key=/gm.test(selectedLineOriginal)){			
+			console.log((/data-attachment-key=/gm.test(selectedLineOriginal)))
+			
+			if (/data-attachment-key=/gm.test(selectedLineOriginal)){	
 				lineElements.annotationType = "typeImage"
-				lineElements.imagePath =  String(selectedLineOriginal.match(/"([^"]*)"/g)[0]).replaceAll("\"","")
+				lineElements.imagePath =  String(selectedLineOriginal.match(/key="([^"]*)"/g)[0]).replaceAll("\"","").replace("key=","")
 			}
 			
 			//Extract the colour of the highlight
@@ -577,6 +616,42 @@ export default class MyPlugin extends Plugin {
 				highlightColour = highlightColour.replace("\"","")
 				lineElements.highlightColour = highlightColour
 			}
+
+			
+			//Extracte the page of the pdf
+
+			if (/"pageIndex":\d+/gm.test(selectedLineOriginal)){
+				let pagePDF = String(selectedLineOriginal.match(/"pageIndex":\d+/gm))
+				if (pagePDF == null){lineElements.pagePDF = null} else{
+					pagePDF = pagePDF.replace('"pageIndex":',"")
+					lineElements.pagePDF = Number(pagePDF)+1
+				}
+			}
+			//Extracte the page of the annotation in the publication
+			if (/"pageLabel":"\d+/g.test(selectedLineOriginal)){
+				let pageLabel = String(selectedLineOriginal.match(/"pageLabel":"\d+/g))
+				if (pageLabel == null){lineElements.pageLabel = null} else{
+					pageLabel = pageLabel.replace('"pageLabel":"',"")
+					lineElements.pageLabel = Number(pageLabel)
+				}
+			}
+
+			//Extract the attachment URI
+			if (/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(selectedLineOriginal)){
+				let attachmentURI = String(selectedLineOriginal.match(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm))
+				if (attachmentURI === null){lineElements.attachmentURI = null} else{
+					attachmentURI = attachmentURI.replace(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\//gm, "")
+					lineElements.attachmentURI = attachmentURI
+				}
+			}
+
+			//Create the zotero backlink
+			if (lineElements.attachmentURI !== null && lineElements.pagePDF !== null){
+			lineElements.zoteroBackLink = "zotero://open-pdf/library/items/" + lineElements.attachmentURI + "?page=" + lineElements.pagePDF
+			}
+
+ 
+			//zotero://open-pdf/library/items/TKT5MBJY?page=8
 
 			//Extract the citation within bracket			
 			if (/\(<span class="citation-item">.*<\/span>\)<\/span>/gm.test(selectedLineOriginal)){			
@@ -641,10 +716,10 @@ export default class MyPlugin extends Plugin {
 				//console.log("annotationCommentFirstWord : " + annotationCommentFirstWord)
 				// Identify what type of annotation is based on the first word
 				if(lineElements.annotationType!=="typeImage"){
-				lineElements.annotationType = this.getAnnotationType(
-					annotationCommentFirstWord,
-					annotationCommentAll
-				)};
+					lineElements.annotationType = this.getAnnotationType(
+						annotationCommentFirstWord,
+						annotationCommentAll
+					)}
 				//console.log(lineElements.annotationType)
 		
 				// Extract the comment without the initial key and store it in  
@@ -665,9 +740,9 @@ export default class MyPlugin extends Plugin {
 			else {lineElements.rowEdited = selectedLine }
 			
 		//Add the element to the array containing all the elements
-		//console.log(lineElements)
+		
 		noteElements.push(lineElements)
-
+		
 		}
 	return noteElements
 
@@ -675,6 +750,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	formatColourHighlight(lineElements: AnnotationElements) {
+		if(lineElements.annotationType === "typeImage"){return lineElements}
 		
 		//fix the label of the annotation colour - Zotero		
 		if (lineElements.highlightColour.includes("#ffd400")){lineElements.highlightColour = "yellow"}
@@ -759,7 +835,7 @@ export default class MyPlugin extends Plugin {
 
 
 		
-	formatNoteElements(noteElements: AnnotationElements[]) {
+	formatNoteElements(noteElements: AnnotationElements[], citeKey: string) {
 		const {
 			isDoubleSpaced,
 		} = this.settings;
@@ -791,24 +867,36 @@ export default class MyPlugin extends Plugin {
 		const highlightsBlue: string[] = []
 		const highlightsMagenta: string[] = []
 		const imagesArray: string[] = []
-		 
-
-		
-
-
+	
 		//Remove undefined elements
 		noteElements = noteElements.filter(x => x !== undefined);
 		//Run a loop, processing each annotation line one at the time
 		
 		
 
-		for (let i = 0; i < noteElements.length; i++) {
+		for (let i = 0; i < noteElements.length; i++) 	{
 			//Select one element to process
 			let lineElements = noteElements[i]
+			// console.log(lineElements)
 			
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements)
 
+			//Extract the citation format from the settings
+			if(lineElements.extractionSource === "zotero"){
+				if(this.settings.highlightCitationsFormat === "Only page number" && lineElements.pageLabel !== undefined){
+					lineElements.citeKey = "(p. "+lineElements.pageLabel+")"
+				} else if(this.settings.highlightCitationsFormat === "Empty" && lineElements.pageLabel !== undefined){
+					lineElements.citeKey = " "
+				}
+			}
+			//Edit the backlink to Zotero based on the settings
+			if(this.settings.highlightCitationsLink===true && lineElements.zoteroBackLink.length>0){
+					lineElements.citeKey = "["+lineElements.citeKey+"]"+"("+ lineElements.zoteroBackLink+")"
+					lineElements.zoteroBackLink = "["+ " " + "]"+"("+ lineElements.zoteroBackLink+")"
+				} else {lineElements.zoteroBackLink = ""}
+
+			
 			//Extract the custom language assocaited with the highlight colour
 			let colourTextBefore = lineElements.colourTextBefore
 			if(colourTextBefore == undefined){colourTextBefore = ""}
@@ -832,18 +920,20 @@ export default class MyPlugin extends Plugin {
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
 					//find the folder the Zotero/storage is kept
 					const pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
+					console.log(pathImageOld)
+					
 
 					//if the settings is to link to the image in teh zotero folder
 					
 					if (this.settings.imagesCopy === false){lineElements.rowEdited = "![](file:///"+pathImageOld+")"}
 					//if the settings is to copy the image from Zotero to the Obsidian vault
 					else{ 
-						const pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + lineElements.imagePath + ".png"
+						const pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + citeKey + "_" + lineElements.imagePath + ".png"
 						//if the file has not already been copied
 						if(!fs.existsSync(pathImageNew)){
 							fs.copyFile(pathImageOld, pathImageNew, (err) => {if (err) throw err;})
 						}
-						lineElements.rowEdited = "![[" + lineElements.imagePath + ".png" + "]] " + lineElements.citeKey
+						lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png" + "]] " + lineElements.citeKey
 					}
 				}
 
@@ -900,7 +990,8 @@ export default class MyPlugin extends Plugin {
 				lineElements.rowEdited =
 					`\n${hashes} ` +
 					lineElements.highlightText +
-					lineElements.commentText;
+					lineElements.commentText +
+					lineElements.zoteroBackLink;
 			}
  
 
@@ -936,7 +1027,8 @@ export default class MyPlugin extends Plugin {
 						`- [ ] ` +
 						commentFormatBefore +
 						lineElements.commentText + 
-						commentFormatAfter 
+						commentFormatAfter +
+						lineElements.zoteroBackLink
 					}
 			}
 
@@ -966,7 +1058,7 @@ export default class MyPlugin extends Plugin {
 
 				} else if (lineElements.highlightText === "" && lineElements.commentText !== ""){
 					lineElements.rowEdited = 
-						commentFormatBefore + lineElements.commentText + commentFormatAfter
+						commentFormatBefore + lineElements.commentText + commentFormatAfter + lineElements.zoteroBackLink
 				}
 
 			}
@@ -978,7 +1070,8 @@ export default class MyPlugin extends Plugin {
 					commentPrepend +
 					commentFormatBefore +
 					lineElements.commentText +
-					commentFormatAfter 
+					commentFormatAfter + 
+					lineElements.zoteroBackLink
 				}
 
 		//Copy the edited text into an array to be exported		
@@ -1175,6 +1268,7 @@ export default class MyPlugin extends Plugin {
 
 				if(extractionType === "Zotfile"){
 					noteElementsSingle = this.parseAnnotationLinesintoElementsZotfile(note)
+
 					noteElements = noteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
 				} 
 
@@ -1188,11 +1282,13 @@ export default class MyPlugin extends Plugin {
 				this.noteElements = noteElements
 				this.userNoteElements = userNoteElements
 
-				}
-				
+			}
+
+
 			
 				//Run the function to edit each line
-			const resultsLineElements = this.formatNoteElements(this.noteElements)
+			const resultsLineElements = this.formatNoteElements(this.noteElements, selectedEntry.citationKey)
+			
 			this.keyWordArray = resultsLineElements.keywordArray
 
 			//Create the annotation by merging the individial elements of rowEditedArray. Do the same for the colour
