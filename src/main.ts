@@ -335,6 +335,7 @@ export default class MyPlugin extends Plugin {
             
 
 			//Extract the colour
+			console.log(extractedText)
 			if(extractedText.startsWith("(Yellow) - ")){
 				lineElements.highlightColour = "yellow";
 				extractedText = extractedText.replace("(Yellow) - ", "")
@@ -394,6 +395,7 @@ export default class MyPlugin extends Plugin {
 			if (/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g.test(selectedLineOriginal)){
 				const zoteroBackLink = String(selectedLineOriginal.match(/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g))
 				lineElements.zoteroBackLink = zoteroBackLink
+				console.log("lineElements.zoteroBackLink: "+ lineElements.zoteroBackLink)
 				}
  
 			//Extracte the page of the annotation in the publication
@@ -638,10 +640,20 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//Extract the attachment URI
+			console.log(selectedLineOriginal)
+			console.log((/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(selectedLineOriginal)))
 			if (/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(selectedLineOriginal)){
 				let attachmentURI = String(selectedLineOriginal.match(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm))
 				if (attachmentURI === null){lineElements.attachmentURI = null} else{
 					attachmentURI = attachmentURI.replace(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\//gm, "")
+					lineElements.attachmentURI = attachmentURI
+				}
+			}
+
+			if (/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm.test(selectedLineOriginal)){
+				let attachmentURI = String(selectedLineOriginal.match(/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm))
+				if (attachmentURI === null){lineElements.attachmentURI = null} else{
+					attachmentURI = attachmentURI.replace(/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\//gm, "")
 					lineElements.attachmentURI = attachmentURI
 				}
 			}
@@ -922,14 +934,19 @@ export default class MyPlugin extends Plugin {
 				//console.log("this.settings.imagesImport: " + this.settings.imagesImport)
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
 					//find the folder the Zotero/storage is kept
-					console.log(this.zoteroBuildWindows)
 					if (this.zoteroBuildWindows==false){
 						pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
 						pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + citeKey + "_" + lineElements.imagePath + ".png"
 					} else {
-						pathImageOld	= this.pathZoteroStorage + "\\" + lineElements.imagePath + "\\" + "image.png"
+						pathImageOld	= this.pathZoteroStorage + lineElements.imagePath + "\\" + "image.png" 
 						pathImageNew = this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath + "\\" + citeKey + "_" + lineElements.imagePath + ".png"
 					}
+
+					console.log("pathImageOld: " + pathImageOld)
+					console.log("Check pathImageOld:" + fs.existsSync(pathImageOld))
+					console.log("pathImageNew: " + pathImageNew)
+					console.log("Check pathImageNew:" + fs.existsSync(pathImageNew)) 
+					
 
 					//Check if the image exists within Zotero or already within the vault
 					if(fs.existsSync(pathImageOld) || fs.existsSync(pathImageNew)){
@@ -1736,6 +1753,7 @@ export default class MyPlugin extends Plugin {
 		}
 
 		//Export the file
+		console.log(noteTitleFull)
 		fs.writeFile(noteTitleFull, litnote, function (err) {
 				if (err) console.log(err);
 			});

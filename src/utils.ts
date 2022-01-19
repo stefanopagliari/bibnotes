@@ -314,10 +314,24 @@ export function createNoteTitle(selectedEntry: Reference, exportTitle: string, e
 
 	//Get the path of the vault
 	const vaultPath = this.app.vault.adapter.getBasePath()
-		
-	//Create the full path
-	const exportPathFull: string = normalizePath(vaultPath + "/" + exportPath + "/" + exportTitle + ".md");
+	console.log("vaultPath: "+ vaultPath)
+	
+	//Check if the file is on windows
+	let zoteroBuildWindows:boolean 
+	const zoteroStorageMac = new RegExp(/.+?(?=Zotero\/storage)/) 
+	const zoteroStorageWindows = new RegExp(/Zotero\\storage\\/gm) 
+	if (zoteroStorageMac.test(selectedEntry.attachments[0].path)){
+		zoteroBuildWindows = false
+	} else if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)){
+		zoteroBuildWindows = true
+	}
 
+	//Create the full path
+	let exportPathFull: string = ""
+	if (zoteroBuildWindows == true){exportPathFull = normalizePath(vaultPath + "\\" + exportPath + "\\" + exportTitle + ".md");} 
+	else{exportPathFull = normalizePath(vaultPath + "/" + exportPath + "/" + exportTitle + ".md");}
+	console.log("exportPathFull: "+ exportPathFull)
+ 
 	return exportPathFull
 	
 }
@@ -494,7 +508,7 @@ export function replaceTagList(selectedEntry:Reference, arrayExtractedKeywords:s
 
 export function openSelectedNote(selectedEntry:Reference, exportTitle:string, exportPath:string){
 
-	const noteTitleFull = createNoteTitle(selectedEntry, exportTitle, exportPath);
+	const noteTitleFull = createNoteTitle(selectedEntry, exportTitle, exportPath, this.zoteroBuildWindows);
 	
 	//remove from the path of the note to be exported the path of the vault
 	const noteTitleShort = noteTitleFull.replace(normalizePath(this.app.vault.adapter.getBasePath())+"/", "")
