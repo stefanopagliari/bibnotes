@@ -79,7 +79,7 @@ By default the plugin will export both the metadata and the notes stored in Zote
     - {{UserNotes}}: notes manually created within Zotero
     - {{Images}}: all the images extracted via the Zotero PDF Reader
 
-- It is also possible to wrap the placeholders into [[ ]] in order to create notes or to preface them with :: in order to create Dataview fields.
+- It is also possible to wrap the placeholders into [[ ]] in order to create notes or to preface them with a tag(#). You can also preface a field with :: in order to create Dataview fields.
 - **Missing Fields**: Fields that are present in the template but missing in the entry are deleted by default. This can be changed in the settings.
 
 ## Basic Formatting
