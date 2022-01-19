@@ -3,6 +3,8 @@
 import * as fs from "fs";
 //import { info, setLevel } from "loglevel";
 import {App, Plugin, Notice, normalizePath, Vault} from "obsidian";
+import path from "path";
+import { BooleanLiteral } from "typescript";
 
 
 import {
@@ -45,6 +47,7 @@ export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 	keyWordArray: string[];
 	pathZoteroStorage: string;
+	zoteroBuildWindows: boolean;
 	noteElements: AnnotationElements[];
 	extractedNoteElements: AnnotationElements[];
 	userNoteElements: AnnotationElements[];
@@ -599,10 +602,11 @@ export default class MyPlugin extends Plugin {
 			//Record the extraction method
 			lineElements.extractionSource = "zotero"
 
-			//Identify images			
+			//Identify images		
 			if (/data-attachment-key=/gm.test(selectedLineOriginal)){	
 				lineElements.annotationType = "typeImage"
 				lineElements.imagePath =  String(selectedLineOriginal.match(/key="([^"]*)"/g)[0]).replaceAll("\"","").replace("key=","")
+ 
 			}
 			
 			//Extract the colour of the highlight
@@ -912,13 +916,21 @@ export default class MyPlugin extends Plugin {
 			//FORMAT IMAGES
 			if (lineElements.annotationType === "typeImage") {
 				lineElements.rowEdited = ""
-
+				let pathImageOld = ""
+				let pathImageNew = ""
+				console.log(this.pathZoteroStorage)
 				//console.log("this.settings.imagesImport: " + this.settings.imagesImport)
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
 					//find the folder the Zotero/storage is kept
-					const pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
-					const pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + citeKey + "_" + lineElements.imagePath + ".png"
-					
+					console.log(this.zoteroBuildWindows)
+					if (this.zoteroBuildWindows==false){
+						pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
+						pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + citeKey + "_" + lineElements.imagePath + ".png"
+					} else {
+						pathImageOld	= this.pathZoteroStorage + "\\" + lineElements.imagePath + "\\" + "image.png"
+						pathImageNew = this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath + "\\" + citeKey + "_" + lineElements.imagePath + ".png"
+					}
+
 					//Check if the image exists within Zotero or already within the vault
 					if(fs.existsSync(pathImageOld) || fs.existsSync(pathImageNew)){
 
@@ -1241,9 +1253,23 @@ export default class MyPlugin extends Plugin {
 			let userNoteElements:AnnotationElements[] = []
 
 			//store the folder on the local computer where zotero/storage is found
+			let zoteroStorage:string = ""
+			let zoteroBuildWindows: boolean = undefined
+			const zoteroBasePath = String(selectedEntry.attachments[0].path.match(/.+?(?=Zotero)/))
+			console.log(zoteroBasePath)
+			const zoteroStorageMac = new RegExp(/.+?(?=Zotero\/storage)/) 
+			const zoteroStorageWindows = new RegExp(/Zotero\\storage\\/gm) 
+			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)){
+				zoteroStorage = "/storage/";
+				zoteroBuildWindows = false
+			} else if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)){
+				zoteroStorage = "\\storage\\"
+				zoteroBuildWindows = true
+			}
 
-			const pathZoteroStorage = selectedEntry.attachments[0].path.match(/.+?(?=Zotero\/storage)/) + "zotero/storage"
-			this.pathZoteroStorage = pathZoteroStorage
+			const pathZoteroStorage = zoteroBasePath + "Zotero" + zoteroStorage
+			this.pathZoteroStorage = pathZoteroStorage 
+			this.zoteroBuildWindows = zoteroBuildWindows
 
 
 			for (let indexNote = 0; indexNote < selectedEntry.notes.length; indexNote++) {
@@ -1281,6 +1307,7 @@ export default class MyPlugin extends Plugin {
 				
 				this.noteElements = noteElements
 				this.userNoteElements = userNoteElements
+				console.log(noteElements)
 
 			}
 
