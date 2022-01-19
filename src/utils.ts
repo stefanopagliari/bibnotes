@@ -273,6 +273,10 @@ export function createLocalFileLink(reference: Reference)  {
 			if(reference.attachments[attachmentindex].itemType !== "attachment") continue
 
 			//remove white spaces from file name
+			if (reference.attachments[attachmentindex].path == undefined){
+				reference.attachments[attachmentindex].path = ""
+			} 
+
 			const attachmentPathCorrected = reference.attachments[attachmentindex].path.replaceAll(" ", "%20")
 
 			const selectedfile:string = "[" +

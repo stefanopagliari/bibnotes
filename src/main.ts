@@ -456,13 +456,12 @@ export default class MyPlugin extends Plugin {
 				noteElements[noteElements.length-1].commentText === ""){
 					noteElements[noteElements.length-1].annotationType = lineElements.annotationType;
 					noteElements[noteElements.length-1].commentText = lineElements.commentText
-				console.log(lineElements.annotationType)
-				console.log(lineElements.commentText)
+				// console.log(lineElements.annotationType)
+				// console.log(lineElements.commentText)
 
 				continue 
 				}  
 			}  
-		console.log(lineElements)
 		noteElements.push(lineElements)			
         }  
 	return noteElements
@@ -600,9 +599,7 @@ export default class MyPlugin extends Plugin {
 			//Record the extraction method
 			lineElements.extractionSource = "zotero"
 
-			//Identify images
-			console.log((/data-attachment-key=/gm.test(selectedLineOriginal)))
-			
+			//Identify images			
 			if (/data-attachment-key=/gm.test(selectedLineOriginal)){	
 				lineElements.annotationType = "typeImage"
 				lineElements.imagePath =  String(selectedLineOriginal.match(/key="([^"]*)"/g)[0]).replaceAll("\"","").replace("key=","")
@@ -920,20 +917,22 @@ export default class MyPlugin extends Plugin {
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
 					//find the folder the Zotero/storage is kept
 					const pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
-					console.log(pathImageOld)
+					const pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + citeKey + "_" + lineElements.imagePath + ".png"
 					
+					//Check if the image exists within Zotero or already within the vault
+					if(fs.existsSync(pathImageOld) || fs.existsSync(pathImageNew)){
 
-					//if the settings is to link to the image in teh zotero folder
-					
-					if (this.settings.imagesCopy === false){lineElements.rowEdited = "![](file:///"+pathImageOld+")"}
-					//if the settings is to copy the image from Zotero to the Obsidian vault
-					else{ 
-						const pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + citeKey + "_" + lineElements.imagePath + ".png"
-						//if the file has not already been copied
-						if(!fs.existsSync(pathImageNew)){
-							fs.copyFile(pathImageOld, pathImageNew, (err) => {if (err) throw err;})
+						//if the settings is to link to the image in teh zotero folder
+						if (this.settings.imagesCopy === false){lineElements.rowEdited = "![](file:///"+pathImageOld+")"}
+						//if the settings is to copy the image from Zotero to the Obsidian vault
+						else{ 
+
+							//if the file has not already been copied
+							if(!fs.existsSync(pathImageNew)){
+								fs.copyFile(pathImageOld, pathImageNew, (err) => {if (err) throw err;})
+							}
+							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png" + "]] " + lineElements.citeKey
 						}
-						lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png" + "]] " + lineElements.citeKey
 					}
 				}
 
@@ -1235,13 +1234,14 @@ export default class MyPlugin extends Plugin {
 		let extractedUserNote = "";
 		//console.log(selectedEntry.notes.length)
 
-		if(this.settings.exportAnnotations && selectedEntry.notes.length>0){
+		if(this.settings.exportAnnotations && selectedEntry.notes.length>0 && selectedEntry.attachments[0]!== undefined){
 
 			//run the function to parse the annotation for each note (there could be more than one)
 			let noteElements:AnnotationElements[] = []
 			let userNoteElements:AnnotationElements[] = []
 
 			//store the folder on the local computer where zotero/storage is found
+
 			const pathZoteroStorage = selectedEntry.attachments[0].path.match(/.+?(?=Zotero\/storage)/) + "zotero/storage"
 			this.pathZoteroStorage = pathZoteroStorage
 
