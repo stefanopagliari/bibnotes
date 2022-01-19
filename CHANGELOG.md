@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.  
 
+## [0.9.01]
+### Bugs
+- Fixed filepath of images on Windows  
+
 ## [0.9] 
 
 ### Improvement
