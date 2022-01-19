@@ -25,7 +25,9 @@ In order to import your references and notes from Zotero, you need to export you
 
 ## Commands
 The plugin introduces two commands into Obsidian:
-- **Create/Update Literature Note**: when you select this command you will be prompted to chose one of references from the library you have imported. If the reference has not been imported yet in the specified folder, a new note will be generated. If a note already exists, its content will be updated without over-writing the existing annotation (e.g. comments added manually from within Obsidian and block-references will not be over-written). The first option ("Entire Library") can be selected to create/update all the notes from the imported library.
+- **Create/Update Literature Note**: when you select this command you will be prompted to chose one of references from the library you have imported. If the reference has not been imported yet in the specified folder, a new note will be generated. If a note already exists, its content will be updated wi
+
+thout over-writing the existing annotation (e.g. comments added manually from within Obsidian and block-references will not be over-written). The first option ("Entire Library") can be selected to create/update all the notes from the imported library.
 
 ![](/images/SelectCommandExample.png)
 
@@ -67,9 +69,16 @@ By default the plugin will export both the metadata and the notes stored in Zote
     - {{eprint}}
     - {{file}}: local path of the file attached to the entry
     - {{localLibrary}}: link to the entry on the Zotero app
-    - {{keywords}}: tags associated with the entry
+    - {{keywordsZotero}}: tags found in the metadata of the entry
+    - {{keywordsPDF}}: tags extracted from the PDF
+    - {{keywords}}, {{keywordsAll}}: both tags found in the metadata of the entry and tags extracted from the PDF
     - {{collections}}: collections/folders where the entry is located
     - {{collectionsParent}}: collections/folders where the entry is located, plus the parent folders to these
+    - {{PDFNotes}}: all the highlights, comments, and images extracted from the PDF, in the order in which they appear
+    - {{Yellow}, {{Red}}, {{Green}}, {{Black}, {{White}}, {{Gray}}, {{Cyan}}, {{Magenta}}, {{Orange}}: all the highlights of a certain colour
+    - {{UserNotes}}: notes manually created within Zotero
+    - {{Images}}: all the images extracted via the Zotero PDF Reader
+
 - It is also possible to wrap the placeholders into [[ ]] in order to create notes or to preface them with :: in order to create Dataview fields.
 - **Missing Fields**: Fields that are present in the template but missing in the entry are deleted by default. This can be changed in the settings.
 
@@ -119,3 +128,10 @@ Transformations can be triggered by adding a dedicated "keyword" at the beginnin
 In addition to using dedicated keywords at the beginning of a comment, it is possible to apply specific styling or transformations to highlights based on the colour of the highlight. The plugin recognize the highlight colour extracted by:
 - **Zotero** native reader (yellow, red, green, blue, purple) 
 - **Zotfile** plugin (black, white, gray, red,orange, yellow, green, cyan, blue, magenta). In order to export the highlight colour you will need to activate this function by going to the main menu of Zoter and selecting Preferences --> Advanced --> Config Editor. Search for "extensions.zotfile.pdfExtraction.colorAnnotations" and turn the value to "true". It is also important that the value "extensions.zotfile.pdfExtraction.colorCategories" is restored to the default value.
+
+### Updating Existing Notes
+In the case you are updating an existing note, you can decide in the plugin settings whether to
+- over-write the existing note completely ("Overwrite Entire Note")
+- preserve the existing note and only add new sentences that were not included in the existing note ("Save Entire Note")  
+- preserve the existing note and add non-overlapping sentences only in a specific section, while over-writing the rest ("Select Section"). When the "Select Section" is chosen, the plugin will ask for a string identifying the beginning and/or end of the section to be updated (rather than overwritten). If the "start" field is left empty, the existing text will be preserved from to the beginning of the note. If the "end" field is left empty, the existing text will be preserved until  the end of the note. For instance, in order to over-write the metadata but maintain changes made manually to the extracted annotations, the start of the section to be preserved should be set to the unique title used in the template before the metadata (e.g. "## Extracted Annotations").
+
