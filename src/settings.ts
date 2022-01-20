@@ -138,17 +138,18 @@ export class SettingTab extends PluginSettingTab {
 		if (settings.templateType==="Custom") {
 			new Setting(settingsExport)
 				.setName('Custom Template')
-				.addTextArea((text) =>
-					text
-					.setValue(settings.templateContent)
-					.onChange(async (value) => {
-						settings.templateContent = value;
-						await plugin.saveSettings();
-						//this.display();
-						}
-					)
-			
-				);
+				.addTextArea((text) => {
+						text.inputEl.rows = 10;
+						// this is not strictly necessary, but it makes it a lot easier to read long lines
+						text.inputEl.style.width = "100%";
+						text.setValue(settings.templateContent).onChange(
+							async (value) => {
+								settings.templateContent = value;
+								await plugin.saveSettings();
+								//this.display();
+							}
+						);
+					});
 				}
 			
 					
