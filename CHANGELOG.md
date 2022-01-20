@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.  
 
+## [0.9.04]
+### Improvement
+- Added setting to activate "debugging mode". This will print the console log from the processing of an entry into a txt file that can be easily shared to debug a problem with the plugin
+- Expanded the size of the text area to input the custom template (thanks to @MichaBrugger)
+- Replaced in the setting "Replace with NA" with "Replace with custom text", and added a field to specify the text to add in the case of a missing value.
+
+### Bugs
+- Fixed filepath of images on Windows  
+
 ## [0.9.01]
 ### Bugs
 - Fixed filepath of images on Windows  

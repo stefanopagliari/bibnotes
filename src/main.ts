@@ -1126,9 +1126,6 @@ export default class MyPlugin extends Plugin {
 				
 			
 			const selectedLine = noteElementsArray[index]
-			bugout.log(selectedLine)
-
-
 				rowEditedArray.push(selectedLine.rowEdited)
 
 				// Copy the rows highlighted in a certain colour into colour-specific arrays 
@@ -1751,7 +1748,7 @@ export default class MyPlugin extends Plugin {
 
 		//delete the missing fields in the metadata
 		const missingFieldSetting = this.settings.missingfield
-		litnote = replaceMissingFields(litnote, missingFieldSetting);
+		litnote = replaceMissingFields(litnote, missingFieldSetting, this.settings.missingfieldreplacement);
 
 		// Compare old note and new note
 		if (this.settings.saveManualEdits!=="Overwrite Entire Note" && fs.existsSync(noteTitleFull)){	//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note

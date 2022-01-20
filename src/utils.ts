@@ -232,11 +232,11 @@ export function createTagList(tagList: string[], note:string){
 
 
 //function to replace the missing fields in the template
-export function replaceMissingFields(note: string, missingfield: string) {
+export function replaceMissingFields(note: string, missingfield: string, missingfieldreplacement: string) {
 		let copy = note.slice();
-		if (missingfield === "Replace with NA") {
-			copy = copy.replace(TEMPLATE_BRACKET_REG, "*NA*").trim();
-			copy = copy.replace(TEMPLATE_REG, "*NA*").trim();
+		if (missingfield === "Replace with custom text") {
+			copy = copy.replace(TEMPLATE_BRACKET_REG, missingfieldreplacement).trim();
+			copy = copy.replace(TEMPLATE_REG, missingfieldreplacement).trim();
 		} else if (missingfield === "Remove (entire row)") {
 			//console.log("Trying to remove all rows with missing field");
 			const lines = copy.split(/\r?\n/);

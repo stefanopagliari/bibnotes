@@ -167,6 +167,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	highlightCitationsLink: true,
 	debugMode: false,
 	zoteroStoragePath: "",
+	missingfieldreplacement: "NA",
 
 };
 

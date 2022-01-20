@@ -135,6 +135,8 @@ export interface MyPluginSettings {
 	highlightCitationsFormat: string;
 	highlightCitationsLink: boolean;
 	debugMode: boolean;
+	zoteroStoragePath: string;
+	missingfieldreplacement: string;
 }
 
 export interface Reference {

@@ -160,21 +160,34 @@ export class SettingTab extends PluginSettingTab {
 				)
 				.addDropdown((d) => {
 					d.addOption("Leave placeholder", "Leave placeholder");
-					d.addOption("Replace with NA", "Replace with NA");
 					d.addOption("Remove (entire row)", "Remove (entire row)");
+					d.addOption("Replace with custom text", "Replace with custom text");
 					d.setValue(settings.missingfield);
 					d.onChange(
 						async (
 							v:
 								| "Leave placeholder"
-								| "Replace with NA"
 								| "Remove (entire row)"
+								| "Replace with custom text"
 						) => {
 							settings.missingfield = v;
 							await plugin.saveSettings();
+							this.display();
 						}
 					);
 				});
+				if (settings.missingfield==="Replace with custom text") {
+					new Setting(settingsExport)
+					.setName("Replacement for missing fields")
+					.addText((text) =>
+						text
+							.setValue(settings.missingfieldreplacement)
+							.onChange(async (value) => {
+								settings.missingfieldreplacement = value;
+								await plugin.saveSettings();
+							})
+					);
+					}
 
 			new Setting(settingsExport)
 			.setName("Multiple Entries Divider")
@@ -915,7 +928,7 @@ export class SettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						settings.zoteroStoragePath = value;
 						await plugin.saveSettings();
-					})); 	
+					})); 	 
 			
 
 			if(settings.imagesImport){
