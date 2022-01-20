@@ -905,6 +905,16 @@ export class SettingTab extends PluginSettingTab {
 							this.display();
 						})
 				);
+			new Setting(importImages)
+				.setName("Zotero Local Folder")
+				.setDesc(`Add the path on your computer where Zotero's data is stored (e.g. "/Users/yourusername/Zotero"). This field is required only when this is different from the folder where the PDF files are stored. To retrieve this information, open Zotero --> Preferences --> Advanced --> Files and Folder, and copy the "data directory location"`)
+				.addText((text) =>
+				text
+					.setValue(settings.zoteroStoragePath)
+					.onChange(async (value) => {
+						settings.zoteroStoragePath = value;
+						await plugin.saveSettings();
+					})); 	
 			
 
 			if(settings.imagesImport){
@@ -958,7 +968,26 @@ export class SettingTab extends PluginSettingTab {
 						);
 					}
 			}	
+			containerEl.createEl('h2', {text: 'Debugging'});
+		
 
+			const debugSettings: HTMLDetailsElement =
+			containerEl.createEl("details");
+			debugSettings.setAttribute("open", "");
+			debugSettings.createEl("summary", {text: "" });
+			
+			new Setting(debugSettings)
+				.setName("Activate Debug Mode")
+				.setDesc("Activating this option will print the console logs of each entry exported in a text file to faciliate debugging.")
+				.addToggle((text) =>
+					text
+						.setValue(settings.debugMode)
+						.onChange(async (value) => {
+							settings.debugMode = value;
+							await plugin.saveSettings();
+							this.display();
+						})
+				);
 			
 		}
 	}

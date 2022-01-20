@@ -134,6 +134,7 @@ export interface MyPluginSettings {
 	nameFormat: string;
 	highlightCitationsFormat: string;
 	highlightCitationsLink: boolean;
+	debugMode: boolean;
 }
 
 export interface Reference {

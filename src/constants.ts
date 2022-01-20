@@ -37,12 +37,15 @@ export const templatePlain = "# {{title}}\n" +
 "- **Collections**: {{collectionsParent}}\n"+
 "\n" +
 "\n" +
-"---"+
+"----"+
+"\n" +
 "\n" +
 "## Comments\n" +
 "{{UserNotes}}\n" +
 "\n" +
-"---"+
+"\n" +
+"----"+
+"\n" +
 "\n" +
 "## Extracted Annotations\n" +
 "{{PDFNotes}}"
@@ -87,12 +90,15 @@ export const templateAdmonition = "# {{title}}\n" +
 "- **Collections**: {{collectionsParent}}\n"+
 "```\n" +
 "\n" +
-"---"+
+"----"+
+"\n" +
 "\n" +
 "## Comments\n" +
 "{{UserNotes}}\n"+
 "\n" +
-"---"+
+"\n" +
+"----"+
+"\n" +
 "\n" +
 "## Extracted Annotations\n" +
 "{{PDFNotes}}"
@@ -159,6 +165,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	nameFormat: "{{lastName}}, {{firstName}}",
 	highlightCitationsFormat: "Author, year, page number",
 	highlightCitationsLink: true,
+	debugMode: false,
+	zoteroStoragePath: "",
 
 };
 

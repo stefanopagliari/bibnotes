@@ -1,6 +1,8 @@
 
 // Import fs 
 import * as fs from "fs";
+import { Debugout } from 'debugout.js';
+
 //import { info, setLevel } from "loglevel";
 import {App, Plugin, Notice, normalizePath, Vault} from "obsidian";
 import path from "path";
@@ -930,13 +932,14 @@ export default class MyPlugin extends Plugin {
 				let pathImageOld = ""
 				let pathImageNew = "" 
 				console.log(this.pathZoteroStorage)
-				//console.log("this.settings.imagesImport: " + this.settings.imagesImport)
+				//console.log("this.settings.imagesImport: " + this.settings.imagesImpI'm ort)
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
 				
 
 					pathImageOld = path.format({
 						dir: this.pathZoteroStorage + lineElements.imagePath,
 						base: 'image.png'})
+					console.log(pathImageOld)
 					
 					pathImageNew = path.normalize(path.format({
 							dir: normalizePath(this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath),
@@ -1120,7 +1123,10 @@ export default class MyPlugin extends Plugin {
 
 		//Add rowEdited into different arrays for the export
 		for (let index = 0; index < noteElementsArray.length; index++) {
-				const selectedLine = noteElementsArray[index]
+				
+			
+			const selectedLine = noteElementsArray[index]
+			bugout.log(selectedLine)
 
 
 				rowEditedArray.push(selectedLine.rowEdited)
@@ -1271,6 +1277,7 @@ export default class MyPlugin extends Plugin {
 			console.log(zoteroBasePath)
 			const zoteroStorageMac = new RegExp(/.+?(?=Zotero\/storage)/) 
 			const zoteroStorageWindows = new RegExp(/Zotero\\storage\\/gm) 
+			console.log(selectedEntry.attachments[0].path)
 			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)){
 				zoteroStorage = "/storage/";
 				zoteroBuildWindows = false
@@ -1278,9 +1285,11 @@ export default class MyPlugin extends Plugin {
 				zoteroStorage = "\\storage\\"
 				zoteroBuildWindows = true
 			}
+			console.log(zoteroStorage)
 
 			const pathZoteroStorage = zoteroBasePath + "Zotero" + zoteroStorage
 			this.pathZoteroStorage = pathZoteroStorage 
+			console.log(pathZoteroStorage)
 			this.zoteroBuildWindows = zoteroBuildWindows
 
 
@@ -1691,18 +1700,24 @@ export default class MyPlugin extends Plugin {
 	
 
 	createNote(selectedEntry: Reference, data){
+		//create bugout to store and export logs in a file
+		let bugout = new Debugout({ realTimeLoggingOn: false }); 
+		if (this.settings.debugMode === true){bugout = new Debugout({ realTimeLoggingOn: true }); }
 		
-		console.log("Bibnotes Importing reference: " + selectedEntry.citationKey)
 
 		//Load Template
 		const templateNote = this.importTemplate()
+		bugout.log("Template: \n" + templateNote)
+		
 
 		//Create the metadata
 		let litnote:string = this.parseMetadata(selectedEntry, templateNote);
+		bugout.log(selectedEntry)
+
 
 		//Extract the list of collections
 		litnote = this.parseCollection(selectedEntry, data, litnote);
-		//console.log(metadata)
+		
 
 		
 		//Define the name and full path of the file to be exported
@@ -1749,7 +1764,10 @@ export default class MyPlugin extends Plugin {
 		}
 
 		//Export the file
-		console.log(noteTitleFull)
+		bugout.log("NoteTitleFull: " + noteTitleFull)
+		bugout.log("Final Note: " + litnote)
+		if(this.settings.debugMode === true){bugout.downloadLog() }
+
 		fs.writeFile(noteTitleFull, litnote, function (err) {
 				if (err) console.log(err);
 			});

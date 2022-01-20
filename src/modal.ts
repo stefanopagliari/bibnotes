@@ -1,7 +1,8 @@
 import MyPlugin from "./main";
 import * as fs from "fs";
 import { App, Modal, FuzzySuggestModal, Notice, Platform} from "obsidian";
-
+import { Debugout } from 'debugout.js';
+const bugout = new Debugout({ realTimeLoggingOn: true });
 
 import { Reference,
 		AnnotationElements} from "./types";		
@@ -178,7 +179,6 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 			} 
 
 		}
-
 
 
 
