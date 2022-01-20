@@ -6,7 +6,7 @@ import { Debugout } from 'debugout.js';
 //import { info, setLevel } from "loglevel";
 import {App, Plugin, Notice, normalizePath, Vault} from "obsidian";
 import path from "path";
-import { BooleanLiteral } from "typescript";
+import { BooleanLiteral, isTokenKind } from "typescript";
 
 
 import {
@@ -1763,6 +1763,7 @@ export default class MyPlugin extends Plugin {
 		//Export the file
 		bugout.log("NoteTitleFull: " + noteTitleFull)
 		bugout.log("Final Note: " + litnote)
+		bugout.log(this.settings)
 		if(this.settings.debugMode === true){bugout.downloadLog() }
 
 		fs.writeFile(noteTitleFull, litnote, function (err) {
