@@ -640,8 +640,7 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//Extract the attachment URI
-			console.log(selectedLineOriginal)
-			console.log((/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(selectedLineOriginal)))
+		
 			if (/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(selectedLineOriginal)){
 				let attachmentURI = String(selectedLineOriginal.match(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm))
 				if (attachmentURI === null){lineElements.attachmentURI = null} else{
@@ -929,24 +928,20 @@ export default class MyPlugin extends Plugin {
 			if (lineElements.annotationType === "typeImage") {
 				lineElements.rowEdited = ""
 				let pathImageOld = ""
-				let pathImageNew = ""
+				let pathImageNew = "" 
 				console.log(this.pathZoteroStorage)
 				//console.log("this.settings.imagesImport: " + this.settings.imagesImport)
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
-					//find the folder the Zotero/storage is kept
-					if (this.zoteroBuildWindows==false){
-						pathImageOld	= this.pathZoteroStorage + "/" + lineElements.imagePath + "/" + "image.png"
-						pathImageNew = this.app.vault.adapter.getBasePath() + "/" + this.settings.imagesPath + "/" + citeKey + "_" + lineElements.imagePath + ".png"
-					} else {
-						pathImageOld	= this.pathZoteroStorage + lineElements.imagePath + "\\" + "image.png" 
-						pathImageNew = this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath + "\\" + citeKey + "_" + lineElements.imagePath + ".png"
-					}
+				
 
-					console.log("pathImageOld: " + pathImageOld)
-					console.log("Check pathImageOld:" + fs.existsSync(pathImageOld))
-					console.log("pathImageNew: " + pathImageNew)
-					console.log("Check pathImageNew:" + fs.existsSync(pathImageNew)) 
+					pathImageOld = path.format({
+						dir: this.pathZoteroStorage + lineElements.imagePath,
+						base: 'image.png'})
 					
+					pathImageNew = path.normalize(path.format({
+							dir: normalizePath(this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath),
+							base: citeKey + "_" + lineElements.imagePath + ".png"}))
+	
 
 					//Check if the image exists within Zotero or already within the vault
 					if(fs.existsSync(pathImageOld) || fs.existsSync(pathImageNew)){
@@ -1300,6 +1295,7 @@ export default class MyPlugin extends Plugin {
 				//Identify manual notes (not extracted from PDF) extracted from zotero
 				else if (unescape(note).includes("div data-schema-version")){extractionType = "UserNote"}
 				else {extractionType = "Other"}
+				console.log(extractionType)
 								
 
 				

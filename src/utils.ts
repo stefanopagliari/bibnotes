@@ -4,8 +4,9 @@ import {
 	Creator,
 	CreatorArray,
 	Reference,
-	AnnotationElements,
 		} from "./types"
+
+import path from 'path';
 
 import {
 	TEMPLATE_BRACKET_REG,
@@ -314,52 +315,16 @@ export function createNoteTitle(selectedEntry: Reference, exportTitle: string, e
 
 	//Get the path of the vault
 	const vaultPath = this.app.vault.adapter.getBasePath()
-	console.log("vaultPath: "+ vaultPath)
 	
-	//Check if the file is on windows
-	let zoteroBuildWindows:boolean 
-	const zoteroStorageMac = new RegExp(/.+?(?=Zotero\/storage)/) 
-	const zoteroStorageWindows = new RegExp(/Zotero\\storage\\/gm) 
-	if (zoteroStorageMac.test(selectedEntry.attachments[0].path)){
-		zoteroBuildWindows = false
-	} else if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)){
-		zoteroBuildWindows = true
-	}
 
-	//Create the full path
-	let exportPathFull: string = ""
-	if (zoteroBuildWindows == true){exportPathFull = normalizePath(vaultPath + "\\" + exportPath + "\\" + exportTitle + ".md");} 
-	else{exportPathFull = normalizePath(vaultPath + "/" + exportPath + "/" + exportTitle + ".md");}
-	console.log("exportPathFull: "+ exportPathFull)
+	const exportPathFull = path.normalize(vaultPath + "/" + exportPath + "/" + exportTitle + ".md");
+	//console.log("exportPathFull: "+ exportPathFull)
  
 	return exportPathFull
 	
 }
 
 
-// export function getFormattingType(currLine: string, selectedEntry: Entry) {
-// 	const ZOTERO_REG = this.getZoteroRegex(selectedEntry)
-// 	if (ZOTERO_REG.test(currLine)) {
-// 		return "Zotero";
-// 	} else if (ZOTFILE_REG.test(currLine)) {
-// 		return "Zotfile";
-// 	} else {
-// 		return null;
-// 	}
-// }
-
-
-// export function getZoteroRegex(selectedEntry: Entry) {
-// 	const NumAuthors = selectedEntry.creators.author.length //check the number of authors
-// 	let AuthorKeyNew:string = undefined
-// 	if (NumAuthors == 1){AuthorKeyNew = selectedEntry.creators.author[0].lastName
-// 		} else if (NumAuthors == 2) {AuthorKeyNew =
-// 			selectedEntry.creators.author[0].lastName +
-// 			" and " + selectedEntry.creators.author[1].lastName
-// 		} else if (NumAuthors>2) {AuthorKeyNew = selectedEntry.creators.author[0].lastName + " et al."}
-// 	const ZOTERO_REG = new RegExp("\\(" + AuthorKeyNew + ", \\d+, p. \\d+\\)")
-// 	return ZOTERO_REG 
-// }
 
 
 export function replaceTagList(selectedEntry:Reference, arrayExtractedKeywords:string[], metadata:string, divider: string){
