@@ -924,9 +924,9 @@ export class SettingTab extends PluginSettingTab {
 				.setDesc(`Add the path on your computer where Zotero's data is stored (e.g. "/Users/yourusername/Zotero"). This field is required only when this is different from the folder where the PDF files are stored. To retrieve this information, open Zotero --> Preferences --> Advanced --> Files and Folder, and copy the "data directory location"`)
 				.addText((text) =>
 				text
-					.setValue(settings.zoteroStoragePath)
+					.setValue(settings.zoteroStoragePathManual)
 					.onChange(async (value) => {
-						settings.zoteroStoragePath = value;
+						settings.zoteroStoragePathManual = value;
 						await plugin.saveSettings();
 					})); 	 
 			

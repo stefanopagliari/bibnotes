@@ -931,15 +931,12 @@ export default class MyPlugin extends Plugin {
 				lineElements.rowEdited = ""
 				let pathImageOld = ""
 				let pathImageNew = "" 
-				console.log(this.pathZoteroStorage)
 				//console.log("this.settings.imagesImport: " + this.settings.imagesImpI'm ort)
 				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
 				
-
 					pathImageOld = path.format({
 						dir: this.pathZoteroStorage + lineElements.imagePath,
 						base: 'image.png'})
-					console.log(pathImageOld)
 					
 					pathImageNew = path.normalize(path.format({
 							dir: normalizePath(this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath),
@@ -961,6 +958,8 @@ export default class MyPlugin extends Plugin {
 							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png" + "]] " + lineElements.citeKey
 						}
 					}
+					else {new Notice(`Cannot find image at "${pathImageOld}". Provide the correct zotero data directory location in the settings`);
+				}
 				}
 
 				//Add the comment after the image
@@ -1170,7 +1169,8 @@ export default class MyPlugin extends Plugin {
 			highlightsOrange: highlightsOrange,
 			highlightsBlue: highlightsBlue,
 			highlightsMagenta: highlightsMagenta,
-			imagesArray: imagesArray
+			imagesArray: imagesArray,
+			noteElements: noteElements
 		}
 
 		return resultsLineElements
@@ -1267,27 +1267,35 @@ export default class MyPlugin extends Plugin {
 			let noteElements:AnnotationElements[] = []
 			let userNoteElements:AnnotationElements[] = []
 
-			//store the folder on the local computer where zotero/storage is found
-			let zoteroStorage:string = ""
+			//identify the folder on the local computer where zotero/storage is found
+			//first look into the same path as the pdf attachment
+			let pathZoteroStorage:string = ""
 			let zoteroBuildWindows: boolean = undefined
-			const zoteroBasePath = String(selectedEntry.attachments[0].path.match(/.+?(?=Zotero)/))
-			console.log(zoteroBasePath)
-			const zoteroStorageMac = new RegExp(/.+?(?=Zotero\/storage)/) 
-			const zoteroStorageWindows = new RegExp(/Zotero\\storage\\/gm) 
-			console.log(selectedEntry.attachments[0].path)
+
+			//check if the base path where the attachment is stored is in Zotero/storage
+			const zoteroStorageMac = new RegExp(/.+?(?=Zotero\/storage)Zotero\/storage\//gm) 
 			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)){
-				zoteroStorage = "/storage/";
+				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageMac))
 				zoteroBuildWindows = false
-			} else if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)){
-				zoteroStorage = "\\storage\\"
+			}
+
+			const zoteroStorageWindows = new RegExp(/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm) 
+			if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)){
+				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageWindows))
 				zoteroBuildWindows = true
 			}
-			console.log(zoteroStorage)
-
-			const pathZoteroStorage = zoteroBasePath + "Zotero" + zoteroStorage
+			
+			if(pathZoteroStorage.length==0 && this.settings.zoteroStoragePathManual.length >0){
+				pathZoteroStorage == this.settings.zoteroStoragePathManual
+				if(pathZoteroStorage.endsWith("\\Zotero")){pathZoteroStorage = pathZoteroStorage + "\\storage\\"}
+				if(pathZoteroStorage.endsWith("\\Zotero\\")){pathZoteroStorage = pathZoteroStorage + "storage\\"}
+				if(pathZoteroStorage.endsWith("\/Zotero")){pathZoteroStorage = pathZoteroStorage + "\/storage\/"}
+				if(pathZoteroStorage.endsWith("\/Zotero\/")){pathZoteroStorage = pathZoteroStorage + "storage\/"}
+			}
 			this.pathZoteroStorage = pathZoteroStorage 
-			console.log(pathZoteroStorage)
+			
 			this.zoteroBuildWindows = zoteroBuildWindows
+
 
 
 			for (let indexNote = 0; indexNote < selectedEntry.notes.length; indexNote++) {
@@ -1301,7 +1309,7 @@ export default class MyPlugin extends Plugin {
 				//Identify manual notes (not extracted from PDF) extracted from zotero
 				else if (unescape(note).includes("div data-schema-version")){extractionType = "UserNote"}
 				else {extractionType = "Other"}
-				console.log(extractionType)
+				
 								
 
 				
@@ -1326,7 +1334,7 @@ export default class MyPlugin extends Plugin {
 				
 				this.noteElements = noteElements
 				this.userNoteElements = userNoteElements
-				console.log(noteElements)
+				
 
 			}
 
@@ -1376,7 +1384,8 @@ export default class MyPlugin extends Plugin {
 			extractedAnnotationsCyan: extractedAnnotationsCyan,
 			extractedAnnotationsOrange: extractedAnnotationsOrange,
 			extractedAnnotationsMagenta: extractedAnnotationsMagenta,
-			extractedImages: extractedImages
+			extractedImages: extractedImages,
+			noteElements: this.noteElements
 		}
 	return(extractedNote)
 	}
@@ -1722,6 +1731,8 @@ export default class MyPlugin extends Plugin {
 			
 		//Extract the annotation and the keyword from the text
 		const resultAnnotations = this.extractAnnotation (selectedEntry, noteTitleFull)
+		bugout.log(resultAnnotations.noteElements)
+		
 
 
 		//Replace annotations in the template

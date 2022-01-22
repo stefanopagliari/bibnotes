@@ -166,7 +166,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	highlightCitationsFormat: "Author, year, page number",
 	highlightCitationsLink: true,
 	debugMode: false,
-	zoteroStoragePath: "",
+	zoteroStoragePathManual: "",
 	missingfieldreplacement: "NA",
 
 };
