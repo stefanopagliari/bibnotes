@@ -942,7 +942,7 @@ export default class MyPlugin extends Plugin {
 							dir: normalizePath(this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath),
 							base: citeKey + "_" + lineElements.imagePath + ".png"}))
 	
-
+					console.log(pathImageOld)
 					//Check if the image exists within Zotero or already within the vault
 					if(fs.existsSync(pathImageOld) || fs.existsSync(pathImageNew)){
 
@@ -1284,16 +1284,16 @@ export default class MyPlugin extends Plugin {
 				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageWindows))
 				zoteroBuildWindows = true
 			}
-			
+			console.log(pathZoteroStorage.length)
 			if(pathZoteroStorage.length==0 && this.settings.zoteroStoragePathManual.length >0){
-				pathZoteroStorage == this.settings.zoteroStoragePathManual
+				pathZoteroStorage = this.settings.zoteroStoragePathManual
 				if(pathZoteroStorage.endsWith("\\Zotero")){pathZoteroStorage = pathZoteroStorage + "\\storage\\"}
 				if(pathZoteroStorage.endsWith("\\Zotero\\")){pathZoteroStorage = pathZoteroStorage + "storage\\"}
 				if(pathZoteroStorage.endsWith("\/Zotero")){pathZoteroStorage = pathZoteroStorage + "\/storage\/"}
 				if(pathZoteroStorage.endsWith("\/Zotero\/")){pathZoteroStorage = pathZoteroStorage + "storage\/"}
 			}
 			this.pathZoteroStorage = pathZoteroStorage 
-			
+			console.log(pathZoteroStorage)
 			this.zoteroBuildWindows = zoteroBuildWindows
 
 
