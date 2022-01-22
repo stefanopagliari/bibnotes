@@ -1,13 +1,16 @@
-
-// Import fs 
+// Import fs
 import * as fs from "fs";
-import { Debugout } from 'debugout.js';
+import { Debugout } from "debugout.js";
 
 //import { info, setLevel } from "loglevel";
-import {App, Plugin, Notice, normalizePath, Vault} from "obsidian";
-import path from "path";
-import { BooleanLiteral, isTokenKind } from "typescript";
 
+import { Plugin, Notice, normalizePath } from "obsidian";
+//import { App, Plugin, Notice, normalizePath, Vault } from "obsidian";
+
+import path from "path";
+
+// wasn't actually used
+//import { BooleanLiteral, isTokenKind } from "typescript";
 
 import {
 	DEFAULT_SETTINGS,
@@ -16,34 +19,32 @@ import {
 } from "./constants";
 
 //Import modals from /modal.ts
-import {
-	fuzzySelectEntryFromJson,
-	updateLibrary 
-} from "./modal";
+import { fuzzySelectEntryFromJson, updateLibrary } from "./modal";
 
 //Import sample settings from /settings.ts
 import { SettingTab } from "./settings";
-import {AnnotationElements,
-		MyPluginSettings,
-		Reference,
-		Collection
-	} from "./types";
+import {
+	AnnotationElements,
+	MyPluginSettings,
+	Reference,
+	Collection,
+} from "./types";
 
-import { 
+import {
 	createAuthorKey,
 	createLocalFileLink,
 	createCreatorList,
 	createNoteTitle,
-	makeWiki, 
+	makeWiki,
 	makeQuotes,
 	removeQuoteFromEnd,
 	removeQuoteFromStart,
-	replaceAllTemplates, 
+	replaceAllTemplates,
 	replaceMissingFields,
 	replaceTagList,
 	replaceTemplate,
-	makeTags,	
-} from "./utils"; 
+	makeTags,
+} from "./utils";
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -77,9 +78,6 @@ export default class MyPlugin extends Plugin {
 				new updateLibrary(this.app, this).open();
 			},
 		});
-		
-
-		
 	}
 
 	onunload() {}
@@ -95,11 +93,6 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
-
-
-	
-
-
 
 	createFormatting() {
 		const {
@@ -189,107 +182,99 @@ export default class MyPlugin extends Plugin {
 			commentPrepend,
 		};
 	}
- 
-
-
-
-	
- 
 
 	parseMetadata(selectedEntry: Reference, templateOriginal: string) {
-		const {
-			exportMetadata,
-		} = this.settings;
+		const { exportMetadata } = this.settings;
 
 		// Create Note from Template
 		// If setting exportMetadata is false, then replace Template with simply the title
 		const template = exportMetadata ? templateOriginal : "# {{title}}";
 
 		//Create Note
-		let note = template
+		let note = template;
 
 		//Replace the author/s
-		
-		note = createCreatorList (selectedEntry.creators, "author", note, this.settings.multipleFieldsDivider, this.settings.nameFormat) 
+
+		note = createCreatorList(
+			selectedEntry.creators,
+			"author",
+			note,
+			this.settings.multipleFieldsDivider,
+			this.settings.nameFormat
+		);
 		//Replace the editor/s
-		note = createCreatorList (selectedEntry.creators, "editor", note, this.settings.multipleFieldsDivider, this.settings.nameFormat) 
-
-
-
-		
+		note = createCreatorList(
+			selectedEntry.creators,
+			"editor",
+			note,
+			this.settings.multipleFieldsDivider,
+			this.settings.nameFormat
+		);
 
 		//Create field year
-		if (selectedEntry.hasOwnProperty("date")){
-			selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm)+""}
-		
+		if (selectedEntry.hasOwnProperty("date")) {
+			selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm) + "";
+		}
+
 		//Create field ZoteroLocalLibrary
-		if (selectedEntry.hasOwnProperty("select")){
-			selectedEntry.localLibrary = "[Zotero](" +
-				selectedEntry.select +
-				")"}
+		if (selectedEntry.hasOwnProperty("select")) {
+			selectedEntry.localLibrary =
+				"[Zotero](" + selectedEntry.select + ")";
+		}
 
 		//create field file
 		//if (selectedEntry.hasOwnProperty("attachment.")){
-		selectedEntry.file= createLocalFileLink(selectedEntry)
+		selectedEntry.file = createLocalFileLink(selectedEntry);
 
 		// Create an array with all the fields
-		const entriesArray: string[] = Object.keys(selectedEntry);
+		const entriesArray = Object.keys(selectedEntry);
 		//replace the single-value placeholders with the value of the field
 		note = replaceAllTemplates(entriesArray, note, selectedEntry);
-		
-
-
 
 		//remove single backticks but retain triple backticks
-		note = note.replace(
-			/```/g, "HEREISAPLACEHOLDERFORBACKTICK"
-			)
-		note = note.replace(
-			/`/g, "'"
-			)
-		note = note.replace(
-				/HEREISAPLACEHOLDERFORBACKTICK/g,
-				"```"
-				)	
-			
-	// //if the abstract is missing, delete Abstract headings
-	
+		note = note.replace(/```/g, "HEREISAPLACEHOLDERFORBACKTICK");
+		note = note.replace(/`/g, "'");
+		note = note.replace(/HEREISAPLACEHOLDERFORBACKTICK/g, "```");
+
+		// //if the abstract is missing, delete Abstract headings
+
 		note = note.replace(
 			"```ad-quote\n" + "title: Abstract\n" + "```\n",
-			"")
+			""
+		);
 		note = note.replace(
 			"```ad-abstract\n" + "title: Files and Links\n" + "```\n",
-			"")
+			""
+		);
 		note = note.replace(
 			"```ad-note\n" + "title: Tags and Collections\n" + "```",
-			"")
-		
-		
-		
+			""
+		);
+
 		// Return the metadata
-		return note
-
+		return note;
 	}
-// FUNCTION TO PARSE ANNOTATION
+	// FUNCTION TO PARSE ANNOTATION
 	parseAnnotationLinesintoElementsZotfile(note: string) {
-
 		//Split the note into lines
-		const lines = note.split(/<p>/gm)
-		const noteElements: AnnotationElements[] = []
+		const lines = note.split(/<p>/gm);
+		const noteElements: AnnotationElements[] = [];
 		for (let indexLines = 0; indexLines < lines.length; indexLines++) {
+			//Remote html tags
+			const selectedLineOriginal = lines[indexLines];
 
-            //Remote html tags
-			const selectedLineOriginal = lines[indexLines]
+			const selectedLine = selectedLineOriginal.replace(
+				/<\/?[^>]+(>|$)/g,
+				""
+			);
 
+			//Skip if empty
+			if (selectedLine === "") {
+				continue;
+			}
 
-            const selectedLine = selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, "");
-
-            
-            //Skip if empty
-            if(selectedLine===""){continue}
-			
-            //Crety empty lineElements
-            const lineElements: AnnotationElements = {
+			//Crety empty lineElements
+			const lineElements: AnnotationElements = {
 				highlightText: "",
 				highlightColour: "",
 				annotationType: "",
@@ -303,108 +288,121 @@ export default class MyPlugin extends Plugin {
 				extractionSource: "zotfile",
 				colourTextAfter: "",
 				colourTextBefore: "",
-			}
+				// added missing properties
+				imagePath: "",
+				pagePDF: 0,
+				pageLabel: 0,
+				attachmentURI: "",
+				zoteroBackLink: "",
+			};
 
-            //Extract the citeKey
-            lineElements.citeKey = String(selectedLine.match(/\(([^)]+)\)+$/g))
+			//Extract the citeKey
+			lineElements.citeKey = String(selectedLine.match(/\(([^)]+)\)+$/g));
 
+			const posCiteKeyBegins = selectedLine.indexOf(lineElements.citeKey);
 
-            const posCiteKeyBegins = selectedLine.indexOf(lineElements.citeKey)
+			let extractedText = "";
+			if (posCiteKeyBegins !== -1) {
+				extractedText = selectedLine
+					.substring(0, posCiteKeyBegins - 1)
+					.trim();
 
-            let extractedText = ""
-            if (posCiteKeyBegins!== -1){
-                extractedText = selectedLine
-						.substring(0, posCiteKeyBegins- 1)
-						.trim();
-                    
-            
-            // Remove quotation marks from extractedText
-			["“", '"', "`", "'"].forEach(
-						(quote) =>
+				// Remove quotation marks from extractedText
+				["“", '"', "`", "'"].forEach(
+					(quote) =>
 						(extractedText = removeQuoteFromStart(
 							quote,
 							extractedText
-							))
-						);
-			["”", '"', "`", "'"].forEach(
-				(quote) =>
-				(extractedText = removeQuoteFromEnd(
-					quote,
-					extractedText
-					))
-					);
-            }
-            
+						))
+				);
+				["”", '"', "`", "'"].forEach(
+					(quote) =>
+						(extractedText = removeQuoteFromEnd(
+							quote,
+							extractedText
+						))
+				);
+			}
 
 			//Extract the colour
-			console.log(extractedText)
-			if(extractedText.startsWith("(Yellow) - ")){
+			console.log(extractedText);
+			if (extractedText.startsWith("(Yellow) - ")) {
 				lineElements.highlightColour = "yellow";
-				extractedText = extractedText.replace("(Yellow) - ", "")
+				extractedText = extractedText.replace("(Yellow) - ", "");
 			}
 
-			if(extractedText.startsWith("(Black) - ")){
+			if (extractedText.startsWith("(Black) - ")) {
 				lineElements.highlightColour = "black";
-				extractedText = extractedText.replace("(Black) - ", "")
+				extractedText = extractedText.replace("(Black) - ", "");
 			}
 
-			if(extractedText.startsWith("(White) - ")){
+			if (extractedText.startsWith("(White) - ")) {
 				lineElements.highlightColour = "white";
-				extractedText = extractedText.replace("(White) - ", "")
+				extractedText = extractedText.replace("(White) - ", "");
 			}
 
-			if(extractedText.startsWith("(Gray) - ")){
+			if (extractedText.startsWith("(Gray) - ")) {
 				lineElements.highlightColour = "gray";
-				extractedText = extractedText.replace("(Gray) - ", "")
+				extractedText = extractedText.replace("(Gray) - ", "");
 			}
-			if(extractedText.startsWith("(Red) - ")){
+			if (extractedText.startsWith("(Red) - ")) {
 				lineElements.highlightColour = "red";
-				extractedText = extractedText.replace("(Red) - ", "")
+				extractedText = extractedText.replace("(Red) - ", "");
 			}
 
-			if(extractedText.startsWith("(Orange) - ")){
+			if (extractedText.startsWith("(Orange) - ")) {
 				lineElements.highlightColour = "orange";
-				extractedText = extractedText.replace("(Orange) - ", "")
+				extractedText = extractedText.replace("(Orange) - ", "");
 			}
 
-			if(extractedText.startsWith("(Green) - ")){
+			if (extractedText.startsWith("(Green) - ")) {
 				lineElements.highlightColour = "green";
-				extractedText = extractedText.replace("(Green) - ", "")
+				extractedText = extractedText.replace("(Green) - ", "");
 			}
 
-			if(extractedText.startsWith("(Cyan) - ")){
+			if (extractedText.startsWith("(Cyan) - ")) {
 				lineElements.highlightColour = "cyan";
-				extractedText = extractedText.replace("(Cyan) - ", "")
+				extractedText = extractedText.replace("(Cyan) - ", "");
 			}
 
-			if(extractedText.startsWith("(Blue) - ")){
+			if (extractedText.startsWith("(Blue) - ")) {
 				lineElements.highlightColour = "blue";
-				extractedText = extractedText.replace("(Blue) - ", "")
+				extractedText = extractedText.replace("(Blue) - ", "");
 			}
 
-			if(extractedText.startsWith("(Magenta) - ")){
+			if (extractedText.startsWith("(Magenta) - ")) {
 				lineElements.highlightColour = "magenta";
-				extractedText = extractedText.replace("(Magenta) - ", "")
+				extractedText = extractedText.replace("(Magenta) - ", "");
 			}
-
-			
-			
-
-
 
 			//Extracte the Zotero backlink
-			lineElements.zoteroBackLink = ""
-			if (/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g.test(selectedLineOriginal)){
-				const zoteroBackLink = String(selectedLineOriginal.match(/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g))
-				lineElements.zoteroBackLink = zoteroBackLink
-				console.log("lineElements.zoteroBackLink: "+ lineElements.zoteroBackLink)
-				}
- 
-			//Extracte the page of the annotation in the publication
-			if (/(\d+)(?!.*\d)/g.test(selectedLineOriginal)){
-				let pageLabel = String(selectedLineOriginal.match(/(\d+)(?!.*\d)/g))
-				if (pageLabel == null){lineElements.pageLabel = null} else{
-					lineElements.pageLabel = Number(pageLabel)
+			lineElements.zoteroBackLink = "";
+			if (
+				/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g.test(
+					selectedLineOriginal
+				)
+			) {
+				const zoteroBackLink = String(
+					selectedLineOriginal.match(
+						/zotero:\/\/open-pdf\/library\/items\/\S+page=\d+/g
+					)
+				);
+				lineElements.zoteroBackLink = zoteroBackLink;
+				console.log(
+					"lineElements.zoteroBackLink: " +
+						lineElements.zoteroBackLink
+				);
+			}
+
+			//Extract the page of the annotation in the publication
+			if (/(\d+)(?!.*\d)/g.test(selectedLineOriginal)) {
+				const pageLabel = String(
+					selectedLineOriginal.match(/(\d+)(?!.*\d)/g)
+				);
+				if (pageLabel == null) {
+					lineElements.pageLabel = null;
+				} else {
+					lineElements.pageLabel = Number(pageLabel);
 				}
 			}
 
@@ -416,97 +414,98 @@ export default class MyPlugin extends Plugin {
 			// 		lineElements.attachmentURI = attachmentURI
 			// 	}
 			// }
-  
-            //Identify if the text is highlight or comment. if it is a comment extract the type of comment
-            const annotationCommentAll = ""
-            if(lineElements.citeKey.includes("(note on p.")){
-                lineElements.commentText = extractedText;
-                lineElements.citeKey = ""} else {
+
+			//Identify if the text is highlight or comment. if it is a comment extract the type of comment
+			const annotationCommentAll = "";
+			if (lineElements.citeKey.includes("(note on p.")) {
+				lineElements.commentText = extractedText;
+				lineElements.citeKey = "";
+			} else {
 				lineElements.highlightText = extractedText;
-				} 
+			}
 
-            // 	Extract the first word in the comment added to the annotation
-			let firstBlank = -1
-			let annotationCommentFirstWord = ""
-			if (lineElements.commentText.length>0){
+			// 	Extract the first word in the comment added to the annotation
+			let firstBlank = -1;
+			let annotationCommentFirstWord = "";
+			if (lineElements.commentText.length > 0) {
 				firstBlank = lineElements.commentText.indexOf(" ");
-				if (firstBlank===-1){firstBlank = lineElements.commentText.length}
-				annotationCommentFirstWord = lineElements.commentText.substring(
-						0,
-						firstBlank
-					);
+				if (firstBlank === -1) {
+					firstBlank = lineElements.commentText.length;
 				}
+				annotationCommentFirstWord = lineElements.commentText.substring(
+					0,
+					firstBlank
+				);
+			}
 
-            lineElements.annotationType = this.getAnnotationType(
-                    annotationCommentFirstWord,
-                    lineElements.commentText
-                );
-			if (firstBlank == -1){firstBlank = annotationCommentAll.length}
+			lineElements.annotationType = this.getAnnotationType(
+				annotationCommentFirstWord,
+				lineElements.commentText
+			);
+			if (firstBlank == -1) {
+				firstBlank = annotationCommentAll.length;
+			}
 			lineElements.commentText =
-				lineElements.annotationType === "noKey" || 
-				lineElements.annotationType === "typeComment" 
-
+				lineElements.annotationType === "noKey" ||
+				lineElements.annotationType === "typeComment"
 					? lineElements.commentText
 					: lineElements.commentText
-						.substring(
-                            firstBlank,
-                            lineElements.commentText.length
-                            )
-                        .trim();
-	
-                        
-		//If a comment includes the key for a transformation, apply that to the previous element
-			
-		if (noteElements.length>1){
-			if(lineElements.annotationType != "noKey" &&
-				noteElements[noteElements.length-1].annotationType === "noKey" &&
-				noteElements[noteElements.length-1].commentText === ""){
-					noteElements[noteElements.length-1].annotationType = lineElements.annotationType;
-					noteElements[noteElements.length-1].commentText = lineElements.commentText
-				// console.log(lineElements.annotationType)
-				// console.log(lineElements.commentText)
+							.substring(
+								firstBlank,
+								lineElements.commentText.length
+							)
+							.trim();
 
-				continue 
-				}  
-			}  
-		noteElements.push(lineElements)			
-        }  
-	return noteElements
- 
+			//If a comment includes the key for a transformation, apply that to the previous element
+
+			if (noteElements.length > 1) {
+				if (
+					lineElements.annotationType != "noKey" &&
+					noteElements[noteElements.length - 1].annotationType ===
+						"noKey" &&
+					noteElements[noteElements.length - 1].commentText === ""
+				) {
+					noteElements[noteElements.length - 1].annotationType =
+						lineElements.annotationType;
+					noteElements[noteElements.length - 1].commentText =
+						lineElements.commentText;
+					// console.log(lineElements.annotationType)
+					// console.log(lineElements.commentText)
+
+					continue;
+				}
+			}
+			noteElements.push(lineElements);
+		}
+		return noteElements;
 	}
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
 		note = note
-		// 	// 	// // Replace backticks
-			.replace(
-				/`/g, "'"
-				)
-				// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
-			.replace(
-				/, p. p. /g,
-				", p. "
-			)
-			.trim()
+			// 	// 	// // Replace backticks
+			.replace(/`/g, "'")
+			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
+			.replace(/, p. p. /g, ", p. ")
+			.trim();
 
-			// Split the annotations into an array where each row is an entry 
-		const lines = note.split(/<\/h1>|<\/p>/gm)
+		// Split the annotations into an array where each row is an entry
+		const lines = note.split(/<\/h1>|<\/p>/gm);
 
-		const noteElements: AnnotationElements[] = []
+		const noteElements: AnnotationElements[] = [];
 
 		//Loop through the lines
-		const lengthLines = Object.keys(lines).length
+		const lengthLines = Object.keys(lines).length;
 		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
 			const selectedLineOriginal = unescape(lines[indexLines]);
 			//Remove HTML tags
-			let selectedLine = String(selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, ""))
-		// 	// Replace backticks with single quote
+			let selectedLine = String(
+				selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, "")
+			);
+			// 	// Replace backticks with single quote
 			selectedLine = replaceTemplate(selectedLine, "`", "'");
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
 			// 	// Correct encoding issues
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
-		
-		
-
 
 			//console.log("Line n." +indexLines + ": " + selectedLine)
 
@@ -524,56 +523,52 @@ export default class MyPlugin extends Plugin {
 				extractionSource: "userNote",
 				colourTextBefore: "",
 				colourTextAfter: "",
-			}  
+				imagePath: "",
+				pagePDF: 0,
+				pageLabel: 0,
+				attachmentURI: "",
+				zoteroBackLink: "",
+			};
 
-			
-			lineElements.rowEdited = selectedLine 
-			
-		//Add the element to the array containing all the elements
-		
-		noteElements.push(lineElements)
+			lineElements.rowEdited = selectedLine;
 
+			//Add the element to the array containing all the elements
+
+			noteElements.push(lineElements);
 		}
-	return noteElements
-	
-
+		return noteElements;
 	}
 	parseAnnotationLinesintoElementsZotero(note: string) {
-		
 		// clean the entire annotation
 		note = note
-		// 	// .replace(
-		// 	// 	// Remove HTML tags
-		// 	// 	HTML_TAG_REG,
-		// 	// 	"")		
-		// 	// 	// // Replace backticks
-			.replace(
-				/`/g, "'"
-				)
-				// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
-			.replace(
-				/, p. p. /g,
-				", p. "
-			)
-			.trim()
+			// 	// .replace(
+			// 	// 	// Remove HTML tags
+			// 	// 	HTML_TAG_REG,
+			// 	// 	"")
+			// 	// 	// // Replace backticks
+			.replace(/`/g, "'")
+			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
+			.replace(/, p. p. /g, ", p. ")
+			.trim();
 
-		// Split the annotations into an array where each row is an entry 
-		const lines = note.split(/<\/h1>|<\/p>/gm)
-		
-		const noteElements: AnnotationElements[] = []
+		// Split the annotations into an array where each row is an entry
+		const lines = note.split(/<\/h1>|<\/p>/gm);
+
+		const noteElements: AnnotationElements[] = [];
 
 		//Loop through the lines
-		const lengthLines = Object.keys(lines).length
+		const lengthLines = Object.keys(lines).length;
 		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
-
 			const selectedLineOriginal = unescape(lines[indexLines]);
 			// console.log(indexLines)
 			// console.log(selectedLineOriginal)
-			
+
 			//Remove HTML tags
-			let selectedLine = String(selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, ""))
+			let selectedLine = String(
+				selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, "")
+			);
 			// console.log(selectedLine)
-		// 	// Replace backticks with single quote
+			// 	// Replace backticks with single quote
 			selectedLine = replaceTemplate(selectedLine, "`", "'");
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
 			// 	// Correct encoding issues
@@ -600,122 +595,179 @@ export default class MyPlugin extends Plugin {
 				pageLabel: undefined,
 				zoteroBackLink: "",
 				attachmentURI: "",
-
-			}  
+			};
 
 			//Record the extraction method
-			lineElements.extractionSource = "zotero"
+			lineElements.extractionSource = "zotero";
 
-			//Identify images		
-			if (/data-attachment-key=/gm.test(selectedLineOriginal)){	
-				lineElements.annotationType = "typeImage"
-				lineElements.imagePath =  String(selectedLineOriginal.match(/key="([^"]*)"/g)[0]).replaceAll("\"","").replace("key=","")
- 
+			//Identify images
+			if (/data-attachment-key=/gm.test(selectedLineOriginal)) {
+				lineElements.annotationType = "typeImage";
+				lineElements.imagePath = String(
+					selectedLineOriginal.match(/key="([^"]*)"/g)[0]
+				)
+					.replaceAll('"', "")
+					.replace("key=", "");
 			}
-			
+
 			//Extract the colour of the highlight
-			if (/"color":"#......"/gm.test(selectedLineOriginal)){			
-				let highlightColour = String(selectedLineOriginal.match(/"color":"#......"/gm))
-				if (highlightColour == null){highlightColour = ""}
-				highlightColour = highlightColour.replace("color\":","")
-				highlightColour = highlightColour.replace("\"","")
-				lineElements.highlightColour = highlightColour
+			if (/"color":"#......"/gm.test(selectedLineOriginal)) {
+				let highlightColour = String(
+					selectedLineOriginal.match(/"color":"#......"/gm)
+				);
+				if (highlightColour == null) {
+					highlightColour = "";
+				}
+				highlightColour = highlightColour.replace('color":', "");
+				highlightColour = highlightColour.replace('"', "");
+				lineElements.highlightColour = highlightColour;
 			}
 
-			
 			//Extracte the page of the pdf
 
-			if (/"pageIndex":\d+/gm.test(selectedLineOriginal)){
-				let pagePDF = String(selectedLineOriginal.match(/"pageIndex":\d+/gm))
-				if (pagePDF == null){lineElements.pagePDF = null} else{
-					pagePDF = pagePDF.replace('"pageIndex":',"")
-					lineElements.pagePDF = Number(pagePDF)+1
+			if (/"pageIndex":\d+/gm.test(selectedLineOriginal)) {
+				let pagePDF = String(
+					selectedLineOriginal.match(/"pageIndex":\d+/gm)
+				);
+				if (pagePDF == null) {
+					lineElements.pagePDF = null;
+				} else {
+					pagePDF = pagePDF.replace('"pageIndex":', "");
+					lineElements.pagePDF = Number(pagePDF) + 1;
 				}
 			}
 			//Extracte the page of the annotation in the publication
-			if (/"pageLabel":"\d+/g.test(selectedLineOriginal)){
-				let pageLabel = String(selectedLineOriginal.match(/"pageLabel":"\d+/g))
-				if (pageLabel == null){lineElements.pageLabel = null} else{
-					pageLabel = pageLabel.replace('"pageLabel":"',"")
-					lineElements.pageLabel = Number(pageLabel)
+			if (/"pageLabel":"\d+/g.test(selectedLineOriginal)) {
+				let pageLabel = String(
+					selectedLineOriginal.match(/"pageLabel":"\d+/g)
+				);
+				if (pageLabel == null) {
+					lineElements.pageLabel = null;
+				} else {
+					pageLabel = pageLabel.replace('"pageLabel":"', "");
+					lineElements.pageLabel = Number(pageLabel);
 				}
 			}
 
 			//Extract the attachment URI
-		
-			if (/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(selectedLineOriginal)){
-				let attachmentURI = String(selectedLineOriginal.match(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm))
-				if (attachmentURI === null){lineElements.attachmentURI = null} else{
-					attachmentURI = attachmentURI.replace(/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\//gm, "")
-					lineElements.attachmentURI = attachmentURI
+
+			if (
+				/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(
+					selectedLineOriginal
+				)
+			) {
+				let attachmentURI = String(
+					selectedLineOriginal.match(
+						/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm
+					)
+				);
+				if (attachmentURI === null) {
+					lineElements.attachmentURI = null;
+				} else {
+					attachmentURI = attachmentURI.replace(
+						/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\//gm,
+						""
+					);
+					lineElements.attachmentURI = attachmentURI;
 				}
 			}
 
-			if (/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm.test(selectedLineOriginal)){
-				let attachmentURI = String(selectedLineOriginal.match(/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm))
-				if (attachmentURI === null){lineElements.attachmentURI = null} else{
-					attachmentURI = attachmentURI.replace(/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\//gm, "")
-					lineElements.attachmentURI = attachmentURI
+			if (
+				/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm.test(
+					selectedLineOriginal
+				)
+			) {
+				let attachmentURI = String(
+					selectedLineOriginal.match(
+						/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm
+					)
+				);
+				if (attachmentURI === null) {
+					lineElements.attachmentURI = null;
+				} else {
+					attachmentURI = attachmentURI.replace(
+						/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\//gm,
+						""
+					);
+					lineElements.attachmentURI = attachmentURI;
 				}
 			}
 
 			//Create the zotero backlink
-			if (lineElements.attachmentURI !== null && lineElements.pagePDF !== null){
-			lineElements.zoteroBackLink = "zotero://open-pdf/library/items/" + lineElements.attachmentURI + "?page=" + lineElements.pagePDF
+			if (
+				lineElements.attachmentURI !== null &&
+				lineElements.pagePDF !== null
+			) {
+				lineElements.zoteroBackLink =
+					"zotero://open-pdf/library/items/" +
+					lineElements.attachmentURI +
+					"?page=" +
+					lineElements.pagePDF;
 			}
 
- 
 			//zotero://open-pdf/library/items/TKT5MBJY?page=8
 
-			//Extract the citation within bracket			
-			if (/\(<span class="citation-item">.*<\/span>\)<\/span>/gm.test(selectedLineOriginal)){			
-				lineElements.citeKey = String(selectedLineOriginal.match(/\(<span class="citation-item">.*<\/span>\)<\/span>/gm))
-				lineElements.citeKey = lineElements.citeKey.replace("(<span class=\"citation-item\">", "")
-				lineElements.citeKey = lineElements.citeKey.replace("</span>)</span>", "")
-				lineElements.citeKey = "("+lineElements.citeKey+")"
+			//Extract the citation within bracket
+			if (
+				/\(<span class="citation-item">.*<\/span>\)<\/span>/gm.test(
+					selectedLineOriginal
+				)
+			) {
+				lineElements.citeKey = String(
+					selectedLineOriginal.match(
+						/\(<span class="citation-item">.*<\/span>\)<\/span>/gm
+					)
+				);
+				lineElements.citeKey = lineElements.citeKey.replace(
+					'(<span class="citation-item">',
+					""
+				);
+				lineElements.citeKey = lineElements.citeKey.replace(
+					"</span>)</span>",
+					""
+				);
+				lineElements.citeKey = "(" + lineElements.citeKey + ")";
 			}
 			//Find the position where the CiteKey begins
-			const beginningCiteKey = selectedLine.indexOf(lineElements.citeKey)
+			const beginningCiteKey = selectedLine.indexOf(lineElements.citeKey);
 			//console.log("beginningCiteKey: " + beginningCiteKey)
 
 			//Find the position where the citekey ends
-			const endCiteKey = selectedLine.indexOf(lineElements.citeKey)+lineElements.citeKey.length
+			const endCiteKey =
+				selectedLine.indexOf(lineElements.citeKey) +
+				lineElements.citeKey.length;
 			//console.log("endCiteKey: " + endCiteKey)
 
 			//Extract the text of the annotation
-			if (endCiteKey!== 0){
+			if (endCiteKey !== 0) {
 				lineElements.highlightText = selectedLine
-						.substring(0, beginningCiteKey- 1)
-								.trim();
-						
-				
-			// Remove quotation marks from annotationHighlight
-			["“", '"', "`", "'"].forEach(
-				(quote) =>
-				(lineElements.highlightText = removeQuoteFromStart(
-					quote,
-					lineElements.highlightText
-					))
-					);
-			//console.log("annotationHighlight after removeQuoteFromStart: "+ annotationHighlight);
-			["”", '"', "`", "'"].forEach(
-				(quote) =>
-				(lineElements.highlightText = removeQuoteFromEnd(
-					quote,
-					lineElements.highlightText
-					))
-					);
-					//console.log("annotationHighlight after removeQuoteFromEnd: "+ annotationHighlight);
-			
-			} 
-			
+					.substring(0, beginningCiteKey - 1)
+					.trim();
 
+				// Remove quotation marks from annotationHighlight
+				["“", '"', "`", "'"].forEach(
+					(quote) =>
+						(lineElements.highlightText = removeQuoteFromStart(
+							quote,
+							lineElements.highlightText
+						))
+				);
+				//console.log("annotationHighlight after removeQuoteFromStart: "+ annotationHighlight);
+				["”", '"', "`", "'"].forEach(
+					(quote) =>
+						(lineElements.highlightText = removeQuoteFromEnd(
+							quote,
+							lineElements.highlightText
+						))
+				);
+				//console.log("annotationHighlight after removeQuoteFromEnd: "+ annotationHighlight);
+			}
 
 			//Extract the comment made to an annotation (after the citeKey)
-			if(endCiteKey>0){
+			if (endCiteKey > 0) {
 				const annotationCommentAll = selectedLine
-									.substring(endCiteKey+1)
-									.trim();
+					.substring(endCiteKey + 1)
+					.trim();
 				//console.log("annotationCommentAll: "+ annotationCommentAll)
 
 				// 	Extract the first word in the comment added to the annotation
@@ -723,24 +775,25 @@ export default class MyPlugin extends Plugin {
 				//if (firstBlank===-1){firstBlank = annotationCommentAll.length}
 				//console.log("firstBlank:  "+ firstBlank)
 
-				const annotationCommentFirstWord = annotationCommentAll.substring(
-						0,
-						firstBlank
-					);
+				const annotationCommentFirstWord =
+					annotationCommentAll.substring(0, firstBlank);
 				//console.log("annotationCommentFirstWord : " + annotationCommentFirstWord)
 				// Identify what type of annotation is based on the first word
-				if(lineElements.annotationType!=="typeImage"){
+				if (lineElements.annotationType !== "typeImage") {
 					lineElements.annotationType = this.getAnnotationType(
 						annotationCommentFirstWord,
 						annotationCommentAll
-					)}
+					);
+				}
 				//console.log(lineElements.annotationType)
-		
-				// Extract the comment without the initial key and store it in  
-				lineElements.commentText = ""	
-				if (firstBlank == -1){firstBlank = annotationCommentAll.length}
+
+				// Extract the comment without the initial key and store it in
+				lineElements.commentText = "";
+				if (firstBlank == -1) {
+					firstBlank = annotationCommentAll.length;
+				}
 				lineElements.commentText =
-					lineElements.annotationType === "noKey" || 
+					lineElements.annotationType === "noKey" ||
 					lineElements.annotationType === "typeComment" ||
 					lineElements.annotationType === "typeImage"
 						? annotationCommentAll
@@ -750,109 +803,167 @@ export default class MyPlugin extends Plugin {
 									annotationCommentAll.length
 								)
 								.trim();
-				} 
-			else {lineElements.rowEdited = selectedLine }
-			
-		//Add the element to the array containing all the elements
-		
-		noteElements.push(lineElements)
-		
+			} else {
+				lineElements.rowEdited = selectedLine;
+			}
+
+			//Add the element to the array containing all the elements
+
+			noteElements.push(lineElements);
 		}
-	return noteElements
-
-
+		return noteElements;
 	}
 
 	formatColourHighlight(lineElements: AnnotationElements) {
-		if(lineElements.annotationType === "typeImage"){return lineElements}
-		
-		//fix the label of the annotation colour - Zotero		
-		if (lineElements.highlightColour.includes("#ffd400")){lineElements.highlightColour = "yellow"}
-		if (lineElements.highlightColour.includes("#ff6666")){lineElements.highlightColour = "red"}
-		if (lineElements.highlightColour.includes("#5fb236")){lineElements.highlightColour = "green"}
-		if (lineElements.highlightColour.includes("#2ea8e5")){lineElements.highlightColour = "blue"}
-		if (lineElements.highlightColour.includes("#a28ae5")){lineElements.highlightColour = "purple"}
+		if (lineElements.annotationType === "typeImage") {
+			return lineElements;
+		}
 
+		//fix the label of the annotation colour - Zotero
+		if (lineElements.highlightColour.includes("#ffd400")) {
+			lineElements.highlightColour = "yellow";
+		}
+		if (lineElements.highlightColour.includes("#ff6666")) {
+			lineElements.highlightColour = "red";
+		}
+		if (lineElements.highlightColour.includes("#5fb236")) {
+			lineElements.highlightColour = "green";
+		}
+		if (lineElements.highlightColour.includes("#2ea8e5")) {
+			lineElements.highlightColour = "blue";
+		}
+		if (lineElements.highlightColour.includes("#a28ae5")) {
+			lineElements.highlightColour = "purple";
+		}
 
 		//fix the label of the annotation colour - Zotfile
-		if (lineElements.highlightColour.includes("#000000")){lineElements.highlightColour = "black"}
-		if (lineElements.highlightColour.includes("##FFFFFF")){lineElements.highlightColour = "white"}
-		if (lineElements.highlightColour.includes("##808080")){lineElements.highlightColour = "gray"}
-		if (lineElements.highlightColour.includes("##FF0000")){lineElements.highlightColour = "red"}
-		if (lineElements.highlightColour.includes("##FFA500")){lineElements.highlightColour = "orange"}
-		if (lineElements.highlightColour.includes("##FFFF00")){lineElements.highlightColour = "yellow"}
-		if (lineElements.highlightColour.includes("##00FF00")){lineElements.highlightColour = "green"}
-		if (lineElements.highlightColour.includes("##00FFFF")){lineElements.highlightColour = "cyan"}
-		if (lineElements.highlightColour.includes("##0000FF")){lineElements.highlightColour = "blue"}
-		if (lineElements.highlightColour.includes("##FF00FF")){lineElements.highlightColour = "magenta"}
+		if (lineElements.highlightColour.includes("#000000")) {
+			lineElements.highlightColour = "black";
+		}
+		if (lineElements.highlightColour.includes("##FFFFFF")) {
+			lineElements.highlightColour = "white";
+		}
+		if (lineElements.highlightColour.includes("##808080")) {
+			lineElements.highlightColour = "gray";
+		}
+		if (lineElements.highlightColour.includes("##FF0000")) {
+			lineElements.highlightColour = "red";
+		}
+		if (lineElements.highlightColour.includes("##FFA500")) {
+			lineElements.highlightColour = "orange";
+		}
+		if (lineElements.highlightColour.includes("##FFFF00")) {
+			lineElements.highlightColour = "yellow";
+		}
+		if (lineElements.highlightColour.includes("##00FF00")) {
+			lineElements.highlightColour = "green";
+		}
+		if (lineElements.highlightColour.includes("##00FFFF")) {
+			lineElements.highlightColour = "cyan";
+		}
+		if (lineElements.highlightColour.includes("##0000FF")) {
+			lineElements.highlightColour = "blue";
+		}
+		if (lineElements.highlightColour.includes("##FF00FF")) {
+			lineElements.highlightColour = "magenta";
+		}
 
-		//Zotfile Default		
-		//{"Black": "#000000", 
-		//"White": "#FFFFFF", 
-		//"Gray": "#808080", 
-		//"Red": "#FF0000", 
+		//Zotfile Default
+		//{"Black": "#000000",
+		//"White": "#FFFFFF",
+		//"Gray": "#808080",
+		//"Red": "#FF0000",
 		//"Orange": "#FFA500",
 		//"Yellow": "#FFFF00",
-		// "Green": "#00FF00", 
-		// "Cyan": "#00FFFF", 
-		//"Blue": "#0000FF", 
+		// "Green": "#00FF00",
+		// "Cyan": "#00FFFF",
+		//"Blue": "#0000FF",
 		//"Magenta": "#FF00FF"}
-		
-		//Extract the transformation text
-		let colourTransformation = ""
-		
-		if(lineElements.highlightColour == "yellow"){colourTransformation = this.settings.colourYellowText}
-		if(lineElements.highlightColour == "red"){colourTransformation = this.settings.colourRedText}
-		if(lineElements.highlightColour == "green"){colourTransformation = this.settings.colourGreenText}
-		if(lineElements.highlightColour == "blue"){colourTransformation = this.settings.colourBlueText}
-		if(lineElements.highlightColour == "purple"){colourTransformation = this.settings.colourPurpleText}
-		if(lineElements.highlightColour == "black"){colourTransformation = this.settings.colourBlackText}
-		if(lineElements.highlightColour == "white"){colourTransformation = this.settings.colourWhiteText}
-		if(lineElements.highlightColour == "gray"){colourTransformation = this.settings.colourGrayText}
-		if(lineElements.highlightColour == "orange"){colourTransformation = this.settings.colourOrangeText}
-		if(lineElements.highlightColour == "cyan"){colourTransformation = this.settings.colourCyanText}
-		if(lineElements.highlightColour == "magenta"){colourTransformation = this.settings.colourMagentaText}
-		//console.log("colourTransformation = "+ colourTransformation);
-		
 
+		//Extract the transformation text
+		let colourTransformation = "";
+
+		if (lineElements.highlightColour == "yellow") {
+			colourTransformation = this.settings.colourYellowText;
+		}
+		if (lineElements.highlightColour == "red") {
+			colourTransformation = this.settings.colourRedText;
+		}
+		if (lineElements.highlightColour == "green") {
+			colourTransformation = this.settings.colourGreenText;
+		}
+		if (lineElements.highlightColour == "blue") {
+			colourTransformation = this.settings.colourBlueText;
+		}
+		if (lineElements.highlightColour == "purple") {
+			colourTransformation = this.settings.colourPurpleText;
+		}
+		if (lineElements.highlightColour == "black") {
+			colourTransformation = this.settings.colourBlackText;
+		}
+		if (lineElements.highlightColour == "white") {
+			colourTransformation = this.settings.colourWhiteText;
+		}
+		if (lineElements.highlightColour == "gray") {
+			colourTransformation = this.settings.colourGrayText;
+		}
+		if (lineElements.highlightColour == "orange") {
+			colourTransformation = this.settings.colourOrangeText;
+		}
+		if (lineElements.highlightColour == "cyan") {
+			colourTransformation = this.settings.colourCyanText;
+		}
+		if (lineElements.highlightColour == "magenta") {
+			colourTransformation = this.settings.colourMagentaText;
+		}
+		//console.log("colourTransformation = "+ colourTransformation);
 
 		//extract from the transformation from the highlight
-		if(lineElements.annotationType=="noKey"){
-			if(colourTransformation.toLowerCase() ==="h1"){lineElements.annotationType = "typeH1"}
-			else if(colourTransformation.toLowerCase()==="h2"){lineElements.annotationType = "typeH2"}
-			else if(colourTransformation.toLowerCase()==="h3"){lineElements.annotationType = "typeH3"}
-			else if(colourTransformation.toLowerCase()==="h4"){lineElements.annotationType = "typeH4"}
-			else if(colourTransformation.toLowerCase()==="h5"){lineElements.annotationType = "typeH5"}
-			else if(colourTransformation.toLowerCase()==="h6"){lineElements.annotationType = "typeH6"}
-			else if(colourTransformation.toLowerCase()==="addtoabove"){lineElements.annotationType = "typeMergeAbove"}
-			else if(colourTransformation.toLowerCase()==="keyword"){lineElements.annotationType = "typeKeyword"} 
-			else if(colourTransformation.toLowerCase()==="todo"){lineElements.annotationType = "typeTask"}
-			else if(colourTransformation.toLowerCase()==="task"){lineElements.annotationType = "typeTask"}
-
-		
-
-		//extract the text to be pre-pended/appended
-			else if (colourTransformation.includes("{{highlight}}")){
-				
-				lineElements.colourTextBefore =  String(colourTransformation.match(/.+?(?={{highlight}})/))
-				if(lineElements.colourTextBefore == "null"){lineElements.colourTextBefore = ""}
-				lineElements.colourTextAfter =  String(colourTransformation.match(/(?<={{highlight}}).*$/))
-				if(lineElements.colourTextAfter == "null"){lineElements.colourTextAfter = ""}
-
+		if (lineElements.annotationType == "noKey") {
+			if (colourTransformation.toLowerCase() === "h1") {
+				lineElements.annotationType = "typeH1";
+			} else if (colourTransformation.toLowerCase() === "h2") {
+				lineElements.annotationType = "typeH2";
+			} else if (colourTransformation.toLowerCase() === "h3") {
+				lineElements.annotationType = "typeH3";
+			} else if (colourTransformation.toLowerCase() === "h4") {
+				lineElements.annotationType = "typeH4";
+			} else if (colourTransformation.toLowerCase() === "h5") {
+				lineElements.annotationType = "typeH5";
+			} else if (colourTransformation.toLowerCase() === "h6") {
+				lineElements.annotationType = "typeH6";
+			} else if (colourTransformation.toLowerCase() === "addtoabove") {
+				lineElements.annotationType = "typeMergeAbove";
+			} else if (colourTransformation.toLowerCase() === "keyword") {
+				lineElements.annotationType = "typeKeyword";
+			} else if (colourTransformation.toLowerCase() === "todo") {
+				lineElements.annotationType = "typeTask";
+			} else if (colourTransformation.toLowerCase() === "task") {
+				lineElements.annotationType = "typeTask";
 			}
-		}	
 
+			//extract the text to be pre-pended/appended
+			else if (colourTransformation.includes("{{highlight}}")) {
+				lineElements.colourTextBefore = String(
+					colourTransformation.match(/.+?(?={{highlight}})/)
+				);
+				if (lineElements.colourTextBefore == "null") {
+					lineElements.colourTextBefore = "";
+				}
+				lineElements.colourTextAfter = String(
+					colourTransformation.match(/(?<={{highlight}}).*$/)
+				);
+				if (lineElements.colourTextAfter == "null") {
+					lineElements.colourTextAfter = "";
+				}
+			}
+		}
 
-
-		return lineElements
+		return lineElements;
 	}
 
-
-		
 	formatNoteElements(noteElements: AnnotationElements[], citeKey: string) {
-		const {
-			isDoubleSpaced,
-		} = this.settings;
+		const { isDoubleSpaced } = this.settings;
 
 		const {
 			commentFormatAfter,
@@ -864,135 +975,202 @@ export default class MyPlugin extends Plugin {
 		} = this.createFormatting();
 
 		//Create an index of rows to be removed
-		const indexRowsToBeRemoved: number[] = []
-		const noteElementsArray: AnnotationElements[] = []
-		const keywordArray: string[] = []
-		const rowEditedArray: string[] = []
+		const indexRowsToBeRemoved: number[] = [];
+		const noteElementsArray: AnnotationElements[] = [];
+		const keywordArray: string[] = [];
+		const rowEditedArray: string[] = [];
 		//Create vector with annotation highlighted in different colour
-		const highlightsYellow: string[] = []
-		const highlightsRed: string[] = []
-		const highlightsGreen: string[] = []
-		const highlightsPurple: string[] = []
-		const highlightsBlack: string[] = []
-		const highlightsWhite: string[] = []
-		const highlightsGray: string[] = []
-		const highlightsCyan: string[] = []
-		const highlightsOrange: string[] = []
-		const highlightsBlue: string[] = []
-		const highlightsMagenta: string[] = []
-		const imagesArray: string[] = []
-	
-		//Remove undefined elements
-		noteElements = noteElements.filter(x => x !== undefined);
-		//Run a loop, processing each annotation line one at the time
-		
-		
+		const highlightsYellow: string[] = [];
+		const highlightsRed: string[] = [];
+		const highlightsGreen: string[] = [];
+		const highlightsPurple: string[] = [];
+		const highlightsBlack: string[] = [];
+		const highlightsWhite: string[] = [];
+		const highlightsGray: string[] = [];
+		const highlightsCyan: string[] = [];
+		const highlightsOrange: string[] = [];
+		const highlightsBlue: string[] = [];
+		const highlightsMagenta: string[] = [];
+		const imagesArray: string[] = [];
 
-		for (let i = 0; i < noteElements.length; i++) 	{
+		//Remove undefined elements
+		noteElements = noteElements.filter((x) => x !== undefined);
+		//Run a loop, processing each annotation line one at the time
+
+		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
-			let lineElements = noteElements[i]
+			let lineElements = noteElements[i];
 			// console.log(lineElements)
-			
+
 			//Run the function to extract the transformation associated with the highlighted colour
-			lineElements = this.formatColourHighlight(lineElements)
+			lineElements = this.formatColourHighlight(lineElements);
 
 			//Extract the citation format from the settings
-			if(lineElements.extractionSource === "zotero"){
-				if(this.settings.highlightCitationsFormat === "Only page number" && lineElements.pageLabel !== undefined){
-					lineElements.citeKey = "(p. "+lineElements.pageLabel+")"
-				} else if(this.settings.highlightCitationsFormat === "Empty" && lineElements.pageLabel !== undefined){
-					lineElements.citeKey = " "
+			if (lineElements.extractionSource === "zotero") {
+				if (
+					this.settings.highlightCitationsFormat ===
+						"Only page number" &&
+					lineElements.pageLabel !== undefined
+				) {
+					lineElements.citeKey =
+						"(p. " + lineElements.pageLabel + ")";
+				} else if (
+					this.settings.highlightCitationsFormat === "Empty" &&
+					lineElements.pageLabel !== undefined
+				) {
+					lineElements.citeKey = " ";
 				}
 			}
 			//Edit the backlink to Zotero based on the settings
-			if(this.settings.highlightCitationsLink===true && lineElements.zoteroBackLink.length>0){
-					lineElements.citeKey = "["+lineElements.citeKey+"]"+"("+ lineElements.zoteroBackLink+")"
-					lineElements.zoteroBackLink = "["+ " " + "]"+"("+ lineElements.zoteroBackLink+")"
-				} else {lineElements.zoteroBackLink = ""}
+			if (
+				this.settings.highlightCitationsLink === true &&
+				lineElements.zoteroBackLink.length > 0
+			) {
+				lineElements.citeKey =
+					"[" +
+					lineElements.citeKey +
+					"]" +
+					"(" +
+					lineElements.zoteroBackLink +
+					")";
+				lineElements.zoteroBackLink =
+					"[" + " " + "]" + "(" + lineElements.zoteroBackLink + ")";
+			} else {
+				lineElements.zoteroBackLink = "";
+			}
 
-			
 			//Extract the custom language assocaited with the highlight colour
-			let colourTextBefore = lineElements.colourTextBefore
-			if(colourTextBefore == undefined){colourTextBefore = ""}
-			let colourTextAfter = lineElements.colourTextAfter
-			if(colourTextAfter == undefined){colourTextAfter = ""}
+			let colourTextBefore = lineElements.colourTextBefore;
+			if (colourTextBefore == undefined) {
+				colourTextBefore = "";
+			}
+			let colourTextAfter = lineElements.colourTextAfter;
+			if (colourTextAfter == undefined) {
+				colourTextAfter = "";
+			}
 
 			//Identify the headings exported by Zotero
-			if(lineElements.highlightText=== "Extracted Annotations"){lineElements.annotationType="typeExtractedHeading"}
+			if (lineElements.highlightText === "Extracted Annotations") {
+				lineElements.annotationType = "typeExtractedHeading";
+			}
 
 			//FORMAT THE HEADINGS IDENTIFIED BY ZOTERO
 			//Transforms headings exported by Zotero into H3 (this could be changed later)
-			if(lineElements.annotationType==="typeExtractedHeading"){
-				lineElements.rowEdited = "**" + lineElements.rowOriginal.toUpperCase() + "**"}
-
+			if (lineElements.annotationType === "typeExtractedHeading") {
+				lineElements.rowEdited =
+					"**" + lineElements.rowOriginal.toUpperCase() + "**";
+			}
 
 			//FORMAT IMAGES
 			if (lineElements.annotationType === "typeImage") {
-				lineElements.rowEdited = ""
-				let pathImageOld = ""
-				let pathImageNew = "" 
+				lineElements.rowEdited = "";
+				let pathImageOld = "";
+				let pathImageNew = "";
 				//console.log("this.settings.imagesImport: " + this.settings.imagesImpI'm ort)
-				if(this.settings.imagesImport){ // Check if the user settings has approved the importing of images
-				
+				if (this.settings.imagesImport) {
+					// Check if the user settings has approved the importing of images
+
 					pathImageOld = path.format({
 						dir: this.pathZoteroStorage + lineElements.imagePath,
-						base: 'image.png'})
-					
-					pathImageNew = path.normalize(path.format({
-							dir: normalizePath(this.app.vault.adapter.getBasePath() + "\\" + this.settings.imagesPath),
-							base: citeKey + "_" + lineElements.imagePath + ".png"}))
-	
-					console.log(pathImageOld)
+						base: "image.png",
+					});
+
+					pathImageNew = path.normalize(
+						path.format({
+							dir: normalizePath(
+								// create new path with the rootpath + settings.imagesPath
+								this.app.vault.adapter.getBasePath() +
+									"\\" +
+									this.settings.imagesPath
+							),
+							base:
+								citeKey + "_" + lineElements.imagePath + ".png",
+						})
+					);
+
+					pathImageNew = "/" + pathImageNew;
+					console.log(pathImageOld);
+					console.log(pathImageNew);
+
 					//Check if the image exists within Zotero or already within the vault
-					if(fs.existsSync(pathImageOld) || fs.existsSync(pathImageNew)){
-
+					if (
+						// replaced fs.existsSync with the obsidian adapter
+						fs.existsSync(pathImageOld) ||
+						fs.existsSync(pathImageNew)
+					) {
 						//if the settings is to link to the image in teh zotero folder
-						if (this.settings.imagesCopy === false){lineElements.rowEdited = "![](file:///"+pathImageOld+")"}
-						//if the settings is to copy the image from Zotero to the Obsidian vault
-						else{ 
-
-							//if the file has not already been copied
-							if(!fs.existsSync(pathImageNew)){
-								fs.copyFile(pathImageOld, pathImageNew, (err) => {if (err) throw err;})
-							}
-							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png" + "]] " + lineElements.citeKey
+						if (this.settings.imagesCopy === false) {
+							lineElements.rowEdited =
+								"![](file:///" + pathImageOld + ")";
 						}
+						//if the settings is to copy the image from Zotero to the Obsidian vault
+						else {
+							//if the file has not already been copied
+							if (!fs.existsSync(pathImageNew)) {
+								fs.copyFile(
+									pathImageOld,
+									pathImageNew,
+									(err) => {
+										if (err) throw err;
+									}
+								);
+							}
+							lineElements.rowEdited =
+								"![[" +
+								citeKey +
+								"_" +
+								lineElements.imagePath +
+								".png" +
+								"]] " +
+								lineElements.citeKey;
+						}
+					} else {
+						new Notice(
+							`Cannot find image at "${pathImageOld}". Provide the correct zotero data directory location in the settings`
+						);
 					}
-					else {new Notice(`Cannot find image at "${pathImageOld}". Provide the correct zotero data directory location in the settings`);
-				}
 				}
 
 				//Add the comment after the image
-				if(lineElements.commentText.length>0){
-				
-					if(this.settings.imagesCommentPosition == "Below the image"){
-						lineElements.rowEdited = lineElements.rowEdited +
-						"\n" + "\n" + commentPrepend +
-						commentFormatBefore +
-						lineElements.commentText +
-						commentFormatAfter 
-						} else {
-						lineElements.rowEdited = 
-						commentPrepend +
-						commentFormatBefore +
-						lineElements.commentText +
-						commentFormatAfter + "\n" + "\n" + 
-						lineElements.rowEdited 
-						}
+				if (lineElements.commentText.length > 0) {
+					if (
+						this.settings.imagesCommentPosition == "Below the image"
+					) {
+						lineElements.rowEdited =
+							lineElements.rowEdited +
+							"\n" +
+							"\n" +
+							commentPrepend +
+							commentFormatBefore +
+							lineElements.commentText +
+							commentFormatAfter;
+					} else {
+						lineElements.rowEdited =
+							commentPrepend +
+							commentFormatBefore +
+							lineElements.commentText +
+							commentFormatAfter +
+							"\n" +
+							"\n" +
+							lineElements.rowEdited;
+					}
 				}
 			}
 
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
 				noteElements[i].rowEdited =
-					noteElements[i-1].rowEdited +
-					" ... " + colourTextBefore +
-					highlightFormatBefore + lineElements.highlightText + highlightFormatAfter + 
-					lineElements.citeKey + colourTextAfter;
-
+					noteElements[i - 1].rowEdited +
+					" ... " +
+					colourTextBefore +
+					highlightFormatBefore +
+					lineElements.highlightText +
+					highlightFormatAfter +
+					lineElements.citeKey +
+					colourTextAfter;
 
 				//Add the highlighted text to the previous one
-				indexRowsToBeRemoved.push(i-1);
+				indexRowsToBeRemoved.push(i - 1);
 			}
 
 			//PREPEND COMMENT TO THE HIGHLIGHTED SENTENCE
@@ -1000,16 +1178,25 @@ export default class MyPlugin extends Plugin {
 				//add the comment before the highlight
 				lineElements.rowEdited =
 					highlightPrepend +
-					commentFormatBefore + lineElements.commentText + commentFormatAfter +
-					": " + colourTextBefore +
-					highlightFormatBefore + lineElements.highlightText + highlightFormatAfter +
-					lineElements.citeKey + colourTextAfter;
+					commentFormatBefore +
+					lineElements.commentText +
+					commentFormatAfter +
+					": " +
+					colourTextBefore +
+					highlightFormatBefore +
+					lineElements.highlightText +
+					highlightFormatAfter +
+					lineElements.citeKey +
+					colourTextAfter;
 			}
 
 			// 	FORMAT THE HEADERS
 			//  Transform header in H1/H2/H3/H4/H5/H6 Level
 			if (/typeH\d/.test(lineElements.annotationType)) {
-				const lastChar = lineElements.annotationType[lineElements.annotationType.length - 1];
+				const lastChar =
+					lineElements.annotationType[
+						lineElements.annotationType.length - 1
+					];
 				const level = parseInt(lastChar);
 				const hashes = "#".repeat(level);
 				lineElements.rowEdited =
@@ -1018,43 +1205,48 @@ export default class MyPlugin extends Plugin {
 					lineElements.commentText +
 					lineElements.zoteroBackLink;
 			}
- 
 
 			//Create Task
-			if(lineElements.annotationType=="typeTask"){
-				
-				if(lineElements.commentText !== "" && lineElements.highlightText!== ""){
+			if (lineElements.annotationType == "typeTask") {
+				if (
+					lineElements.commentText !== "" &&
+					lineElements.highlightText !== ""
+				) {
 					lineElements.rowEdited =
 						`- [ ] ` +
 						commentFormatBefore +
-						lineElements.commentText + 
+						lineElements.commentText +
 						commentFormatAfter +
 						" - " +
 						colourTextBefore +
 						highlightFormatBefore +
 						lineElements.highlightText +
-						highlightFormatAfter + 
-						lineElements.citeKey + 
+						highlightFormatAfter +
+						lineElements.citeKey +
 						colourTextAfter;
-					}
-				else if(lineElements.commentText == "" && lineElements.highlightColour!== ""){ 
+				} else if (
+					lineElements.commentText == "" &&
+					lineElements.highlightColour !== ""
+				) {
 					lineElements.rowEdited =
 						`- [ ] ` +
 						colourTextBefore +
 						highlightFormatBefore +
 						lineElements.highlightText +
-						highlightFormatAfter + 
-						lineElements.citeKey + 
+						highlightFormatAfter +
+						lineElements.citeKey +
 						colourTextAfter;
-					}
-				else if(lineElements.commentText !== "" && lineElements.highlightColour=== ""){
+				} else if (
+					lineElements.commentText !== "" &&
+					lineElements.highlightColour === ""
+				) {
 					lineElements.rowEdited =
 						`- [ ] ` +
 						commentFormatBefore +
-						lineElements.commentText + 
+						lineElements.commentText +
 						commentFormatAfter +
-						lineElements.zoteroBackLink
-					}
+						lineElements.zoteroBackLink;
+				}
 			}
 
 			//FORMAT KEYWORDS
@@ -1063,31 +1255,42 @@ export default class MyPlugin extends Plugin {
 				keywordArray.push(lineElements.highlightText);
 
 				//remove the text of the line
-				lineElements.rowEdited=""
+				lineElements.rowEdited = "";
 
 				//Add the line to an index of lines to be removed
 				indexRowsToBeRemoved.push(i);
 			}
-			
-				//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
-			if (lineElements.annotationType ===  "noKey"){
-				if(lineElements.highlightText !== ""){
-					lineElements.rowEdited = highlightPrepend + colourTextBefore +
-						highlightFormatBefore + lineElements.highlightText + highlightFormatAfter +
-						lineElements.citeKey + colourTextAfter;
-					if(lineElements.commentText !== ""){
-						lineElements.rowEdited = lineElements.rowEdited + 
-						commentFormatBefore + lineElements.commentText + commentFormatAfter
+
+			//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
+			if (lineElements.annotationType === "noKey") {
+				if (lineElements.highlightText !== "") {
+					lineElements.rowEdited =
+						highlightPrepend +
+						colourTextBefore +
+						highlightFormatBefore +
+						lineElements.highlightText +
+						highlightFormatAfter +
+						lineElements.citeKey +
+						colourTextAfter;
+					if (lineElements.commentText !== "") {
+						lineElements.rowEdited =
+							lineElements.rowEdited +
+							commentFormatBefore +
+							lineElements.commentText +
+							commentFormatAfter;
 					}
-			// 	//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
-
-				} else if (lineElements.highlightText === "" && lineElements.commentText !== ""){
-					lineElements.rowEdited = 
-						commentFormatBefore + lineElements.commentText + commentFormatAfter + lineElements.zoteroBackLink
+					// 	//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
+				} else if (
+					lineElements.highlightText === "" &&
+					lineElements.commentText !== ""
+				) {
+					lineElements.rowEdited =
+						commentFormatBefore +
+						lineElements.commentText +
+						commentFormatAfter +
+						lineElements.zoteroBackLink;
 				}
-
 			}
-			
 
 			// 	//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
 			if (lineElements.annotationType === "typeComment") {
@@ -1095,14 +1298,12 @@ export default class MyPlugin extends Plugin {
 					commentPrepend +
 					commentFormatBefore +
 					lineElements.commentText +
-					commentFormatAfter + 
-					lineElements.zoteroBackLink
-				}
+					commentFormatAfter +
+					lineElements.zoteroBackLink;
+			}
 
-		//Copy the edited text into an array to be exported		
-		noteElementsArray.push(lineElements)
-
-	
+			//Copy the edited text into an array to be exported
+			noteElementsArray.push(lineElements);
 		}
 
 		// PERFORM THE FOLLOWING OPERATIONS ON THE WHOLE ARRAY
@@ -1113,37 +1314,46 @@ export default class MyPlugin extends Plugin {
 				let index = indexRowsToBeRemoved.length - 1;
 				index >= 0;
 				index--
-			) { 
+			) {
 				//console.log("indexRowsToBeRemoved : "+ index)
 				noteElementsArray.splice(indexRowsToBeRemoved[index], 1);
-
 			}
 		}
 
 		//Add rowEdited into different arrays for the export
 		for (let index = 0; index < noteElementsArray.length; index++) {
-				
-			
-			const selectedLine = noteElementsArray[index]
-				rowEditedArray.push(selectedLine.rowEdited)
+			const selectedLine = noteElementsArray[index];
+			rowEditedArray.push(selectedLine.rowEdited);
 
-				// Copy the rows highlighted in a certain colour into colour-specific arrays 
-				if(selectedLine.highlightColour === "yellow"){highlightsYellow.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "red"){highlightsRed.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "green"){highlightsGreen.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "purple"){highlightsPurple.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "black"){highlightsBlack.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "white"){highlightsWhite.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "gray"){highlightsGray.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "cyan"){highlightsCyan.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "orange"){highlightsOrange.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "blue"){highlightsBlue.push(selectedLine.rowEdited)}
-				else if(selectedLine.highlightColour === "magenta"){highlightsMagenta.push(selectedLine.rowEdited)}
+			// Copy the rows highlighted in a certain colour into colour-specific arrays
+			if (selectedLine.highlightColour === "yellow") {
+				highlightsYellow.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "red") {
+				highlightsRed.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "green") {
+				highlightsGreen.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "purple") {
+				highlightsPurple.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "black") {
+				highlightsBlack.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "white") {
+				highlightsWhite.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "gray") {
+				highlightsGray.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "cyan") {
+				highlightsCyan.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "orange") {
+				highlightsOrange.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "blue") {
+				highlightsBlue.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "magenta") {
+				highlightsMagenta.push(selectedLine.rowEdited);
+			}
 
-				//Copy the images in a specific array
-				if(selectedLine.annotationType === "typeImage"){imagesArray.push(selectedLine.rowEdited)}
-			
-			
+			//Copy the images in a specific array
+			if (selectedLine.annotationType === "typeImage") {
+				imagesArray.push(selectedLine.rowEdited);
+			}
 		}
 
 		// Add empty row in between rows if selected in the settings
@@ -1170,17 +1380,16 @@ export default class MyPlugin extends Plugin {
 			highlightsBlue: highlightsBlue,
 			highlightsMagenta: highlightsMagenta,
 			imagesArray: imagesArray,
-			noteElements: noteElements
-		}
+			noteElements: noteElements,
+		};
 
-		return resultsLineElements
+		return resultsLineElements;
 	}
 
 	getAnnotationType(
 		annotationCommentFirstWord: string,
-		annotationCommentAll: string,
+		annotationCommentAll: string
 	) {
-
 		const {
 			keyMergeAbove,
 			keyCommentPrepend,
@@ -1195,8 +1404,7 @@ export default class MyPlugin extends Plugin {
 		} = this.settings;
 
 		//Take the lower cap version
-		annotationCommentFirstWord = annotationCommentFirstWord.toLowerCase()
-	
+		annotationCommentFirstWord = annotationCommentFirstWord.toLowerCase();
 
 		let annotationType = "noKey";
 		if (
@@ -1204,7 +1412,9 @@ export default class MyPlugin extends Plugin {
 			annotationCommentAll === keyMergeAbove
 		) {
 			annotationType = "typeMergeAbove";
-		} else if (annotationCommentFirstWord === keyCommentPrepend.toLowerCase()) {
+		} else if (
+			annotationCommentFirstWord === keyCommentPrepend.toLowerCase()
+		) {
 			annotationType = "typeCommentPrepend";
 		} else if (annotationCommentFirstWord === keyH1.toLowerCase()) {
 			annotationType = "typeH1";
@@ -1241,11 +1451,11 @@ export default class MyPlugin extends Plugin {
 			annotationCommentFirstWord === keyTask.toLowerCase()
 		) {
 			annotationType = "typeTask";
-		} 
+		}
 		return annotationType;
 	}
 
-	extractAnnotation(selectedEntry:Reference, noteTitleFull:string){
+	extractAnnotation(selectedEntry: Reference, noteTitleFull: string) {
 		let extractedAnnotations = "";
 		let extractedAnnotationsYellow = "";
 		let extractedAnnotationsRed = "";
@@ -1261,119 +1471,163 @@ export default class MyPlugin extends Plugin {
 		let extractedUserNote = "";
 		//console.log(selectedEntry.notes.length)
 
-		if(this.settings.exportAnnotations && selectedEntry.notes.length>0 && selectedEntry.attachments[0]!== undefined){
-
+		if (
+			this.settings.exportAnnotations &&
+			selectedEntry.notes.length > 0 &&
+			selectedEntry.attachments[0] !== undefined
+		) {
 			//run the function to parse the annotation for each note (there could be more than one)
-			let noteElements:AnnotationElements[] = []
-			let userNoteElements:AnnotationElements[] = []
+			let noteElements: AnnotationElements[] = [];
+			let userNoteElements: AnnotationElements[] = [];
 
 			//identify the folder on the local computer where zotero/storage is found
 			//first look into the same path as the pdf attachment
-			let pathZoteroStorage:string = ""
-			let zoteroBuildWindows: boolean = undefined
+			let pathZoteroStorage = "";
+			let zoteroBuildWindows: boolean = undefined;
 
 			//check if the base path where the attachment is stored is in Zotero/storage
-			const zoteroStorageMac = new RegExp(/.+?(?=Zotero\/storage)Zotero\/storage\//gm) 
-			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)){
-				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageMac))
-				zoteroBuildWindows = false
+			const zoteroStorageMac = new RegExp(
+				/.+?(?=Zotero\/storage)Zotero\/storage\//gm
+			);
+			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)) {
+				pathZoteroStorage = String(
+					selectedEntry.attachments[0].path.match(zoteroStorageMac)
+				);
+				zoteroBuildWindows = false;
 			}
 
-			const zoteroStorageWindows = new RegExp(/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm) 
-			if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)){
-				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageWindows))
-				zoteroBuildWindows = true
+			const zoteroStorageWindows = new RegExp(
+				/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm
+			);
+			if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)) {
+				pathZoteroStorage = String(
+					selectedEntry.attachments[0].path.match(
+						zoteroStorageWindows
+					)
+				);
+				zoteroBuildWindows = true;
 			}
-			console.log(pathZoteroStorage.length)
-			if(pathZoteroStorage.length==0 && this.settings.zoteroStoragePathManual.length >0){
-				pathZoteroStorage = this.settings.zoteroStoragePathManual
-				if(pathZoteroStorage.endsWith("\\Zotero")){pathZoteroStorage = pathZoteroStorage + "\\storage\\"}
-				if(pathZoteroStorage.endsWith("\\Zotero\\")){pathZoteroStorage = pathZoteroStorage + "storage\\"}
-				if(pathZoteroStorage.endsWith("\/Zotero")){pathZoteroStorage = pathZoteroStorage + "\/storage\/"}
-				if(pathZoteroStorage.endsWith("\/Zotero\/")){pathZoteroStorage = pathZoteroStorage + "storage\/"}
+			console.log(pathZoteroStorage.length);
+			if (
+				pathZoteroStorage.length == 0 &&
+				this.settings.zoteroStoragePathManual.length > 0
+			) {
+				pathZoteroStorage = this.settings.zoteroStoragePathManual;
+				if (pathZoteroStorage.endsWith("\\Zotero")) {
+					pathZoteroStorage = pathZoteroStorage + "\\storage\\";
+				}
+				if (pathZoteroStorage.endsWith("\\Zotero\\")) {
+					pathZoteroStorage = pathZoteroStorage + "storage\\";
+				}
+				if (pathZoteroStorage.endsWith("/Zotero")) {
+					pathZoteroStorage = pathZoteroStorage + "/storage/";
+				}
+				if (pathZoteroStorage.endsWith("/Zotero/")) {
+					pathZoteroStorage = pathZoteroStorage + "storage/";
+				}
 			}
-			this.pathZoteroStorage = pathZoteroStorage 
-			console.log(pathZoteroStorage)
-			this.zoteroBuildWindows = zoteroBuildWindows
+			this.pathZoteroStorage = pathZoteroStorage;
+			console.log(pathZoteroStorage);
+			this.zoteroBuildWindows = zoteroBuildWindows;
 
+			for (
+				let indexNote = 0;
+				indexNote < selectedEntry.notes.length;
+				indexNote++
+			) {
+				const note = selectedEntry.notes[indexNote].note;
 
-
-			for (let indexNote = 0; indexNote < selectedEntry.notes.length; indexNote++) {
-				const note = selectedEntry.notes[indexNote].note
-				
 				//Identify the extraction Type (Zotero vs. Zotfile)
-				let extractionType = undefined
-				
-				if (unescape(note).includes("<span class=")){extractionType = "Zotero"} 
-				else if (unescape(note).includes("<a href=\"zotero://open-pdf/library/")){extractionType = "Zotfile"}
+				let extractionType = undefined;
+
+				if (unescape(note).includes("<span class=")) {
+					extractionType = "Zotero";
+				} else if (
+					unescape(note).includes(
+						'<a href="zotero://open-pdf/library/'
+					)
+				) {
+					extractionType = "Zotfile";
+				}
 				//Identify manual notes (not extracted from PDF) extracted from zotero
-				else if (unescape(note).includes("div data-schema-version")){extractionType = "UserNote"}
-				else {extractionType = "Other"}
-				
-								
+				else if (unescape(note).includes("div data-schema-version")) {
+					extractionType = "UserNote";
+				} else {
+					extractionType = "Other";
+				}
 
-				
-				let noteElementsSingle:AnnotationElements
-				if(extractionType === "Zotero"){
-					noteElementsSingle  = this.parseAnnotationLinesintoElementsZotero(note)
-					noteElements = noteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
-				} 
+				let noteElementsSingle: AnnotationElements[] = []; // array of elements
+				if (extractionType === "Zotero") {
+					noteElementsSingle =
+						this.parseAnnotationLinesintoElementsZotero(note);
+					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
+				}
 
-				if(extractionType === "Zotfile"){
-					noteElementsSingle = this.parseAnnotationLinesintoElementsZotfile(note)
+				if (extractionType === "Zotfile") {
+					noteElementsSingle =
+						this.parseAnnotationLinesintoElementsZotfile(note);
 
-					noteElements = noteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
-				} 
+					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
+				}
 
-				if(extractionType === "UserNote"){
-					noteElementsSingle = this.parseAnnotationLinesintoElementsUserNote(note)
-					userNoteElements = userNoteElements.concat(noteElementsSingle) //concatenate the annotaiton element to the next one
-					
-				} 
+				if (extractionType === "UserNote") {
+					noteElementsSingle =
+						this.parseAnnotationLinesintoElementsUserNote(note);
+					userNoteElements =
+						userNoteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
+				}
 
-				
-				this.noteElements = noteElements
-				this.userNoteElements = userNoteElements
-				
-
+				this.noteElements = noteElements;
+				this.userNoteElements = userNoteElements;
 			}
 
+			//Run the function to edit each line
+			const resultsLineElements = this.formatNoteElements(
+				this.noteElements,
+				selectedEntry.citationKey
+			);
 
-			
-				//Run the function to edit each line
-			const resultsLineElements = this.formatNoteElements(this.noteElements, selectedEntry.citationKey)
-			
-			this.keyWordArray = resultsLineElements.keywordArray
+			this.keyWordArray = resultsLineElements.keywordArray;
 
 			//Create the annotation by merging the individial elements of rowEditedArray. Do the same for the colour
-			extractedAnnotations = resultsLineElements.rowEditedArray.join("\n");
-			extractedAnnotationsYellow = resultsLineElements.highlightsYellow.join("\n");
-			extractedAnnotationsRed = resultsLineElements.highlightsRed.join("\n");
-			extractedAnnotationsGreen = resultsLineElements.highlightsGreen.join("\n");
-			extractedAnnotationsPurple = resultsLineElements.highlightsPurple.join("\n");
-			extractedAnnotationsBlack = resultsLineElements.highlightsBlack.join("\n");
-			extractedAnnotationsWhite = resultsLineElements.highlightsWhite.join("\n");
-			extractedAnnotationsGray = resultsLineElements.highlightsGray.join("\n");
-			extractedAnnotationsCyan = resultsLineElements.highlightsCyan.join("\n");
-			extractedAnnotationsOrange = resultsLineElements.highlightsOrange.join("\n");
-			extractedAnnotationsMagenta = resultsLineElements.highlightsMagenta.join("\n");
+			extractedAnnotations =
+				resultsLineElements.rowEditedArray.join("\n");
+			extractedAnnotationsYellow =
+				resultsLineElements.highlightsYellow.join("\n");
+			extractedAnnotationsRed =
+				resultsLineElements.highlightsRed.join("\n");
+			extractedAnnotationsGreen =
+				resultsLineElements.highlightsGreen.join("\n");
+			extractedAnnotationsPurple =
+				resultsLineElements.highlightsPurple.join("\n");
+			extractedAnnotationsBlack =
+				resultsLineElements.highlightsBlack.join("\n");
+			extractedAnnotationsWhite =
+				resultsLineElements.highlightsWhite.join("\n");
+			extractedAnnotationsGray =
+				resultsLineElements.highlightsGray.join("\n");
+			extractedAnnotationsCyan =
+				resultsLineElements.highlightsCyan.join("\n");
+			extractedAnnotationsOrange =
+				resultsLineElements.highlightsOrange.join("\n");
+			extractedAnnotationsMagenta =
+				resultsLineElements.highlightsMagenta.join("\n");
 			extractedImages = resultsLineElements.imagesArray.join("\n");
-			//Creates an array with the notes from the user 		
-			const extractedUserNoteArray = Array.from(Object.values(this.userNoteElements), note => note.rowEdited)
-			extractedUserNote = extractedUserNoteArray.join("\n")
+			//Creates an array with the notes from the user
+			const extractedUserNoteArray = Array.from(
+				Object.values(this.userNoteElements),
+				(note) => note.rowEdited
+			);
+			extractedUserNote = extractedUserNoteArray.join("\n");
 
-			//	
+			//
+		}
 
-		}			
- 
-			
-			
-		
-		//Export both the extracted annotations, user annotation, and the keywords extracted in the object extractedNote	
+		//Export both the extracted annotations, user annotation, and the keywords extracted in the object extractedNote
 		const extractedNote = {
 			extractedAnnotations: extractedAnnotations,
 			extractedUserNote: extractedUserNote,
-			extractedKeywords: this.keyWordArray, 
+			extractedKeywords: this.keyWordArray,
 			extractedAnnotationsYellow: extractedAnnotationsYellow,
 			extractedAnnotationsRed: extractedAnnotationsRed,
 			extractedAnnotationsGreen: extractedAnnotationsGreen,
@@ -1385,82 +1639,112 @@ export default class MyPlugin extends Plugin {
 			extractedAnnotationsOrange: extractedAnnotationsOrange,
 			extractedAnnotationsMagenta: extractedAnnotationsMagenta,
 			extractedImages: extractedImages,
-			noteElements: this.noteElements
-		}
-	return(extractedNote)
+			noteElements: this.noteElements,
+		};
+		return extractedNote;
 	}
 
-	parseCollection(selectedEntry: Reference, data, metadata:string){
-
+	parseCollection(
+		selectedEntry: Reference,
+		data: { collections: Collection[] },
+		metadata: string
+	) {
 		//Create object with all the collections
-		const exportedCollections:Collection[] = data.collections;
-		
+		const exportedCollections: Collection[] = data.collections;
+
 		//identify the ID of the item
-		const selectedID = selectedEntry.itemID
+		const selectedID = selectedEntry.itemID;
 
 		//Create empty array to store information about the collections of the item
-		let collectionArray: string[] = []
+		let collectionArray: string[] = [];
 
 		//Create empty array to store information about the parent of the collections of the item
-		const collectionParentCode: string[] = []
-		let collectionParentArray: string[] = []
-		const collectionParentParent: string[] = []
+		const collectionParentCode: string[] = [];
+		let collectionParentArray: string[] = [];
+		const collectionParentParent: string[] = [];
 
-		
 		//identify the number of collections in the data
-		const collectionKeys:string[] = Object.keys(exportedCollections)
+		const collectionKeys: string[] = Object.keys(exportedCollections);
 
 		//loop through the collections and search for the ID of the selected reference
-		for (let indexCollection = 0; indexCollection < collectionKeys.length; indexCollection++) {
-			const collectionName = exportedCollections[collectionKeys[indexCollection]].name
-			const collectionItem = exportedCollections[collectionKeys[indexCollection]].items
-			const collectionParent = exportedCollections[collectionKeys[indexCollection]].parent
-			if(collectionItem.includes(selectedID)){
-				collectionArray.push(collectionName)
-				collectionParentCode.push(collectionParent)
+		for (
+			let indexCollection = 0;
+			indexCollection < collectionKeys.length;
+			indexCollection++
+		) {
+			const collectionName =
+				exportedCollections[collectionKeys[indexCollection]].name;
+			const collectionItem =
+				exportedCollections[collectionKeys[indexCollection]].items;
+			const collectionParent =
+				exportedCollections[collectionKeys[indexCollection]].parent;
+			if (collectionItem.includes(selectedID)) {
+				collectionArray.push(collectionName);
+				collectionParentCode.push(collectionParent);
 			}
 		}
-		
 
 		//loop through the collections and search for the name of the parent collection
-		if(collectionParentCode.length>0){
-			for (let indexCollection = 0; indexCollection < collectionKeys.length; indexCollection++) {
-				if(collectionParentCode.includes(exportedCollections[collectionKeys[indexCollection]].key)){
-					collectionParentArray.push(exportedCollections[collectionKeys[indexCollection]].name)
+		if (collectionParentCode.length > 0) {
+			for (
+				let indexCollection = 0;
+				indexCollection < collectionKeys.length;
+				indexCollection++
+			) {
+				if (
+					collectionParentCode.includes(
+						exportedCollections[collectionKeys[indexCollection]].key
+					)
+				) {
+					collectionParentArray.push(
+						exportedCollections[collectionKeys[indexCollection]]
+							.name
+					);
 				}
 			}
 		}
 
 		//loop through the collections and search for the name of the grandparent collection
-		if(collectionParentParent.length>0){
-			for (let indexCollection = 0; indexCollection < collectionKeys.length; indexCollection++) {
-				if(collectionParentParent.includes(exportedCollections[collectionKeys[indexCollection]].key)){
-					collectionParentArray.push(exportedCollections[collectionKeys[indexCollection]].name)
+		if (collectionParentParent.length > 0) {
+			for (
+				let indexCollection = 0;
+				indexCollection < collectionKeys.length;
+				indexCollection++
+			) {
+				if (
+					collectionParentParent.includes(
+						exportedCollections[collectionKeys[indexCollection]].key
+					)
+				) {
+					collectionParentArray.push(
+						exportedCollections[collectionKeys[indexCollection]]
+							.name
+					);
 				}
 			}
 		}
 
 		//Add Collection to Collection Parent
-		collectionParentArray = collectionParentArray.concat(collectionArray)
+		collectionParentArray = collectionParentArray.concat(collectionArray);
 
 		//Sort the collections in alphabetical order
-		collectionArray = collectionArray.sort()
-		collectionParentArray = collectionParentArray.sort()
+		collectionArray = collectionArray.sort();
+		collectionParentArray = collectionParentArray.sort();
 
-		
-		
 		//add a space after the divided if it is not present
-		let divider = this.settings.multipleFieldsDivider
-		if (divider.slice(-1) !== " "){divider = divider + " "}
+		let divider = this.settings.multipleFieldsDivider;
+		if (divider.slice(-1) !== " ") {
+			divider = divider + " ";
+		}
 
 		//Replace the keywords in the metadata
 		if (collectionArray.length > 0) {
-			const collectionArrayBraket = 	collectionArray.map(makeWiki);
+			const collectionArrayBraket = collectionArray.map(makeWiki);
 			metadata = replaceTemplate(
 				metadata,
-					`[[{{collections}}]]`,
-					String(collectionArrayBraket.join(divider))
-				);
+				`[[{{collections}}]]`,
+				String(collectionArrayBraket.join(divider))
+			);
 
 			const collectionArrayQuotes = collectionArray.map(makeQuotes);
 			metadata = replaceTemplate(
@@ -1481,309 +1765,427 @@ export default class MyPlugin extends Plugin {
 				`{{collections}}`,
 				String(collectionArray.join(divider))
 			);
-			}
+		}
 
 		if (collectionParentArray.length > 0) {
-			const collectionParentArrayBraket = collectionParentArray.map(makeWiki);
+			const collectionParentArrayBraket =
+				collectionParentArray.map(makeWiki);
 			metadata = replaceTemplate(
 				metadata,
-					`[[{{collectionsParent}}]]`,
-					String(collectionParentArrayBraket.join(divider))
-				);
+				`[[{{collectionsParent}}]]`,
+				String(collectionParentArrayBraket.join(divider))
+			);
 
-			const collectionParentArrayQuotes = collectionParentArray.map(makeQuotes);
+			const collectionParentArrayQuotes =
+				collectionParentArray.map(makeQuotes);
 			metadata = replaceTemplate(
-			metadata,
+				metadata,
 				`"{{collectionsParent}}"`,
 				String(collectionParentArrayQuotes.join(divider))
-			);	
+			);
 
-			const collectionParentArrayTags = collectionParentArray.map(makeTags);
+			const collectionParentArrayTags =
+				collectionParentArray.map(makeTags);
 			metadata = replaceTemplate(
-			metadata,
+				metadata,
 				`#{{collectionsParent}}`,
 				String(collectionParentArrayTags.join(divider))
-			);	
+			);
 			metadata = replaceTemplate(
 				metadata,
 				`{{collectionsParent}}`,
 				String(collectionParentArray.join(divider))
 			);
-				}
-		return metadata
-		
-
+		}
+		return metadata;
 	}
 
 	// Function to extract the notes added manually
 
-	
-
-
 	// Function to import the right template
 
-	importTemplate(){
-		let template = templatePlain
-		if (this.settings.templateType === "Plain"){
-			template = templatePlain
-		} else if (this.settings.templateType === "Admonition"){
-			template = templateAdmonition
+	importTemplate() {
+		let template = templatePlain;
+		if (this.settings.templateType === "Plain") {
+			template = templatePlain;
+		} else if (this.settings.templateType === "Admonition") {
+			template = templateAdmonition;
+		} else if (this.settings.templateType === "Custom") {
+			template = this.settings.templateContent;
 		}
-		else if (this.settings.templateType === "Custom"){
-			template = this.settings.templateContent
-		}
-		
-		return template
 
+		return template;
 	}
 
-	compareOldNewNote(existingNote: string, newNote: string, authorKey: string){
+	compareOldNewNote(
+		existingNote: string,
+		newNote: string,
+		authorKey: string
+	) {
 		//Find the position of the line breaks in the old note
-		const newLineRegex = RegExp (/\n/gm)
-		const positionNewLine: number[] = []
-		let match = undefined
-		while(match = newLineRegex.exec(existingNote)){
-		positionNewLine.push(match.index); 
+		const newLineRegex = RegExp(/\n/gm);
+		const positionNewLine: number[] = [];
+		let match = undefined;
+		while ((match = newLineRegex.exec(existingNote))) {
+			positionNewLine.push(match.index);
 		}
 
 		//Create an array to record where in the old note the matches with the new note are found
-		const positionOldNote: number[] = [0] 
+		const positionOldNote: number[] = [0];
 		//Create an array to record which sentences of the new note need to be stored in the old note and their position in the old note
-		const newNoteInsertText: string[] = []
-		const newNoteInsertPosition: number[] = []
-		
+		const newNoteInsertText: string[] = [];
+		const newNoteInsertPosition: number[] = [];
 
 		//Split the new note into sentences
-		const newNoteArray = newNote.split("\n")
+		const newNoteArray = newNote.split("\n");
 
 		//Remove markdown formatting from the beginning and end of each line
 
-
 		//loop through each of the lines extracted in the note
-	for (let indexLines = 0; indexLines < newNoteArray.length ; indexLines++) {
+		for (
+			let indexLines = 0;
+			indexLines < newNoteArray.length;
+			indexLines++
+		) {
+			let segmentWhole = "";
+			let segmentFirstHalf = "";
+			let segmentSecondHalf = "";
+			let segmentFirstQuarter = "";
+			let segmentSecondQuarter = "";
+			let segmentThirdQuarter = "";
+			let segmentFourthQuarter = "";
+			//Create an array to record where in the old note the matches with the new note are found
+			const positionArray: number[] = [-1];
 
-		let segmentWhole = ""
-		let segmentFirstHalf = ""
-		let segmentSecondHalf = ""
-		let segmentFirstQuarter = ""
-		let segmentSecondQuarter = ""
-		let segmentThirdQuarter = ""
-		let segmentFourthQuarter = ""
-		//Create an array to record where in the old note the matches with the new note are found
-		const positionArray: number[] = [-1]
-		
-		// Select the line to be searched
+			// Select the line to be searched
 
-		//Remove formatting added by bibnotes at the beginning of the line
-		let selectedNewLine = newNoteArray[indexLines]
-		selectedNewLine = selectedNewLine.trim()
-		selectedNewLine = selectedNewLine.replace(/^- /mg, "")
-		selectedNewLine = selectedNewLine.replace(/^> /mg, "")
-		selectedNewLine = selectedNewLine.replace(/^=/mg, "")
-		selectedNewLine = selectedNewLine.replace(/^\**/mg, "")
-		selectedNewLine = selectedNewLine.replace(/^\*/mg, "")
-		selectedNewLine = selectedNewLine.replace(/^"/mg, "")
+			//Remove formatting added by bibnotes at the beginning of the line
+			let selectedNewLine = newNoteArray[indexLines];
+			selectedNewLine = selectedNewLine.trim();
+			selectedNewLine = selectedNewLine.replace(/^- /gm, "");
+			selectedNewLine = selectedNewLine.replace(/^> /gm, "");
+			selectedNewLine = selectedNewLine.replace(/^=/gm, "");
+			selectedNewLine = selectedNewLine.replace(/^\**/gm, "");
+			selectedNewLine = selectedNewLine.replace(/^\*/gm, "");
+			selectedNewLine = selectedNewLine.replace(/^"/gm, "");
 
-		//Remove the authorkey at the end of the line
-		const authorKey_Zotero = new RegExp("\\(" + authorKey + ", \\d+, p. \\d+\\)$")
-		const authorKey_Zotfile = new RegExp("\\(" + authorKey + " \\d+:\\d+\\)$")
-		selectedNewLine = selectedNewLine.replace(authorKey_Zotero, "")
-		selectedNewLine = selectedNewLine.replace(authorKey_Zotfile, "")
+			//Remove the authorkey at the end of the line
+			const authorKey_Zotero = new RegExp(
+				"\\(" + authorKey + ", \\d+, p. \\d+\\)$"
+			);
+			const authorKey_Zotfile = new RegExp(
+				"\\(" + authorKey + " \\d+:\\d+\\)$"
+			);
+			selectedNewLine = selectedNewLine.replace(authorKey_Zotero, "");
+			selectedNewLine = selectedNewLine.replace(authorKey_Zotfile, "");
 
-		//Remove formatting added by bibnotes at the end of the line
-		selectedNewLine = selectedNewLine.replace(/=$/mg, "")
-		selectedNewLine = selectedNewLine.replace(/\**$/mg, "")
-		selectedNewLine = selectedNewLine.replace(/\*$/mg, "")
-		selectedNewLine = selectedNewLine.replace(/"$/mg, "")
+			//Remove formatting added by bibnotes at the end of the line
+			selectedNewLine = selectedNewLine.replace(/=$/gm, "");
+			selectedNewLine = selectedNewLine.replace(/\**$/gm, "");
+			selectedNewLine = selectedNewLine.replace(/\*$/gm, "");
+			selectedNewLine = selectedNewLine.replace(/"$/gm, "");
 
-
-
-		
-		//Calculate the length of the highlighted text
-		if(selectedNewLine== undefined){continue}
-		
-		
-		const lengthExistingLine = selectedNewLine.length
-		//Calculate the length of the comment text
-		if(lengthExistingLine === 0) { continue; }
-
-
-		//CHECK THE PRESENCE OF THE HIGHLIGHTED TEXT IN THE EXISTING ONE
-
-		//Check if the entire line (or part of the line for longer lines) are found in the existing note
-		if(lengthExistingLine>1 && lengthExistingLine<30){
-			segmentWhole = selectedNewLine
-			positionArray.push(existingNote.indexOf(segmentWhole))
+			//Calculate the length of the highlighted text
+			if (selectedNewLine == undefined) {
+				continue;
 			}
-		else if(lengthExistingLine>=30 && lengthExistingLine<150){
-			segmentFirstHalf = selectedNewLine.substring(0, lengthExistingLine/2)
-			positionArray.push(existingNote.indexOf(segmentFirstHalf))
-			
-			segmentSecondHalf = selectedNewLine.substring((lengthExistingLine/2)+1, lengthExistingLine)
-			positionArray.push(existingNote.indexOf(segmentSecondHalf))}
 
-		else if(lengthExistingLine>=150){
-			segmentFirstQuarter = selectedNewLine.substring(0, lengthExistingLine/4)
-			positionArray.push(existingNote.indexOf(segmentFirstQuarter))
-			
-			segmentSecondQuarter = selectedNewLine.substring((lengthExistingLine/4)+1, lengthExistingLine/2)
-			positionArray.push(existingNote.indexOf(segmentSecondQuarter))
-			
-			segmentThirdQuarter = selectedNewLine.substring((lengthExistingLine/2)+1, 3*lengthExistingLine/4)
-			positionArray.push(existingNote.indexOf(segmentThirdQuarter))
+			const lengthExistingLine = selectedNewLine.length;
+			//Calculate the length of the comment text
+			if (lengthExistingLine === 0) {
+				continue;
+			}
 
-			segmentFourthQuarter = selectedNewLine.substring((3*lengthExistingLine/4)+1, lengthExistingLine)
-			positionArray.push(existingNote.indexOf(segmentFourthQuarter))
+			//CHECK THE PRESENCE OF THE HIGHLIGHTED TEXT IN THE EXISTING ONE
+
+			//Check if the entire line (or part of the line for longer lines) are found in the existing note
+			if (lengthExistingLine > 1 && lengthExistingLine < 30) {
+				segmentWhole = selectedNewLine;
+				positionArray.push(existingNote.indexOf(segmentWhole));
+			} else if (lengthExistingLine >= 30 && lengthExistingLine < 150) {
+				segmentFirstHalf = selectedNewLine.substring(
+					0,
+					lengthExistingLine / 2
+				);
+				positionArray.push(existingNote.indexOf(segmentFirstHalf));
+
+				segmentSecondHalf = selectedNewLine.substring(
+					lengthExistingLine / 2 + 1,
+					lengthExistingLine
+				);
+				positionArray.push(existingNote.indexOf(segmentSecondHalf));
+			} else if (lengthExistingLine >= 150) {
+				segmentFirstQuarter = selectedNewLine.substring(
+					0,
+					lengthExistingLine / 4
+				);
+				positionArray.push(existingNote.indexOf(segmentFirstQuarter));
+
+				segmentSecondQuarter = selectedNewLine.substring(
+					lengthExistingLine / 4 + 1,
+					lengthExistingLine / 2
+				);
+				positionArray.push(existingNote.indexOf(segmentSecondQuarter));
+
+				segmentThirdQuarter = selectedNewLine.substring(
+					lengthExistingLine / 2 + 1,
+					(3 * lengthExistingLine) / 4
+				);
+				positionArray.push(existingNote.indexOf(segmentThirdQuarter));
+
+				segmentFourthQuarter = selectedNewLine.substring(
+					(3 * lengthExistingLine) / 4 + 1,
+					lengthExistingLine
+				);
+				positionArray.push(existingNote.indexOf(segmentFourthQuarter));
+			}
+
+			// if a match if found with the old note, set foundOld to TRUE
+			if (Math.max(...positionArray) > -1) {
+				//record the position of the found line in the old note
+				const positionOldNoteMax = Math.max(...positionArray);
+				positionOldNote.push(positionOldNoteMax);
+			}
+			// if a match if not found with the old note, set foundOld to FALSE and set positionOld to the position in the old note where the line break is found
+			if (Math.max(...positionArray) === -1) {
+				const positionOldNoteMax = Math.max(...positionOldNote);
+				newNoteInsertText.push(newNoteArray[indexLines]);
+				newNoteInsertPosition.push(
+					positionNewLine.filter((pos) => pos > positionOldNoteMax)[0]
+				);
+			}
 		}
-		
-		// if a match if found with the old note, set foundOld to TRUE
-		if(Math.max(...positionArray)> -1){
 
-			//record the position of the found line in the old note
-			const positionOldNoteMax = Math.max(...positionArray)
-			positionOldNote.push(positionOldNoteMax)
+		let doubleSpaceAdd = "";
+		if (this.settings.isDoubleSpaced) {
+			doubleSpaceAdd = "\n";
 		}
-		// if a match if not found with the old note, set foundOld to FALSE and set positionOld to the position in the old note where the line break is found
-		if(Math.max(...positionArray)=== -1){
-			const positionOldNoteMax = Math.max(...positionOldNote)
-			newNoteInsertText.push(newNoteArray[indexLines])
-			newNoteInsertPosition.push(positionNewLine.filter(pos => pos >positionOldNoteMax)[0])
+
+		//Add the new annotations into the old note
+		for (
+			let indexNoteElements = newNoteInsertText.length - 1;
+			indexNoteElements >= 0;
+			indexNoteElements--
+		) {
+			const insertText = newNoteInsertText[indexNoteElements];
+			const insertPosition = newNoteInsertPosition[indexNoteElements];
+			existingNote =
+				existingNote.slice(0, insertPosition) +
+				doubleSpaceAdd +
+				insertText +
+				existingNote.slice(insertPosition);
+		}
+		if (this.settings.saveManualEdits == "Save Entire Note") {
+			return existingNote;
+		}
+		if (this.settings.saveManualEdits == "Select Section") {
+			//identify the keyword marking the beginning and the end of the section not to be overwritten
+			const startSave = this.settings.saveManualEditsStart;
+			const endSave = this.settings.saveManualEditsEnd;
+
+			//identify the keyword identifying the beginning of the section to be preserved is empty, the position is the beginning of the string. Otherwise find the match in the text
+			let startSaveOld = 0;
+			if (startSave !== "") {
+				startSaveOld = existingNote.indexOf(startSave);
+			}
+			if (startSaveOld < 0) {
+				startSaveOld = 0;
+			}
+
+			//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
+			let endSaveOld: number = existingNote.length - 1;
+			if (endSave !== "") {
+				endSaveOld = existingNote.indexOf(endSave) - 1;
+			}
+			if (endSaveOld < 0) {
+				endSaveOld = existingNote.length - 1;
+			}
+
+			//Find the sections of the existing note to be preserved
+			const existingNotePreserved = existingNote.substring(
+				startSaveOld,
+				endSaveOld
+			);
+
+			//identify the keyword identifying the beginning of the section to be preserved is empty, the position is the beginning of the string. Otherwise find the match in the text
+			let startSaveNew = 0;
+			if (startSave !== "") {
+				startSaveNew = newNote.indexOf(startSave);
+			}
+			if (startSaveNew < 0) {
+				startSaveNew = 0;
+			}
+
+			//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
+			let endSaveNew: number = newNote.length - 1;
+			if (endSave !== "") {
+				endSaveNew = newNote.indexOf(endSave) - 1;
+			}
+			if (endSaveNew < 0) {
+				endSaveNew = newNote.length - 1;
+			}
+
+			//Find the sections of the existing note before the one to be preserved
+			const newNotePreservedBefore = newNote.substring(0, startSaveNew);
+			//Find the sections of the existing note after the one to be preserved
+			const newNotePreservedAfter = newNote.substring(
+				endSaveNew,
+				newNote.length - 1
+			);
+
+			const newNoteCombined =
+				newNotePreservedBefore +
+				existingNotePreserved +
+				newNotePreservedAfter;
+
+			return newNoteCombined;
 		}
 	}
-	
-	let doubleSpaceAdd = ""
-	if(this.settings.isDoubleSpaced){doubleSpaceAdd = "\n"}
 
-	//Add the new annotations into the old note
-	for (let indexNoteElements = newNoteInsertText.length-1; indexNoteElements >=0; indexNoteElements--) {const insertText = newNoteInsertText[indexNoteElements]
-		const insertPosition = newNoteInsertPosition[indexNoteElements]		
-		existingNote = existingNote.slice(0, insertPosition) + doubleSpaceAdd + insertText + existingNote.slice(insertPosition)
+	createNote(
+		selectedEntry: Reference,
+		data: {
+			collections: Record<string, never> | Collection[];
+			config?: Record<string, never>;
+			items?: Reference[];
+			version?: string;
 		}
-	if(this.settings.saveManualEdits=="Save Entire Note"){return existingNote}
-	if(this.settings.saveManualEdits=="Select Section"){
-		//identify the keyword marking the beginning and the end of the section not to be overwritten
-		const startSave = this.settings.saveManualEditsStart
-		const endSave = this.settings.saveManualEditsEnd
-
-	//identify the keyword identifying the beginning of the section to be preserved is empty, the position is the beginning of the string. Otherwise find the match in the text
-		let startSaveOld: number = 0
-		if (startSave !== ""){startSaveOld = existingNote.indexOf(startSave)}
-		if (startSaveOld<0){startSaveOld = 0}
-
-		//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
-		let endSaveOld: number = existingNote.length-1
-		if (endSave !== ""){endSaveOld = existingNote.indexOf(endSave)-1}
-		if (endSaveOld<0){endSaveOld = existingNote.length-1}	
-
-		//Find the sections of the existing note to be preserved
-		const existingNotePreserved = existingNote.substring(startSaveOld, endSaveOld)
-		
-
-		 //identify the keyword identifying the beginning of the section to be preserved is empty, the position is the beginning of the string. Otherwise find the match in the text
-		let startSaveNew: number = 0
-		if (startSave !== ""){startSaveNew = newNote.indexOf(startSave)}
-		if (startSaveNew<0){startSaveNew = 0}
-
-		//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
-		let endSaveNew: number = newNote.length-1
-		if (endSave !== ""){endSaveNew = newNote.indexOf(endSave)-1}
-		if (endSaveNew<0){endSaveNew = newNote.length-1}	
-
-		
-		//Find the sections of the existing note before the one to be preserved
-		const newNotePreservedBefore = newNote.substring(0, startSaveNew)
-		//Find the sections of the existing note after the one to be preserved
-		const newNotePreservedAfter = newNote.substring(endSaveNew, newNote.length-1)
-		
-		const newNoteCombined = newNotePreservedBefore + existingNotePreserved + newNotePreservedAfter
-
-		return newNoteCombined
-
-		}
-
-
-	}
-	
-
-	createNote(selectedEntry: Reference, data){
+	) {
 		//create bugout to store and export logs in a file
-		let bugout = new Debugout({ realTimeLoggingOn: false }); 
-		if (this.settings.debugMode === true){bugout = new Debugout({ realTimeLoggingOn: true }); }
-		
+		let bugout = new Debugout({ realTimeLoggingOn: false });
+		if (this.settings.debugMode === true) {
+			bugout = new Debugout({ realTimeLoggingOn: true });
+		}
 
 		//Load Template
-		const templateNote = this.importTemplate()
-		bugout.log("Template: \n" + templateNote)
-		
+		const templateNote = this.importTemplate();
+		bugout.log("Template: \n" + templateNote);
 
 		//Create the metadata
-		let litnote:string = this.parseMetadata(selectedEntry, templateNote);
-		bugout.log(selectedEntry)
-
+		let litnote: string = this.parseMetadata(selectedEntry, templateNote);
+		bugout.log(selectedEntry);
 
 		//Extract the list of collections
 		litnote = this.parseCollection(selectedEntry, data, litnote);
-		
 
-		
 		//Define the name and full path of the file to be exported
-		const noteTitleFull = createNoteTitle(selectedEntry, this.settings.exportTitle, this.settings.exportPath);
-			
-		//Extract the annotation and the keyword from the text
-		const resultAnnotations = this.extractAnnotation (selectedEntry, noteTitleFull)
-		bugout.log(resultAnnotations.noteElements)
-		
+		const noteTitleFull = createNoteTitle(
+			selectedEntry,
+			this.settings.exportTitle,
+			this.settings.exportPath
+		);
 
+		//Extract the annotation and the keyword from the text
+		const resultAnnotations = this.extractAnnotation(
+			selectedEntry,
+			noteTitleFull
+		);
+		bugout.log(resultAnnotations.noteElements);
 
 		//Replace annotations in the template
-		litnote = litnote.replace("{{PDFNotes}}", resultAnnotations.extractedAnnotations)
-		litnote = litnote.replace("{{UserNotes}}", resultAnnotations.extractedUserNote)
-		litnote = litnote.replace("{{Yellow}}", resultAnnotations.extractedAnnotationsYellow)
-		litnote = litnote.replace("{{Red}}", resultAnnotations.extractedAnnotationsRed)
-		litnote = litnote.replace("{{Green}}", resultAnnotations.extractedAnnotationsGreen)
-		litnote = litnote.replace("{{Purple}}", resultAnnotations.extractedAnnotationsPurple)
-		litnote = litnote.replace("{{Black}}", resultAnnotations.extractedAnnotationsBlack)
-		litnote = litnote.replace("{{White}}", resultAnnotations.extractedAnnotationsWhite)
-		litnote = litnote.replace("{{Gray}}", resultAnnotations.extractedAnnotationsGray)
-		litnote = litnote.replace("{{Cyan}}", resultAnnotations.extractedAnnotationsCyan)
-		litnote = litnote.replace("{{Orange}}", resultAnnotations.extractedAnnotationsOrange)
-		litnote = litnote.replace("{{Magenta}}", resultAnnotations.extractedAnnotationsMagenta)
-		litnote = litnote.replace("{{Images}}", resultAnnotations.extractedImages)
+		litnote = litnote.replace(
+			"{{PDFNotes}}",
+			resultAnnotations.extractedAnnotations
+		);
+		litnote = litnote.replace(
+			"{{UserNotes}}",
+			resultAnnotations.extractedUserNote
+		);
+		litnote = litnote.replace(
+			"{{Yellow}}",
+			resultAnnotations.extractedAnnotationsYellow
+		);
+		litnote = litnote.replace(
+			"{{Red}}",
+			resultAnnotations.extractedAnnotationsRed
+		);
+		litnote = litnote.replace(
+			"{{Green}}",
+			resultAnnotations.extractedAnnotationsGreen
+		);
+		litnote = litnote.replace(
+			"{{Purple}}",
+			resultAnnotations.extractedAnnotationsPurple
+		);
+		litnote = litnote.replace(
+			"{{Black}}",
+			resultAnnotations.extractedAnnotationsBlack
+		);
+		litnote = litnote.replace(
+			"{{White}}",
+			resultAnnotations.extractedAnnotationsWhite
+		);
+		litnote = litnote.replace(
+			"{{Gray}}",
+			resultAnnotations.extractedAnnotationsGray
+		);
+		litnote = litnote.replace(
+			"{{Cyan}}",
+			resultAnnotations.extractedAnnotationsCyan
+		);
+		litnote = litnote.replace(
+			"{{Orange}}",
+			resultAnnotations.extractedAnnotationsOrange
+		);
+		litnote = litnote.replace(
+			"{{Magenta}}",
+			resultAnnotations.extractedAnnotationsMagenta
+		);
+		litnote = litnote.replace(
+			"{{Images}}",
+			resultAnnotations.extractedImages
+		);
 
-
-		let extractedKeywords = resultAnnotations.extractedKeywords
-		if(extractedKeywords== undefined){extractedKeywords = []}
+		let extractedKeywords = resultAnnotations.extractedKeywords;
+		if (extractedKeywords == undefined) {
+			extractedKeywords = [];
+		}
 
 		// Join the tags in the metadata with the tags extracted in the text and replace them in the text
-		litnote = replaceTagList(selectedEntry, extractedKeywords, litnote, this.settings.multipleFieldsDivider)
+		litnote = replaceTagList(
+			selectedEntry,
+			extractedKeywords,
+			litnote,
+			this.settings.multipleFieldsDivider
+		);
 
 		//delete the missing fields in the metadata
-		const missingFieldSetting = this.settings.missingfield
-		litnote = replaceMissingFields(litnote, missingFieldSetting, this.settings.missingfieldreplacement);
+		const missingFieldSetting = this.settings.missingfield;
+		litnote = replaceMissingFields(
+			litnote,
+			missingFieldSetting,
+			this.settings.missingfieldreplacement
+		);
 
 		// Compare old note and new note
-		if (this.settings.saveManualEdits!=="Overwrite Entire Note" && fs.existsSync(noteTitleFull)){	//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
+		if (
+			this.settings.saveManualEdits !== "Overwrite Entire Note" &&
+			fs.existsSync(noteTitleFull)
+		) {
+			//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
 			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
 
 			//Extract the reference within bracket to faciliate comparison
-			const authorKey = createAuthorKey(selectedEntry.creators)
-			const existingNoteAll = String(fs.readFileSync(noteTitleFull))
-			litnote = this.compareOldNewNote(existingNoteAll, litnote, authorKey)
+			const authorKey = createAuthorKey(selectedEntry.creators);
+			const existingNoteAll = String(fs.readFileSync(noteTitleFull));
+			litnote = this.compareOldNewNote(
+				existingNoteAll,
+				litnote,
+				authorKey
+			);
 		}
 
 		//Export the file
-		bugout.log("NoteTitleFull: " + noteTitleFull)
-		bugout.log("Final Note: " + litnote)
-		bugout.log(this.settings)
-		if(this.settings.debugMode === true){bugout.downloadLog() }
+		bugout.log("NoteTitleFull: " + noteTitleFull);
+		bugout.log("Final Note: " + litnote);
+		bugout.log(this.settings);
+		if (this.settings.debugMode === true) {
+			bugout.downloadLog();
+		}
 
 		fs.writeFile(noteTitleFull, litnote, function (err) {
-				if (err) console.log(err);
-			});
+			if (err) console.log(err);
+		});
 		new Notice(`Imported ${selectedEntry.citationKey}!`);
-
-
 	}
-					
-}	
- 
+}

@@ -71,8 +71,6 @@ export interface Name {
 // //     sentenceCased?: boolean
 // //   }
 
-
-
 export interface MyPluginSettings {
 	bibPath: string;
 	exportMetadata: boolean;
@@ -118,18 +116,18 @@ export interface MyPluginSettings {
 	isCommentQuote: boolean;
 	commentCustomTextBefore: string;
 	commentCustomTextAfter: string;
-	isDoubleSpaced: boolean;	
+	isDoubleSpaced: boolean;
 	colourYellowText: string;
 	colourPurpleText: string;
 	colourRedText: string;
 	colourGreenText: string;
-	colourBlueText: string; 
-	colourBlackText: string; 
-	colourWhiteText: string; 
-	colourGrayText: string; 
-	colourOrangeText: string; 
-	colourCyanText: string; 
-	colourMagentaText: string; 
+	colourBlueText: string;
+	colourBlackText: string;
+	colourWhiteText: string;
+	colourGrayText: string;
+	colourOrangeText: string;
+	colourCyanText: string;
+	colourMagentaText: string;
 	multipleFieldsDivider: string;
 	nameFormat: string;
 	highlightCitationsFormat: string;
@@ -148,7 +146,7 @@ export interface Reference {
 	inlineReference: string;
 	date: string;
 	dateModified: string;
-	itemKey:string;
+	itemKey: string;
 	itemID: number;
 	title: string;
 	creators: {
@@ -156,75 +154,73 @@ export interface Reference {
 		firstName: string;
 		lastName: string;
 		name: string;
-		}[]
+	}[];
 	file: string;
 	localLibrary: string;
-	select:string;
-	attachments:{
-		dateAdded: string,
-		dateModified: string,
-		itemType: string,
-		path: string,
-		relations: string[],
-		tags: string[],
-		title: string,
-		uri: string,
-	}[],
-	notes:{
-		"dateAdded": string,
-		"dateModified": string,
-		"itemType": string,
-		"key": string,
-		"note": string,
-		"parentItem": "VMSSFNIR",
-        "relations": string[],
-        "tags": string[],
-        "uri": string,
-        "version": number
-	}[],
-	tags: 
-        {
-          "tag": string
-        }[],
-	zoteroTags: string[]
+	select: string;
+	attachments: {
+		dateAdded: string;
+		dateModified: string;
+		itemType: string;
+		path: string;
+		relations: string[];
+		tags: string[];
+		title: string;
+		uri: string;
+	}[];
+	notes: {
+		dateAdded: string;
+		dateModified: string;
+		itemType: string;
+		key: string;
+		note: string;
+		parentItem: "VMSSFNIR";
+		relations: string[];
+		tags: string[];
+		uri: string;
+		version: number;
+	}[];
+	tags: {
+		tag: string;
+	}[];
+	zoteroTags: string[];
 }
 
 export interface AnnotationElements {
-	annotationType: string,
-	citeKey: string,
-	commentText: string,
-	highlightText: string,
-	highlightColour: string,
-	indexNote: number,
-	rowOriginal: string,
-	rowEdited: string,
-	foundOld: boolean,
-	positionOld: number,
-	extractionSource: string,
-	colourTextBefore: string,
-	colourTextAfter: string,
-	imagePath: string,
-	pagePDF: number,
-	pageLabel: number,
-	attachmentURI: string,
-	zoteroBackLink: string,
-	}[]
-
-
+	annotationType: string;
+	citeKey: string;
+	commentText: string;
+	highlightText: string;
+	highlightColour: string;
+	indexNote: number;
+	rowOriginal: string;
+	rowEdited: string;
+	foundOld: boolean;
+	positionOld: number;
+	extractionSource: string;
+	colourTextBefore: string;
+	colourTextAfter: string;
+	imagePath: string;
+	pagePDF: number;
+	pageLabel: number;
+	attachmentURI: string;
+	zoteroBackLink: string;
+}
+[];
 
 export interface Creator {
-    creatorType: string;
-    firstName: string;
-    lastName: string;
-    name: string;
+	creatorType: string;
+	firstName: string;
+	lastName: string;
+	name: string;
 }
 
 export interface Collection {
-    collections: string[];
-    items: string[];
-    key: string;
-    name: string;
-    parent: string;
+	collections: string[];
+	items: string[];
+	key: string;
+	name: string;
+	parent: string;
 }
 
-export type CreatorArray = Array<Creator>
+export type CreatorArray = Array<Creator>;
