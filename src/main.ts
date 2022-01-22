@@ -943,6 +943,8 @@ export default class MyPlugin extends Plugin {
 							base: citeKey + "_" + lineElements.imagePath + ".png"}))
 	
 					console.log(pathImageOld)
+					console.log(pathImageNew)
+
 					//Check if the image exists within Zotero or already within the vault
 					if(fs.existsSync(pathImageOld) || fs.existsSync(pathImageNew)){
 
