@@ -1072,7 +1072,7 @@ export default class MyPlugin extends Plugin {
 						dir: this.pathZoteroStorage + lineElements.imagePath, 
 						base: "image.png",
 					});
-
+					console.log("pathImageNew before systemcheck: "+ pathImageNew)
 					pathImageNew = path.normalize(
 						path.format({
 							dir: normalizePath(
@@ -1086,10 +1086,10 @@ export default class MyPlugin extends Plugin {
 						})
 					);
 				
-
+					console.log("systemcheck: " + this.zoteroBuildWindows) 
 					if (this.zoteroBuildWindows == false){pathImageNew = "/" + pathImageNew}
 					console.log(pathImageOld);
-					console.log(pathImageNew);
+					console.log("pathImageNew after` systemcheck: "+ pathImageNew)
 
 					//Check if the image exists within Zotero or already within the vault
 					if (
@@ -1184,7 +1184,7 @@ export default class MyPlugin extends Plugin {
 					commentFormatBefore +
 					lineElements.commentText +
 					commentFormatAfter +
-					": " +
+					this.settings.commentPrependDivider +
 					colourTextBefore +
 					highlightFormatBefore +
 					lineElements.highlightText +
@@ -1495,10 +1495,7 @@ export default class MyPlugin extends Plugin {
 				/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm
 			);
 			if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)) {
-				pathZoteroStorage = String(
-					selectedEntry.attachments[0].path.match(
-						zoteroStorageWindows
-					)
+				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageWindows)
 				);
 				zoteroBuildWindows = true;
 			}
