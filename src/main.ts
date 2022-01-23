@@ -1071,7 +1071,7 @@ export default class MyPlugin extends Plugin {
 					// Check if the user settings has approved the importing of images
 
 					pathImageOld = path.format({
-						dir: this.pathZoteroStorage + lineElements.imagePath,
+						dir: this.pathZoteroStorage + lineElements.imagePath, 
 						base: "image.png",
 					});
 
@@ -1087,6 +1087,7 @@ export default class MyPlugin extends Plugin {
 								citeKey + "_" + lineElements.imagePath + ".png",
 						})
 					);
+				
 
 					pathImageNew = "/" + pathImageNew;
 					console.log(pathImageOld);
