@@ -2,9 +2,6 @@ import MyPlugin from "./main";
 import * as fs from "fs";
 import { App, Modal, FuzzySuggestModal, Notice, Platform } from "obsidian";
 
-// both were not used
-// import { Debugout } from "debugout.js";
-// const bugout = new Debugout({ realTimeLoggingOn: true });
 
 import { Reference, AnnotationElements } from "./types";
 
@@ -15,8 +12,6 @@ import {
 	orderByDateModified,
 } from "./utils";
 
-// wasn't used
-// import { toEditorSettings } from "typescript";
 
 export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 	plugin: MyPlugin;
@@ -28,7 +23,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 		config: Record<string, never>;
 		items: Reference[];
 		version: string;
-		__proto__: Record<string, never>;
+		__proto__: Record<string, never>; 
 	};
 	keyWordArray: string[];
 	noteElements: AnnotationElements[];
@@ -78,11 +73,11 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 			// console.log(bibtexArrayItem.title)
 
 			// Extract the date
-			bibtexArrayItem.date = selectedEntry.date;
-			if (selectedEntry.hasOwnProperty("date")) {
-				selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm)[0];
-				bibtexArrayItem.date = selectedEntry.year;
-			}
+			bibtexArrayItem.date = selectedEntry.date
+ 			if (selectedEntry.hasOwnProperty("date")){
+ 				selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm)
+ 				bibtexArrayItem.date = selectedEntry.year
+			 }
 			// console.log(bibtexArrayItem.date)
 
 			//Extract the author

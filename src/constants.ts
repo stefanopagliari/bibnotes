@@ -125,6 +125,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	imagesCommentPosition: "Above the image",
 	keyMergeAbove: "+",
 	keyCommentPrepend: "%",
+	commentPrependDefault: false,
 	keyH1: "#",
 	keyH2: "##",
 	keyH3: "###",

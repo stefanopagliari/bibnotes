@@ -446,8 +446,7 @@ export default class MyPlugin extends Plugin {
 				firstBlank = annotationCommentAll.length;
 			}
 			lineElements.commentText =
-				lineElements.annotationType === "noKey" ||
-				lineElements.annotationType === "typeComment"
+				lineElements.annotationType === "noKey" 
 					? lineElements.commentText
 					: lineElements.commentText
 							.substring(
@@ -794,7 +793,6 @@ export default class MyPlugin extends Plugin {
 				}
 				lineElements.commentText =
 					lineElements.annotationType === "noKey" ||
-					lineElements.annotationType === "typeComment" ||
 					lineElements.annotationType === "typeImage"
 						? annotationCommentAll
 						: annotationCommentAll
@@ -1089,7 +1087,7 @@ export default class MyPlugin extends Plugin {
 					);
 				
 
-					pathImageNew = "/" + pathImageNew;
+					if (this.zoteroBuildWindows == false){pathImageNew = "/" + pathImageNew}
 					console.log(pathImageOld);
 					console.log(pathImageNew);
 
@@ -1174,7 +1172,11 @@ export default class MyPlugin extends Plugin {
 				indexRowsToBeRemoved.push(i - 1);
 			}
 
+
 			//PREPEND COMMENT TO THE HIGHLIGHTED SENTENCE
+			//check the setting commentPrependDefault. If true, then everytime there is an highlight with a comment, prepend the comment to the highlight
+			if(this.settings.commentPrependDefault=== true && lineElements.highlightText !== "" && lineElements.commentText !== ""){lineElements.annotationType = "typeCommentPrepend"} 
+			//commentPrependDefault
 			if (lineElements.annotationType === "typeCommentPrepend") {
 				//add the comment before the highlight
 				lineElements.rowEdited =
@@ -1293,15 +1295,7 @@ export default class MyPlugin extends Plugin {
 				}
 			}
 
-			// 	//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
-			if (lineElements.annotationType === "typeComment") {
-				lineElements.rowEdited =
-					commentPrepend +
-					commentFormatBefore +
-					lineElements.commentText +
-					commentFormatAfter +
-					lineElements.zoteroBackLink;
-			}
+	
 
 			//Copy the edited text into an array to be exported
 			noteElementsArray.push(lineElements);

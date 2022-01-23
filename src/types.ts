@@ -90,6 +90,7 @@ export interface MyPluginSettings {
 	imagesCommentPosition: string;
 	keyMergeAbove: string;
 	keyCommentPrepend: string;
+	commentPrependDefault: boolean;
 	keyH1: string;
 	keyH2: string;
 	keyH3: string;

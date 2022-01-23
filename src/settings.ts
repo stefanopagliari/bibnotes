@@ -724,8 +724,9 @@ export class SettingTab extends PluginSettingTab {
 							})
 					);
 
+
 				new Setting(settingsAdvanced)
-					.setName("Place comment before the highlight")
+				.setName("Place comment before the highlight")
 					.addText((text) =>
 						text
 							// .setPlaceholder('%')
@@ -744,6 +745,18 @@ export class SettingTab extends PluginSettingTab {
 									await plugin.saveSettings();
 								}
 							})
+					);
+
+					new Setting(settingsAdvanced)
+					.setDesc("Always place the comment made to an highlight before the text of the highlight")
+					.addToggle((text) =>
+					text
+						.setValue(settings.commentPrependDefault)
+						.onChange(async (value) => {
+							settings.commentPrependDefault = value;
+							await plugin.saveSettings();
+							this.display();
+						})
 					);
 
 				new Setting(settingsAdvanced)
