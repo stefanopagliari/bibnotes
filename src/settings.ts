@@ -933,7 +933,7 @@ export class SettingTab extends PluginSettingTab {
 
 			if(settings.imagesImport){
 				new Setting(importImages)
-					.setName("Copy File of the Image into the Obsidian Vault")
+					.setName("Copy the Image into the Obsidian Vault")
 					.setDesc("If this option is selected, images selected through the Zotero reader will be copied into the Vault. If this option is not selected, the note will link to the file stored in Zotero/storage")					.addToggle((text) =>
 						text
 							.setValue(settings.imagesCopy)
