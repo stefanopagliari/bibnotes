@@ -1288,6 +1288,7 @@ export default class MyPlugin extends Plugin {
 					lineElements.commentText !== ""
 				) {
 					lineElements.rowEdited =
+						commentPrepend + 
 						commentFormatBefore +
 						lineElements.commentText +
 						commentFormatAfter +
@@ -1508,16 +1509,16 @@ export default class MyPlugin extends Plugin {
 				this.settings.zoteroStoragePathManual.length > 0
 			) {
 				pathZoteroStorage = this.settings.zoteroStoragePathManual;
-				if (pathZoteroStorage.endsWith("\\Zotero")) {
+				if (pathZoteroStorage.toLowerCase(). endsWith("\\zotero")) {
 					pathZoteroStorage = pathZoteroStorage + "\\storage\\";
 				}
-				if (pathZoteroStorage.endsWith("\\Zotero\\")) {
+				if (pathZoteroStorage.toLowerCase().endsWith("\\zotero\\")) {
 					pathZoteroStorage = pathZoteroStorage + "storage\\";
 				}
-				if (pathZoteroStorage.endsWith("/Zotero")) {
+				if (pathZoteroStorage.toLowerCase().endsWith("/zotero")) {
 					pathZoteroStorage = pathZoteroStorage + "/storage/";
 				}
-				if (pathZoteroStorage.endsWith("/Zotero/")) {
+				if (pathZoteroStorage.toLowerCase().endsWith("/zotero/")) {
 					pathZoteroStorage = pathZoteroStorage + "storage/";
 				}
 			}

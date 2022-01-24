@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ### Bugs
 - Fixed filepath of images on Windows  
 - Fixed filepath of images on Linux (thanks to @MichaBrugger)
+- Fixed bug related to the formatting of comments
 
 ## [0.9.01]
 ### Bugs
