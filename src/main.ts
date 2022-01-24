@@ -1484,6 +1484,8 @@ export default class MyPlugin extends Plugin {
 			const zoteroStorageMac = new RegExp(
 				/.+?(?=Zotero\/storage)Zotero\/storage\//gm
 			);
+			console.log(selectedEntry.attachments[0].path)
+			console.log(zoteroStorageMac.test(selectedEntry.attachments[0].path))
 			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)) {
 				pathZoteroStorage = String(
 					selectedEntry.attachments[0].path.match(zoteroStorageMac)
@@ -1492,8 +1494,9 @@ export default class MyPlugin extends Plugin {
 			}
 
 			const zoteroStorageWindows = new RegExp(
-				/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm
+				/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm 
 			);
+			console.log(zoteroStorageWindows.test(selectedEntry.attachments[0].path))
 			if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)) {
 				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageWindows)
 				);
@@ -2066,7 +2069,6 @@ export default class MyPlugin extends Plugin {
 			this.settings.exportTitle,
 			this.settings.exportPath
 		);
-
 		//Extract the annotation and the keyword from the text
 		const resultAnnotations = this.extractAnnotation(
 			selectedEntry,

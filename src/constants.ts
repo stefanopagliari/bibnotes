@@ -126,6 +126,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	keyMergeAbove: "+",
 	keyCommentPrepend: "%",
 	commentPrependDefault: false,
+	commentPrependDivider: ": ",
 	keyH1: "#",
 	keyH2: "##",
 	keyH3: "###",

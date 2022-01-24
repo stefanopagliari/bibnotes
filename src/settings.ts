@@ -746,7 +746,17 @@ export class SettingTab extends PluginSettingTab {
 								}
 							})
 					);
-
+					
+					new Setting(settingsAdvanced)
+					.setDesc("Text placed between the comment and the related highlight")
+					.addText((text) =>
+					text
+						.setValue(settings.commentPrependDivider)
+						.onChange(async (value) => {
+							settings.commentPrependDivider = value;
+							await plugin.saveSettings();
+						})
+				);
 					new Setting(settingsAdvanced)
 					.setDesc("Always place the comment made to an highlight before the text of the highlight")
 					.addToggle((text) =>
@@ -759,6 +769,7 @@ export class SettingTab extends PluginSettingTab {
 						})
 					);
 
+					//commentPrependDivider
 				new Setting(settingsAdvanced)
 					.setName("Transform the highlight/comment into a task")
 					.addText((text) =>

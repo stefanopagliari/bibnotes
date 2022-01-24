@@ -91,6 +91,7 @@ export interface MyPluginSettings {
 	keyMergeAbove: string;
 	keyCommentPrepend: string;
 	commentPrependDefault: boolean;
+	commentPrependDivider: string;
 	keyH1: string;
 	keyH2: string;
 	keyH3: string;
