@@ -290,11 +290,12 @@ export class SettingTab extends PluginSettingTab {
 			new Setting(settingsCitations)
 				.setName("End of Highlight Citation Format")
 				.setDesc(
-					"Select the style of the reference added next to the highlights and figures extracted from the PDF"
+					"Select the style of the reference added next to the highlights and figures extracted from the PDF. This feature is for now available only for sources extracted from Zotero"
 				)
 				.addDropdown((d) => {
 					d.addOption("Author, year, page number", "Author, year, page number");
 					d.addOption("Only page number", "Only page number");
+					d.addOption("Pandoc", "Pandoc");
 					d.addOption("Empty", "Empty");
 					d.setValue(settings.highlightCitationsFormat);
 					d.onChange(
@@ -302,6 +303,7 @@ export class SettingTab extends PluginSettingTab {
 							v:
 								| "Author, year, page number"
 								| "Only page number"
+								| "Pandoc"	
 								| "Empty"
 						) => {
 							settings.highlightCitationsFormat = v;
