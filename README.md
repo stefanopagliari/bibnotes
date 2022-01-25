@@ -48,6 +48,7 @@ By default the plugin will export both the metadata and the notes stored in Zote
     - {{itemType}} 
     - {{author}} 
     - {{editor}} 
+    - {{creator}}: all the individual listed as creators, including authors, editors, etc...
     - {{translator}}
     - {{publisher}}
     - {{place}}

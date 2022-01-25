@@ -106,8 +106,6 @@ export const templateAdmonition = "# {{title}}\n" +
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	bibPath: "",
-	exportMetadata: true,
-	exportAnnotations: true,
 	templateContent: templatePlain,
 	templatePath: "",
 	templateType: "Admonition",

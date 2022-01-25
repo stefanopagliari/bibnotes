@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.  
 
-## [0.9.08]
+## [0.9.10]
 ### Improvement
 - Added setting to activate "debugging mode". This will print the console log from the processing of an entry into a txt file that can be easily shared to debug a problem with the plugin
 - Added setting to place the comments made to an highlight in front of the text of the highlight the default option
@@ -13,10 +13,9 @@ All notable changes to this project will be documented in this file.
 - Fixed filepath of images on Windows  
 - Fixed filepath of images on Linux (thanks to @MichaBrugger)
 - Fixed bug related to the formatting of comments
-
-## [0.9.01]
-### Bugs
 - Fixed filepath of images on Windows  
+- Fixed bug that prevented export of user-notes when there was no PDF attached to the same note 
+
 
 ## [0.9] 
 

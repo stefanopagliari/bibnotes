@@ -78,35 +78,11 @@ export class SettingTab extends PluginSettingTab {
 		);	
 
 		
-		new Setting(settingsExport)
-			.setName("Extract Metadata")
-			.setDesc(
-				'Select "Yes" to extract the metadata at the beginning of the note, "No" to extract only the title and the author/s'
-			)
-			.addToggle((text) =>
-				text
-					.setValue(settings.exportMetadata)
-					.onChange(async (value) => {
-						settings.exportMetadata = value;
-						await plugin.saveSettings();
-						this.display();
-					})
-			);
+
 		
-			new Setting(settingsExport)
-			.setName("Extract Annotations")
-			.addToggle((text) =>
-				text
-					.setValue(settings.exportAnnotations)
-					.onChange(async (value) => {
-						settings.exportAnnotations = value;
-						await plugin.saveSettings();
-						this.display();
-					})
-			);
 
 
-		if (settings.exportMetadata) {
+		
 
 			new Setting(settingsExport)
 				.setName("Select Template")
@@ -217,8 +193,7 @@ export class SettingTab extends PluginSettingTab {
 				)
 			)
 
-		}
-		if (settings.exportAnnotations) {
+	
 
 			new Setting(settingsExport)
 			.setName("Save Manual Edits")
@@ -462,8 +437,7 @@ export class SettingTab extends PluginSettingTab {
 							await plugin.saveSettings();
 						})
 				);
-		}
-		if (settings.exportAnnotations) {
+		
 			containerEl.createEl('h3', {text: 'Comments'});
 			const settingsComments: HTMLDetailsElement =
 				containerEl.createEl("details");
@@ -561,7 +535,6 @@ export class SettingTab extends PluginSettingTab {
 						})
 				);
 
-			if (settings.exportAnnotations) {
 				containerEl.createEl('h3', {text: 'Additional Transformations'});
 				const settingsAdvanced: HTMLDetailsElement =
 					containerEl.createEl("details");
@@ -922,7 +895,7 @@ export class SettingTab extends PluginSettingTab {
 						await plugin.saveSettings();
 					})); 		
  
-			}
+			
 			containerEl.createEl('h2', {text: 'Import Images'});
 		
 
@@ -1005,7 +978,7 @@ export class SettingTab extends PluginSettingTab {
 							}
 						);
 					}
-			}	
+				
 			containerEl.createEl('h2', {text: 'Debugging'});
 		
 

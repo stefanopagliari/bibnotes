@@ -44,6 +44,7 @@ import {
 	replaceTagList,
 	replaceTemplate,
 	makeTags,
+	createCreatorAllList,
 } from "./utils";
 
 export default class MyPlugin extends Plugin {
@@ -206,6 +207,14 @@ export default class MyPlugin extends Plugin {
 		note = createCreatorList(
 			selectedEntry.creators,
 			"editor",
+			note,
+			this.settings.multipleFieldsDivider,
+			this.settings.nameFormat
+		);
+
+		//Replace the creators (authors+editors+everybodyelse)
+		note = createCreatorAllList(
+			selectedEntry.creators,
 			note,
 			this.settings.multipleFieldsDivider,
 			this.settings.nameFormat
@@ -1465,16 +1474,13 @@ export default class MyPlugin extends Plugin {
 		let extractedAnnotationsMagenta = "";
 		let extractedImages = "";
 		let extractedUserNote = "";
-		//console.log(selectedEntry.notes.length)
 
+
+		//Check the path to the data folder
 		if (
-			this.settings.exportAnnotations &&
-			selectedEntry.notes.length > 0 &&
 			selectedEntry.attachments[0] !== undefined
 		) {
-			//run the function to parse the annotation for each note (there could be more than one)
-			let noteElements: AnnotationElements[] = [];
-			let userNoteElements: AnnotationElements[] = [];
+
 
 			//identify the folder on the local computer where zotero/storage is found
 			//first look into the same path as the pdf attachment
@@ -1485,8 +1491,7 @@ export default class MyPlugin extends Plugin {
 			const zoteroStorageMac = new RegExp(
 				/.+?(?=Zotero\/storage)Zotero\/storage\//gm
 			);
-			console.log(selectedEntry.attachments[0].path)
-			console.log(zoteroStorageMac.test(selectedEntry.attachments[0].path))
+
 			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)) {
 				pathZoteroStorage = String(
 					selectedEntry.attachments[0].path.match(zoteroStorageMac)
@@ -1523,8 +1528,13 @@ export default class MyPlugin extends Plugin {
 				}
 			}
 			this.pathZoteroStorage = pathZoteroStorage;
-			console.log(pathZoteroStorage);
 			this.zoteroBuildWindows = zoteroBuildWindows;
+		}
+
+		//run the function to parse the annotation for each note (there could be more than one)
+		let noteElements: AnnotationElements[] = [];
+		let userNoteElements: AnnotationElements[] = [];
+		if	(selectedEntry.notes.length >0 ){
 
 			for (
 				let indexNote = 0;
@@ -1566,9 +1576,10 @@ export default class MyPlugin extends Plugin {
 					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
 
-				if (extractionType === "UserNote") {
+				if (extractionType === "UserNote" || extractionType === "Other" ) { 
 					noteElementsSingle =
 						this.parseAnnotationLinesintoElementsUserNote(note);
+						console.log(noteElementsSingle)
 					userNoteElements =
 						userNoteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
@@ -1615,7 +1626,6 @@ export default class MyPlugin extends Plugin {
 				(note) => note.rowEdited
 			);
 			extractedUserNote = extractedUserNoteArray.join("\n");
-
 			//
 		}
 
@@ -2082,6 +2092,7 @@ export default class MyPlugin extends Plugin {
 			"{{PDFNotes}}",
 			resultAnnotations.extractedAnnotations
 		);
+
 		litnote = litnote.replace(
 			"{{UserNotes}}",
 			resultAnnotations.extractedUserNote
