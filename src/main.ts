@@ -331,7 +331,7 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//Extract the colour
-			console.log(extractedText);
+			
 			if (extractedText.startsWith("(Yellow) - ")) {
 				lineElements.highlightColour = "yellow";
 				extractedText = extractedText.replace("(Yellow) - ", "");
@@ -394,10 +394,7 @@ export default class MyPlugin extends Plugin {
 					)
 				);
 				lineElements.zoteroBackLink = zoteroBackLink;
-				console.log(
-					"lineElements.zoteroBackLink: " +
-						lineElements.zoteroBackLink
-				);
+
 			}
 
 			//Extract the page of the annotation in the publication
@@ -1006,7 +1003,8 @@ export default class MyPlugin extends Plugin {
 		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
 			let lineElements = noteElements[i];
-			// console.log(lineElements)
+			console.log("Line before processing: " + lineElements.rowEdited)
+			console.log("CUSTOM commentPrepend: " + commentPrepend )
 
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements);
@@ -1313,6 +1311,7 @@ export default class MyPlugin extends Plugin {
 
 			//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
 			if (lineElements.annotationType === "noKey") {
+				console.log("lineElements.annotationType === noKey")
 				if (lineElements.highlightText !== "") {
 					lineElements.rowEdited =
 						highlightPrepend +
@@ -1335,15 +1334,19 @@ export default class MyPlugin extends Plugin {
 					lineElements.highlightText === "" &&
 					lineElements.commentText !== ""
 				) {
+					console.log("empty highlightText - value in commentText")
+					console.log(lineElements.rowEdited)
+
 					lineElements.rowEdited =
 						commentPrepend +
 						commentFormatBefore +
 						lineElements.commentText +
 						commentFormatAfter +
 						lineElements.zoteroBackLink;
+					console.log(lineElements.rowEdited)	
 				}
 			}
-
+			console.log(lineElements)
 			//Copy the edited text into an array to be exported
 			noteElementsArray.push(lineElements);
 		}
@@ -1360,7 +1363,7 @@ export default class MyPlugin extends Plugin {
 				//console.log("indexRowsToBeRemoved : "+ index)
 				noteElementsArray.splice(indexRowsToBeRemoved[index], 1);
 			}
-		}
+		} 
 
 		//Add rowEdited into different arrays for the export
 		for (let index = 0; index < noteElementsArray.length; index++) {
