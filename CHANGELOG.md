@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.10]
 ### Improvement
+- Added placeholder for {{creator}} which includes all the named entities (e.g. author, editor, etc...)
 - Added setting to activate "debugging mode". This will print the console log from the processing of an entry into a txt file that can be easily shared to debug a problem with the plugin
 - Added setting to place the comments made to an highlight in front of the text of the highlight the default option
 - Expanded the size of the text area to input the custom template (thanks to @MichaBrugger)

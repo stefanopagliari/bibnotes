@@ -185,11 +185,9 @@ export default class MyPlugin extends Plugin {
 	}
 
 	parseMetadata(selectedEntry: Reference, templateOriginal: string) {
-		const { exportMetadata } = this.settings;
-
+		
 		// Create Note from Template
-		// If setting exportMetadata is false, then replace Template with simply the title
-		const template = exportMetadata ? templateOriginal : "# {{title}}";
+		const template = templateOriginal
 
 		//Create Note
 		let note = template;
@@ -1013,7 +1011,7 @@ export default class MyPlugin extends Plugin {
 			lineElements = this.formatColourHighlight(lineElements);
 
 			//Extract the citation format from the settings
-			if (lineElements.extractionSource === "zotero") {
+			if (lineElements.extractionSource === "zotero" || lineElements.extractionSource === "zotfile" ) { 
 				if (
 					this.settings.highlightCitationsFormat ===
 						"Only page number" &&
@@ -1022,6 +1020,22 @@ export default class MyPlugin extends Plugin {
 					lineElements.citeKey =
 						"(p. " + lineElements.pageLabel + ")";
 				} else if (
+					this.settings.highlightCitationsFormat ===
+						"Pandoc" &&
+					lineElements.pageLabel !== undefined
+				) {
+					lineElements.citeKey =
+					"[@" + citeKey + ", p." + lineElements.pageLabel + "]"
+						
+				} else if (
+					this.settings.highlightCitationsFormat ===
+						"Pandoc" &&
+					lineElements.pageLabel === undefined
+				) {
+					lineElements.citeKey =
+					"[@" + citeKey + "]"
+				} 
+				else if (
 					this.settings.highlightCitationsFormat === "Empty" &&
 					lineElements.pageLabel !== undefined
 				) {
@@ -1033,15 +1047,28 @@ export default class MyPlugin extends Plugin {
 				this.settings.highlightCitationsLink === true &&
 				lineElements.zoteroBackLink.length > 0
 			) {
-				lineElements.citeKey =
-					"[" +
-					lineElements.citeKey +
-					"]" +
-					"(" +
-					lineElements.zoteroBackLink +
-					")";
-				lineElements.zoteroBackLink =
-					"[" + " " + "]" + "(" + lineElements.zoteroBackLink + ")";
+				if(this.settings.highlightCitationsFormat !==
+					"Pandoc"){
+						lineElements.citeKey =
+							"[" +
+							lineElements.citeKey +
+							"]" +
+							"(" +
+							lineElements.zoteroBackLink +
+							")";
+						lineElements.zoteroBackLink =
+							"[" + " " + "]" + "(" + lineElements.zoteroBackLink + ")";
+				} else {
+					lineElements.citeKey =
+							
+							lineElements.citeKey +
+							
+							" [](" +
+							lineElements.zoteroBackLink +
+							")";
+						lineElements.zoteroBackLink =
+							"[" + " " + "]" + "(" + lineElements.zoteroBackLink + ")";
+				}
 			} else {
 				lineElements.zoteroBackLink = "";
 			}
@@ -1095,11 +1122,9 @@ export default class MyPlugin extends Plugin {
 						})
 					);
 				
-					console.log("systemcheck: " + this.zoteroBuildWindows) 
-					if (this.zoteroBuildWindows == false){pathImageNew = "/" + pathImageNew}
-					console.log(pathImageOld);
-					console.log("pathImageNew after` systemcheck: "+ pathImageNew)
-
+					
+					if (this.zoteroBuildWindows != true){pathImageNew = "/" + pathImageNew}
+					 
 					//Check if the image exists within Zotero or already within the vault
 					if (
 						// replaced fs.existsSync with the obsidian adapter
@@ -1474,13 +1499,15 @@ export default class MyPlugin extends Plugin {
 		let extractedAnnotationsMagenta = "";
 		let extractedImages = "";
 		let extractedUserNote = "";
+		//console.log(selectedEntry.notes.length)
 
-
-		//Check the path to the data folder
 		if (
+			selectedEntry.notes.length > 0 &&
 			selectedEntry.attachments[0] !== undefined
 		) {
-
+			//run the function to parse the annotation for each note (there could be more than one)
+			let noteElements: AnnotationElements[] = [];
+			let userNoteElements: AnnotationElements[] = [];
 
 			//identify the folder on the local computer where zotero/storage is found
 			//first look into the same path as the pdf attachment
@@ -1491,7 +1518,8 @@ export default class MyPlugin extends Plugin {
 			const zoteroStorageMac = new RegExp(
 				/.+?(?=Zotero\/storage)Zotero\/storage\//gm
 			);
-
+			console.log(selectedEntry.attachments[0].path)
+			console.log(zoteroStorageMac.test(selectedEntry.attachments[0].path))
 			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)) {
 				pathZoteroStorage = String(
 					selectedEntry.attachments[0].path.match(zoteroStorageMac)
@@ -1528,13 +1556,8 @@ export default class MyPlugin extends Plugin {
 				}
 			}
 			this.pathZoteroStorage = pathZoteroStorage;
+			console.log(pathZoteroStorage);
 			this.zoteroBuildWindows = zoteroBuildWindows;
-		}
-
-		//run the function to parse the annotation for each note (there could be more than one)
-		let noteElements: AnnotationElements[] = [];
-		let userNoteElements: AnnotationElements[] = [];
-		if	(selectedEntry.notes.length >0 ){
 
 			for (
 				let indexNote = 0;
@@ -1576,10 +1599,9 @@ export default class MyPlugin extends Plugin {
 					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
 
-				if (extractionType === "UserNote" || extractionType === "Other" ) { 
+				if (extractionType === "UserNote") {
 					noteElementsSingle =
 						this.parseAnnotationLinesintoElementsUserNote(note);
-						console.log(noteElementsSingle)
 					userNoteElements =
 						userNoteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
@@ -1626,6 +1648,7 @@ export default class MyPlugin extends Plugin {
 				(note) => note.rowEdited
 			);
 			extractedUserNote = extractedUserNoteArray.join("\n");
+
 			//
 		}
 
@@ -2092,7 +2115,6 @@ export default class MyPlugin extends Plugin {
 			"{{PDFNotes}}",
 			resultAnnotations.extractedAnnotations
 		);
-
 		litnote = litnote.replace(
 			"{{UserNotes}}",
 			resultAnnotations.extractedUserNote
