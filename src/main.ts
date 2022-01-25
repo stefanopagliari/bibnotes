@@ -490,7 +490,7 @@ export default class MyPlugin extends Plugin {
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
 		note = note
-			// 	// 	// // Replace backticks
+			// Replace backticks
 			.replace(/`/g, "'")
 			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
 			.replace(/, p. p. /g, ", p. ")
@@ -509,10 +509,10 @@ export default class MyPlugin extends Plugin {
 			let selectedLine = String(
 				selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, "")
 			);
-			// 	// Replace backticks with single quote
+			// Replace backticks with single quote
 			selectedLine = replaceTemplate(selectedLine, "`", "'");
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
-			// 	// Correct encoding issues
+			// Correct encoding issues
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
 
 			//console.log("Line n." +indexLines + ": " + selectedLine)
@@ -528,7 +528,7 @@ export default class MyPlugin extends Plugin {
 				indexNote: undefined,
 				foundOld: undefined,
 				positionOld: undefined,
-				extractionSource: "userNote",
+				extractionSource: "UserNote",
 				colourTextBefore: "",
 				colourTextAfter: "",
 				imagePath: "",
@@ -549,11 +549,11 @@ export default class MyPlugin extends Plugin {
 	parseAnnotationLinesintoElementsZotero(note: string) {
 		// clean the entire annotation
 		note = note
-			// 	// .replace(
-			// 	// 	// Remove HTML tags
-			// 	// 	HTML_TAG_REG,
-			// 	// 	"")
-			// 	// 	// // Replace backticks
+			// .replace(
+			// 	Remove HTML tags
+			// 	HTML_TAG_REG,
+			// 	"")
+			// 	Replace backticks
 			.replace(/`/g, "'")
 			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
 			.replace(/, p. p. /g, ", p. ")
@@ -1595,7 +1595,7 @@ export default class MyPlugin extends Plugin {
 				) {
 					noteElementsSingle =
 						this.parseAnnotationLinesintoElementsUserNote(note);
-					console.log(noteElementsSingle);
+					// console.log(noteElementsSingle);
 					userNoteElements =
 						userNoteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
@@ -1642,7 +1642,6 @@ export default class MyPlugin extends Plugin {
 				(note) => note.rowEdited
 			);
 			extractedUserNote = extractedUserNoteArray.join("\n");
-			//
 		}
 
 		//Export both the extracted annotations, user annotation, and the keywords extracted in the object extractedNote

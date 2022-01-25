@@ -234,7 +234,6 @@ export const createCreatorAllList = (
 		const creator: Creator = creators[creatorindex]; //select the author
 		creatorList.push(formatCreatorsName(creator, nameFormat));
 	}
-	// console.log(creatorList);
 
 	const creatorListBracket = creatorList.map(makeWiki);
 	const creatorListQuotes = creatorList.map(makeQuotes);
