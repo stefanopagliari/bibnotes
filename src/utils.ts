@@ -257,6 +257,8 @@ export const createCreatorAllList = (
 			creatorListQuotes.join(divider)
 		);
 		note = replaceTemplate(note, `{{creator}}`, creatorList.join(divider));
+		note = replaceTemplate(note, `{{Creator}}`, creatorList.join(divider));
+
 
 		return note;
 	}

@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Added setting to place the comments made to an highlight in front of the text of the highlight the default option
 - Expanded the size of the text area to input the custom template (thanks to @MichaBrugger)
 - Replaced in the setting "Replace with NA" with "Replace with custom text", and added a field to specify the text to add in the case of a missing value.
+- Added support for exporting in-line references in a pandoc format ([@citationkey, p. pagenumber])
 
 ### Bugs
 - Fixed filepath of images on Windows  

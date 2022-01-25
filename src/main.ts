@@ -487,6 +487,8 @@ export default class MyPlugin extends Plugin {
 	}
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
+		console.log("parsing user note")
+
 		note = note
 			// Replace backticks
 			.replace(/`/g, "'")
@@ -1100,7 +1102,6 @@ export default class MyPlugin extends Plugin {
 				lineElements.rowEdited = "";
 				let pathImageOld = "";
 				let pathImageNew = "";
-				//console.log("this.settings.imagesImport: " + this.settings.imagesImpI'm ort)
 				if (this.settings.imagesImport) {
 					// Check if the user settings has approved the importing of images
 
@@ -1108,9 +1109,7 @@ export default class MyPlugin extends Plugin {
 						dir: this.pathZoteroStorage + lineElements.imagePath,
 						base: "image.png",
 					});
-					// console.log(
-					// 	"pathImageNew before systemcheck: " + pathImageNew
-					// );
+
 					pathImageNew = path.normalize(
 						path.format({
 							dir: normalizePath(
@@ -1127,7 +1126,7 @@ export default class MyPlugin extends Plugin {
 				
 					
 					if (this.zoteroBuildWindows != true){pathImageNew = "/" + pathImageNew}
-					 
+					
 					//Check if the image exists within Zotero or already within the vault
 					if (
 						// replaced fs.existsSync with the obsidian adapter
@@ -1521,8 +1520,7 @@ export default class MyPlugin extends Plugin {
 			const zoteroStorageMac = new RegExp(
 				/.+?(?=Zotero\/storage)Zotero\/storage\//gm
 			);
-			console.log(selectedEntry.attachments[0].path)
-			console.log(zoteroStorageMac.test(selectedEntry.attachments[0].path))
+
 			if (zoteroStorageMac.test(selectedEntry.attachments[0].path)) {
 				pathZoteroStorage = String(
 					selectedEntry.attachments[0].path.match(zoteroStorageMac)
@@ -1542,8 +1540,7 @@ export default class MyPlugin extends Plugin {
 				);
 				zoteroBuildWindows = true;
 			}
-			// console.log(pathZoteroStorage.length);
-			// console.log(selectedEntry);
+
 			if (
 				pathZoteroStorage.length == 0 &&
 				this.settings.zoteroStoragePathManual.length > 0
@@ -1602,7 +1599,7 @@ export default class MyPlugin extends Plugin {
 				if (extractionType === "Zotero") {
 					noteElementsSingle =
 						this.parseAnnotationLinesintoElementsZotero(note);
-					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
+					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one 
 				}
 
 				if (extractionType === "Zotfile") {
