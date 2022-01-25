@@ -136,77 +136,44 @@ export function orderByDateModified(a: Reference, b: Reference) {
 	return 0;
 }
 
-export function formatCreatorsName(creator:Creator, nameCustom:string){
-
+export function formatCreatorsName(creator: Creator, nameCustom: string) {
 	if (creator.hasOwnProperty("name")) {
 		nameCustom = nameCustom.replace("{{lastName}}", creator.name);
-		nameCustom = nameCustom.replace(
-			"; {{firstName}}",
-			creator.firstName
-		);
-		nameCustom = nameCustom.replace(
-			", {{firstName}}",
-			creator.firstName
-		);
-		nameCustom = nameCustom.replace(
-			"{{firstName}}",
-			creator.firstName
-		);
+		nameCustom = nameCustom.replace("; {{firstName}}", creator.firstName);
+		nameCustom = nameCustom.replace(", {{firstName}}", creator.firstName);
+		nameCustom = nameCustom.replace("{{firstName}}", creator.firstName);
 		nameCustom = nameCustom.trim();
-		return(nameCustom);
+		return nameCustom;
 	} else if (
 		creator.hasOwnProperty("lastName") &&
 		creator.hasOwnProperty("firstName")
 	) {
-		nameCustom = nameCustom.replace(
-			"{{lastName}}",
-			creator.lastName
-		);
-		nameCustom = nameCustom.replace(
-			"{{firstName}}",
-			creator.firstName
-		);
+		nameCustom = nameCustom.replace("{{lastName}}", creator.lastName);
+		nameCustom = nameCustom.replace("{{firstName}}", creator.firstName);
 		nameCustom = nameCustom.trim();
-		return(nameCustom);
+		return nameCustom;
 	} else if (
 		creator.hasOwnProperty("lastName") &&
 		!creator.hasOwnProperty("firstName")
 	) {
-		nameCustom = nameCustom.replace(
-			"{{lastName}}",
-			creator.lastName
-		);
-		nameCustom = nameCustom.replace(
-			"; {{firstName}}",
-			creator.firstName
-		);
-		nameCustom = nameCustom.replace(
-			", {{firstName}}",
-			creator.firstName
-		);
+		nameCustom = nameCustom.replace("{{lastName}}", creator.lastName);
+		nameCustom = nameCustom.replace("; {{firstName}}", creator.firstName);
+		nameCustom = nameCustom.replace(", {{firstName}}", creator.firstName);
 		nameCustom = nameCustom.replace("{{firstName}}", "");
 		nameCustom = nameCustom.trim();
-		return(nameCustom);
+		return nameCustom;
 	} else if (
 		!creator.hasOwnProperty("lastName") &&
 		creator.hasOwnProperty("firstName")
 	) {
-		nameCustom = nameCustom.replace(
-			"; {{lastName}}",
-			creator.firstName
-		);
-		nameCustom = nameCustom.replace(
-			", {{lastName}}",
-			creator.firstName
-		);
+		nameCustom = nameCustom.replace("; {{lastName}}", creator.firstName);
+		nameCustom = nameCustom.replace(", {{lastName}}", creator.firstName);
 		nameCustom = nameCustom.replace("{{lastName}}", "");
-		nameCustom = nameCustom.replace(
-			"{{firstName}}",
-			creator.firstName
-		);
+		nameCustom = nameCustom.replace("{{firstName}}", creator.firstName);
 		nameCustom = nameCustom.trim();
-		return(nameCustom);
-	}}
+		return nameCustom;
+	}
+}
 
 //Function that create an array with the creators of a given type (e.g. author, editor)
 export const createCreatorList = (
@@ -220,9 +187,11 @@ export const createCreatorList = (
 	for (let creatorindex = 0; creatorindex < creators.length; creatorindex++) {
 		const creator: Creator = creators[creatorindex]; //select the author
 
-		if (creator.creatorType === typeCreator) {creatorList.push(formatCreatorsName(creator, nameFormat));}
+		if (creator.creatorType === typeCreator) {
+			creatorList.push(formatCreatorsName(creator, nameFormat));
 		}
-	 
+	}
+
 	//console.log(creatorList)
 
 	const creatorListBracket = creatorList.map(makeWiki);
@@ -265,7 +234,7 @@ export const createCreatorAllList = (
 	const creatorList: string[] = [];
 	for (let creatorindex = 0; creatorindex < creators.length; creatorindex++) {
 		const creator: Creator = creators[creatorindex]; //select the author
-		creatorList.push(formatCreatorsName(creator, nameFormat))
+		creatorList.push(formatCreatorsName(creator, nameFormat));
 	}
 	//console.log(creatorList)
 
@@ -290,11 +259,7 @@ export const createCreatorAllList = (
 			`"{{creator}}"`,
 			creatorListQuotes.join(divider)
 		);
-		note = replaceTemplate(
-			note,
-			`{{creator}}`,
-			creatorList.join(divider)
-		);
+		note = replaceTemplate(note, `{{creator}}`, creatorList.join(divider));
 
 		return note;
 	}
@@ -395,7 +360,7 @@ export function createLocalFileLink(reference: Reference) {
 		const selectedfile: string =
 			"[" +
 			reference.attachments[attachmentindex].title +
-			"](file:/" +
+			"](file://" + // added an extra "/" to make it work on Linux
 			attachmentPathCorrected +
 			")"; //select the author
 

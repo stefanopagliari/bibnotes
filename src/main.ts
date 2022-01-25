@@ -455,7 +455,7 @@ export default class MyPlugin extends Plugin {
 				firstBlank = annotationCommentAll.length;
 			}
 			lineElements.commentText =
-				lineElements.annotationType === "noKey" 
+				lineElements.annotationType === "noKey"
 					? lineElements.commentText
 					: lineElements.commentText
 							.substring(
@@ -1078,10 +1078,12 @@ export default class MyPlugin extends Plugin {
 					// Check if the user settings has approved the importing of images
 
 					pathImageOld = path.format({
-						dir: this.pathZoteroStorage + lineElements.imagePath, 
+						dir: this.pathZoteroStorage + lineElements.imagePath,
 						base: "image.png",
 					});
-					console.log("pathImageNew before systemcheck: "+ pathImageNew)
+					// console.log(
+					// 	"pathImageNew before systemcheck: " + pathImageNew
+					// );
 					pathImageNew = path.normalize(
 						path.format({
 							dir: normalizePath(
@@ -1094,12 +1096,17 @@ export default class MyPlugin extends Plugin {
 								citeKey + "_" + lineElements.imagePath + ".png",
 						})
 					);
-				
-					console.log("systemcheck: " + this.zoteroBuildWindows) 
-					if (this.zoteroBuildWindows == false){pathImageNew = "/" + pathImageNew}
-					console.log(pathImageOld);
-					console.log("pathImageNew after` systemcheck: "+ pathImageNew)
 
+					//console.log("systemcheck: " + this.zoteroBuildWindows);
+					if (this.zoteroBuildWindows !== true) {
+						//console.log("this is not windows: " + pathImageNew);
+						pathImageNew = "/" + pathImageNew;
+					}
+					// console.log("pathImageOld: " + pathImageOld);
+					// console.log(
+					// 	"pathImageNew after` systemcheck: " + pathImageNew
+					// );
+					// console.log(navigator);
 					//Check if the image exists within Zotero or already within the vault
 					if (
 						// replaced fs.existsSync with the obsidian adapter
@@ -1107,6 +1114,7 @@ export default class MyPlugin extends Plugin {
 						fs.existsSync(pathImageNew)
 					) {
 						//if the settings is to link to the image in teh zotero folder
+						// console.log("before copy settings " + pathImageOld);
 						if (this.settings.imagesCopy === false) {
 							lineElements.rowEdited =
 								"![](file:///" + pathImageOld + ")";
@@ -1181,10 +1189,15 @@ export default class MyPlugin extends Plugin {
 				indexRowsToBeRemoved.push(i - 1);
 			}
 
-
 			//PREPEND COMMENT TO THE HIGHLIGHTED SENTENCE
 			//check the setting commentPrependDefault. If true, then everytime there is an highlight with a comment, prepend the comment to the highlight
-			if(this.settings.commentPrependDefault=== true && lineElements.highlightText !== "" && lineElements.commentText !== ""){lineElements.annotationType = "typeCommentPrepend"} 
+			if (
+				this.settings.commentPrependDefault === true &&
+				lineElements.highlightText !== "" &&
+				lineElements.commentText !== ""
+			) {
+				lineElements.annotationType = "typeCommentPrepend";
+			}
 			//commentPrependDefault
 			if (lineElements.annotationType === "typeCommentPrepend") {
 				//add the comment before the highlight
@@ -1297,15 +1310,13 @@ export default class MyPlugin extends Plugin {
 					lineElements.commentText !== ""
 				) {
 					lineElements.rowEdited =
-						commentPrepend + 
+						commentPrepend +
 						commentFormatBefore +
 						lineElements.commentText +
 						commentFormatAfter +
 						lineElements.zoteroBackLink;
 				}
 			}
-
-	
 
 			//Copy the edited text into an array to be exported
 			noteElementsArray.push(lineElements);
@@ -1475,13 +1486,10 @@ export default class MyPlugin extends Plugin {
 		let extractedImages = "";
 		let extractedUserNote = "";
 
+		// console.log(selectedEntry);
 
 		//Check the path to the data folder
-		if (
-			selectedEntry.attachments[0] !== undefined
-		) {
-
-
+		if (selectedEntry.attachments[0] !== undefined) {
 			//identify the folder on the local computer where zotero/storage is found
 			//first look into the same path as the pdf attachment
 			let pathZoteroStorage = "";
@@ -1500,21 +1508,27 @@ export default class MyPlugin extends Plugin {
 			}
 
 			const zoteroStorageWindows = new RegExp(
-				/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm 
+				/.+?(?=Zotero\\storage\\)Zotero\\storage\\/gm
 			);
-			console.log(zoteroStorageWindows.test(selectedEntry.attachments[0].path))
+			// console.log(
+			// 	zoteroStorageWindows.test(selectedEntry.attachments[0].path)
+			// );
 			if (zoteroStorageWindows.test(selectedEntry.attachments[0].path)) {
-				pathZoteroStorage = String(selectedEntry.attachments[0].path.match(zoteroStorageWindows)
+				pathZoteroStorage = String(
+					selectedEntry.attachments[0].path.match(
+						zoteroStorageWindows
+					)
 				);
 				zoteroBuildWindows = true;
 			}
-			console.log(pathZoteroStorage.length);
+			// console.log(pathZoteroStorage.length);
+			// console.log(selectedEntry);
 			if (
 				pathZoteroStorage.length == 0 &&
 				this.settings.zoteroStoragePathManual.length > 0
 			) {
 				pathZoteroStorage = this.settings.zoteroStoragePathManual;
-				if (pathZoteroStorage.toLowerCase(). endsWith("\\zotero")) {
+				if (pathZoteroStorage.toLowerCase().endsWith("\\zotero")) {
 					pathZoteroStorage = pathZoteroStorage + "\\storage\\";
 				}
 				if (pathZoteroStorage.toLowerCase().endsWith("\\zotero\\")) {
@@ -1534,8 +1548,7 @@ export default class MyPlugin extends Plugin {
 		//run the function to parse the annotation for each note (there could be more than one)
 		let noteElements: AnnotationElements[] = [];
 		let userNoteElements: AnnotationElements[] = [];
-		if	(selectedEntry.notes.length >0 ){
-
+		if (selectedEntry.notes.length > 0) {
 			for (
 				let indexNote = 0;
 				indexNote < selectedEntry.notes.length;
@@ -1576,10 +1589,13 @@ export default class MyPlugin extends Plugin {
 					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
 
-				if (extractionType === "UserNote" || extractionType === "Other" ) { 
+				if (
+					extractionType === "UserNote" ||
+					extractionType === "Other"
+				) {
 					noteElementsSingle =
 						this.parseAnnotationLinesintoElementsUserNote(note);
-						console.log(noteElementsSingle)
+					console.log(noteElementsSingle);
 					userNoteElements =
 						userNoteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
