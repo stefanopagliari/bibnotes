@@ -919,10 +919,8 @@ export default class MyPlugin extends Plugin {
 		if (lineElements.highlightColour == "magenta") {
 			colourTransformation = this.settings.colourMagentaText;
 		}
-		//console.log("colourTransformation = "+ colourTransformation);
 
-		//extract from the transformation from the highlight
-		console.log(colourTransformation);
+	//extract the transformation from the highlight colour
 		if (lineElements.annotationType == "noKey") {
 			if (colourTransformation.toLowerCase() === "h1") {
 				lineElements.annotationType = "typeH1";
@@ -946,7 +944,8 @@ export default class MyPlugin extends Plugin {
 				lineElements.annotationType = "typeTask";
 			}
 		}
-		//extract the text to be pre-pended/appended
+    
+	//extract the text to be pre-pended/appended
 		if (colourTransformation.includes("{{highlight}}")) {
 			lineElements.colourTextBefore = String(
 				colourTransformation.match(/.+?(?={{highlight}})/)
@@ -1026,7 +1025,7 @@ export default class MyPlugin extends Plugin {
 					lineElements.pageLabel !== undefined
 				) {
 					lineElements.citeKey =
-						"[@" + citeKey + ", p." + lineElements.pageLabel + "]";
+					"[@" + citeKey + ", p. " + lineElements.pageLabel + "]"
 				} else if (
 					this.settings.highlightCitationsFormat === "Pandoc" &&
 					lineElements.pageLabel === undefined
