@@ -185,9 +185,8 @@ export default class MyPlugin extends Plugin {
 	}
 
 	parseMetadata(selectedEntry: Reference, templateOriginal: string) {
-		
 		// Create Note from Template
-		const template = templateOriginal
+		const template = templateOriginal;
 
 		//Create Note
 		let note = template;
@@ -484,7 +483,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
-		console.log("parsing user note")
+		console.log("parsing user note");
 
 		note = note
 			// Replace backticks
@@ -920,9 +919,8 @@ export default class MyPlugin extends Plugin {
 		if (lineElements.highlightColour == "magenta") {
 			colourTransformation = this.settings.colourMagentaText;
 		}
-		//console.log("colourTransformation = "+ colourTransformation);
 
-		//extract the transformation from the highlight colour
+	//extract the transformation from the highlight colour
 		if (lineElements.annotationType == "noKey") {
 			if (colourTransformation.toLowerCase() === "h1") {
 				lineElements.annotationType = "typeH1";
@@ -945,21 +943,21 @@ export default class MyPlugin extends Plugin {
 			} else if (colourTransformation.toLowerCase() === "task") {
 				lineElements.annotationType = "typeTask";
 			}
-
-			//extract the text to be pre-pended/appended
-			else if (colourTransformation.includes("{{highlight}}")) {
-				lineElements.colourTextBefore = String(
-					colourTransformation.match(/.+?(?={{highlight}})/)
-				);
-				if (lineElements.colourTextBefore == "null") {
-					lineElements.colourTextBefore = "";
-				}
-				lineElements.colourTextAfter = String(
-					colourTransformation.match(/(?<={{highlight}}).*$/)
-				);
-				if (lineElements.colourTextAfter == "null") {
-					lineElements.colourTextAfter = "";
-				}
+		}
+    
+	//extract the text to be pre-pended/appended
+		if (colourTransformation.includes("{{highlight}}")) {
+			lineElements.colourTextBefore = String(
+				colourTransformation.match(/.+?(?={{highlight}})/)
+			);
+			if (lineElements.colourTextBefore == "null") {
+				lineElements.colourTextBefore = "";
+			}
+			lineElements.colourTextAfter = String(
+				colourTransformation.match(/(?<={{highlight}}).*$/)
+			);
+			if (lineElements.colourTextAfter == "null") {
+				lineElements.colourTextAfter = "";
 			}
 		}
 
@@ -1011,7 +1009,10 @@ export default class MyPlugin extends Plugin {
 			lineElements = this.formatColourHighlight(lineElements);
 
 			//Extract the citation format from the settings
-			if (lineElements.extractionSource === "zotero" || lineElements.extractionSource === "zotfile" ) { 
+			if (
+				lineElements.extractionSource === "zotero" ||
+				lineElements.extractionSource === "zotfile"
+			) {
 				if (
 					this.settings.highlightCitationsFormat ===
 						"Only page number" &&
@@ -1020,22 +1021,17 @@ export default class MyPlugin extends Plugin {
 					lineElements.citeKey =
 						"(p. " + lineElements.pageLabel + ")";
 				} else if (
-					this.settings.highlightCitationsFormat ===
-						"Pandoc" &&
+					this.settings.highlightCitationsFormat === "Pandoc" &&
 					lineElements.pageLabel !== undefined
 				) {
 					lineElements.citeKey =
 					"[@" + citeKey + ", p. " + lineElements.pageLabel + "]"
-						
 				} else if (
-					this.settings.highlightCitationsFormat ===
-						"Pandoc" &&
+					this.settings.highlightCitationsFormat === "Pandoc" &&
 					lineElements.pageLabel === undefined
 				) {
-					lineElements.citeKey =
-					"[@" + citeKey + "]"
-				} 
-				else if (
+					lineElements.citeKey = "[@" + citeKey + "]";
+				} else if (
 					this.settings.highlightCitationsFormat === "Empty" &&
 					lineElements.pageLabel !== undefined
 				) {
@@ -1047,27 +1043,34 @@ export default class MyPlugin extends Plugin {
 				this.settings.highlightCitationsLink === true &&
 				lineElements.zoteroBackLink.length > 0
 			) {
-				if(this.settings.highlightCitationsFormat !==
-					"Pandoc"){
-						lineElements.citeKey =
-							"[" +
-							lineElements.citeKey +
-							"]" +
-							"(" +
-							lineElements.zoteroBackLink +
-							")";
-						lineElements.zoteroBackLink =
-							"[" + " " + "]" + "(" + lineElements.zoteroBackLink + ")";
+				if (this.settings.highlightCitationsFormat !== "Pandoc") {
+					lineElements.citeKey =
+						"[" +
+						lineElements.citeKey +
+						"]" +
+						"(" +
+						lineElements.zoteroBackLink +
+						")";
+					lineElements.zoteroBackLink =
+						"[" +
+						" " +
+						"]" +
+						"(" +
+						lineElements.zoteroBackLink +
+						")";
 				} else {
 					lineElements.citeKey =
-							
-							lineElements.citeKey +
-							
-							" [](" +
-							lineElements.zoteroBackLink +
-							")";
-						lineElements.zoteroBackLink =
-							"[" + " " + "]" + "(" + lineElements.zoteroBackLink + ")";
+						lineElements.citeKey +
+						" [](" +
+						lineElements.zoteroBackLink +
+						")";
+					lineElements.zoteroBackLink =
+						"[" +
+						" " +
+						"]" +
+						"(" +
+						lineElements.zoteroBackLink +
+						")";
 				}
 			} else {
 				lineElements.zoteroBackLink = "";
@@ -1121,10 +1124,10 @@ export default class MyPlugin extends Plugin {
 						})
 					);
 
-				
-					
-					if (this.zoteroBuildWindows != true){pathImageNew = "/" + pathImageNew}
-					
+					if (this.zoteroBuildWindows != true) {
+						pathImageNew = "/" + pathImageNew;
+					}
+
 					//Check if the image exists within Zotero or already within the vault
 					if (
 						// replaced fs.existsSync with the obsidian adapter
@@ -1196,6 +1199,7 @@ export default class MyPlugin extends Plugin {
 				noteElements[i].rowEdited =
 					noteElements[i - 1].rowEdited +
 					" ... " +
+					this.settings.highlightCustomTextBefore +
 					colourTextBefore +
 					highlightFormatBefore +
 					lineElements.highlightText +
@@ -1316,6 +1320,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatAfter +
 						lineElements.citeKey +
 						colourTextAfter;
+					console.log(lineElements);
 					if (lineElements.commentText !== "") {
 						lineElements.rowEdited =
 							lineElements.rowEdited +
@@ -1510,10 +1515,8 @@ export default class MyPlugin extends Plugin {
 		let extractedUserNote = "";
 		//console.log(selectedEntry.notes.length)
 
-	
 		//Check the path to the data folder
 		if (selectedEntry.attachments[0] !== undefined) {
-
 			//identify the folder on the local computer where zotero/storage is found
 			//first look into the same path as the pdf attachment
 			let pathZoteroStorage = "";
@@ -1571,7 +1574,6 @@ export default class MyPlugin extends Plugin {
 		let noteElements: AnnotationElements[] = [];
 		let userNoteElements: AnnotationElements[] = [];
 		if (selectedEntry.notes.length > 0) {
-
 			for (
 				let indexNote = 0;
 				indexNote < selectedEntry.notes.length;
@@ -1602,7 +1604,7 @@ export default class MyPlugin extends Plugin {
 				if (extractionType === "Zotero") {
 					noteElementsSingle =
 						this.parseAnnotationLinesintoElementsZotero(note);
-					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one 
+					noteElements = noteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
 
 				if (extractionType === "Zotfile") {
