@@ -44,6 +44,7 @@ By default the plugin will export both the metadata and the notes stored in Zote
 - **Template**: It is possible to select among two existing templates (one presenting the metadata as a simple list and the other wrapping the information into boxes using the Admonition plugin) or to or provide a custom template (see below). 
 - **Fields**: It is possible to include in your custom template all the fields found in the Better Bibtex json file, as well as additional ones created by the plugin. These include:
     - {{title}}
+    - {{shortTitle}}
     - {{citekey}} 
     - {{itemType}} 
     - {{author}} 
