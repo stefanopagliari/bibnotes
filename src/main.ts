@@ -922,7 +922,7 @@ export default class MyPlugin extends Plugin {
 		}
 		//console.log("colourTransformation = "+ colourTransformation);
 
-		//extract from the transformation from the highlight
+		//extract the transformation from the highlight colour
 		if (lineElements.annotationType == "noKey") {
 			if (colourTransformation.toLowerCase() === "h1") {
 				lineElements.annotationType = "typeH1";
@@ -1025,7 +1025,7 @@ export default class MyPlugin extends Plugin {
 					lineElements.pageLabel !== undefined
 				) {
 					lineElements.citeKey =
-					"[@" + citeKey + ", p." + lineElements.pageLabel + "]"
+					"[@" + citeKey + ", p. " + lineElements.pageLabel + "]"
 						
 				} else if (
 					this.settings.highlightCitationsFormat ===
