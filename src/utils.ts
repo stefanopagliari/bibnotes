@@ -139,7 +139,7 @@ export function orderByDateModified(a: Reference, b: Reference) {
 export function formatCreatorsName(creator: Creator, nameCustom: string) {
 	// when the creator only has a name (no first or last name) this works just fine
 	if (creator.hasOwnProperty("name")) {
-		nameCustom = `[[${creator.name}]]`;
+		nameCustom = creator.name;
 		nameCustom = nameCustom.trim();
 		return nameCustom;
 	} else if (
@@ -184,15 +184,19 @@ export const createCreatorList = (
 	const creatorList: string[] = [];
 	for (let creatorindex = 0; creatorindex < creators.length; creatorindex++) {
 		const creator: Creator = creators[creatorindex]; //select the author
+		console.log(creator)
 
 		if (creator.creatorType === typeCreator) {
 			creatorList.push(formatCreatorsName(creator, nameFormat));
 		}
+		console.log(creatorList)
 	}
 
 	// console.log(creatorList);
 
 	const creatorListBracket = creatorList.map(makeWiki);
+	console.log(creatorListBracket) 
+
 	const creatorListQuotes = creatorList.map(makeQuotes);
 
 	//add a space after the divided if it is not present
