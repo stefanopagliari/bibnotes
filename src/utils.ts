@@ -184,18 +184,14 @@ export const createCreatorList = (
 	const creatorList: string[] = [];
 	for (let creatorindex = 0; creatorindex < creators.length; creatorindex++) {
 		const creator: Creator = creators[creatorindex]; //select the author
-		console.log(creator)
-
 		if (creator.creatorType === typeCreator) {
 			creatorList.push(formatCreatorsName(creator, nameFormat));
 		}
-		console.log(creatorList)
 	}
 
 	// console.log(creatorList);
 
 	const creatorListBracket = creatorList.map(makeWiki);
-	console.log(creatorListBracket) 
 
 	const creatorListQuotes = creatorList.map(makeQuotes);
 
@@ -293,6 +289,7 @@ export function replaceMissingFields(
 	missingfield: string,
 	missingfieldreplacement: string
 ) {
+	console.log(note)
 	let copy = note.slice();
 	if (missingfield === "Replace with custom text") {
 		copy = copy
@@ -304,6 +301,8 @@ export function replaceMissingFields(
 		const lines = copy.split(/\r?\n/);
 		// 	run function to determine where we still have double curly brackets
 		for (let j = 0; j < lines.length; j++) {
+			console.log(lines[j])
+			console.log(lines[j].match(TEMPLATE_REG))
 			if (lines[j].match(TEMPLATE_REG)) {
 				lines.splice(j, 1);
 				j--;
@@ -311,6 +310,7 @@ export function replaceMissingFields(
 		}
 		copy = lines.join("\n");
 	}
+	console.log(copy)
 
 	//Remove empty sections when there is no data
 	copy = copy.replace("```ad-quote\n" + "title: Abstract\n" + "```\n", "");

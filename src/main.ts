@@ -483,7 +483,6 @@ export default class MyPlugin extends Plugin {
 	}
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
-		console.log("parsing user note");
 
 		note = note
 			// Replace backticks
@@ -540,6 +539,7 @@ export default class MyPlugin extends Plugin {
 
 			noteElements.push(lineElements);
 		}
+
 		return noteElements;
 	}
 	parseAnnotationLinesintoElementsZotero(note: string) {
@@ -1002,8 +1002,7 @@ export default class MyPlugin extends Plugin {
 		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
 			let lineElements = noteElements[i];
-			console.log("Line before processing: " + lineElements.rowEdited)
-			console.log("CUSTOM commentPrepend: " + commentPrepend )
+
 
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements);
@@ -1345,7 +1344,9 @@ export default class MyPlugin extends Plugin {
 					console.log(lineElements.rowEdited)	
 				}
 			}
-			console.log(lineElements)
+			
+
+
 			//Copy the edited text into an array to be exported
 			noteElementsArray.push(lineElements);
 		}
@@ -1522,6 +1523,8 @@ export default class MyPlugin extends Plugin {
 			let pathZoteroStorage = "";
 			let zoteroBuildWindows: boolean = undefined;
 
+			
+
 			//check if the base path where the attachment is stored is in Zotero/storage
 			const zoteroStorageMac = new RegExp(
 				/.+?(?=Zotero\/storage)Zotero\/storage\//gm
@@ -1573,13 +1576,19 @@ export default class MyPlugin extends Plugin {
 		//run the function to parse the annotation for each note (there could be more than one)
 		let noteElements: AnnotationElements[] = [];
 		let userNoteElements: AnnotationElements[] = [];
+		console.log(selectedEntry.notes.length)
 		if (selectedEntry.notes.length > 0) {
 			for (
 				let indexNote = 0;
 				indexNote < selectedEntry.notes.length;
 				indexNote++
 			) {
-				const note = selectedEntry.notes[indexNote].note;
+				let note = selectedEntry.notes[indexNote].note;
+
+				// Remove special characters that would break the replacement of the text in the template
+			//lineElements.rowEdited = lineElements.rowEdited.replaceAll("$>", '$$'); 
+				note = note.replaceAll("$&", '$ &'); 
+				console.log(note)
 
 				//Identify the extraction Type (Zotero vs. Zotfile)
 				let extractionType = undefined;
@@ -2126,15 +2135,21 @@ export default class MyPlugin extends Plugin {
 		);
 		bugout.log(resultAnnotations.noteElements);
 
+
 		//Replace annotations in the template
 		litnote = litnote.replace(
 			"{{PDFNotes}}",
 			resultAnnotations.extractedAnnotations
 		);
+		console.log(litnote)
 		litnote = litnote.replace(
 			"{{UserNotes}}",
 			resultAnnotations.extractedUserNote
 		);
+		console.log(resultAnnotations.extractedUserNote)
+		console.log(litnote)
+
+
 		litnote = litnote.replace(
 			"{{Yellow}}",
 			resultAnnotations.extractedAnnotationsYellow
@@ -2200,7 +2215,7 @@ export default class MyPlugin extends Plugin {
 			missingFieldSetting,
 			this.settings.missingfieldreplacement
 		);
-
+		console.log(litnote)
 		// Compare old note and new note
 		if (
 			this.settings.saveManualEdits !== "Overwrite Entire Note" &&

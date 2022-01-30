@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Fixed bug related to the formatting of comments
 - Fixed filepath of images on Windows  
 - Fixed bug that prevented export of user-notes when there was no PDF attached to the same note 
+- Fixed bug that preventex export of notes when $& was found in the text
 
 
 ## [0.9] 
