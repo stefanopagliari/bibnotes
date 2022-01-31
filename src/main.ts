@@ -1588,7 +1588,6 @@ export default class MyPlugin extends Plugin {
 				// Remove special characters that would break the replacement of the text in the template
 			//lineElements.rowEdited = lineElements.rowEdited.replaceAll("$>", '$$'); 
 				note = note.replaceAll("$&", '$ &'); 
-				console.log(note)
 
 				//Identify the extraction Type (Zotero vs. Zotfile)
 				let extractionType = undefined;
@@ -2141,13 +2140,11 @@ export default class MyPlugin extends Plugin {
 			"{{PDFNotes}}",
 			resultAnnotations.extractedAnnotations
 		);
-		console.log(litnote)
 		litnote = litnote.replace(
 			"{{UserNotes}}",
 			resultAnnotations.extractedUserNote
 		);
-		console.log(resultAnnotations.extractedUserNote)
-		console.log(litnote)
+
 
 
 		litnote = litnote.replace(
