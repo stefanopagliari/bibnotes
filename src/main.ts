@@ -2104,6 +2104,11 @@ export default class MyPlugin extends Plugin {
 			version?: string;
 		}
 	) {
+		//Extract the reference within bracket to faciliate comparison
+		const authorKey = createAuthorKey(selectedEntry.creators);
+		//set the authorkey field on the entry to use when creating the title
+		selectedEntry.authorKey = authorKey;
+
 		//create bugout to store and export logs in a file
 		let bugout = new Debugout({ realTimeLoggingOn: false });
 		if (this.settings.debugMode === true) {
@@ -2221,8 +2226,6 @@ export default class MyPlugin extends Plugin {
 			//Check if the settings in settings.saveManualEdits are TRUE. In that case compare existing file with new notes. If false don't look at existing note
 			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
 
-			//Extract the reference within bracket to faciliate comparison
-			const authorKey = createAuthorKey(selectedEntry.creators);
 			const existingNoteAll = String(fs.readFileSync(noteTitleFull));
 			litnote = this.compareOldNewNote(
 				existingNoteAll,
