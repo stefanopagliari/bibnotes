@@ -418,7 +418,7 @@ export class SettingTab extends PluginSettingTab {
 
 			new Setting(settingsHighlights)
 				.setName("Custom text before all highlights")
-				.addText((text) =>
+				.addTextArea((text) =>
 					text
 						.setValue(settings.highlightCustomTextBefore)
 						.onChange(async (value) => {
@@ -430,7 +430,7 @@ export class SettingTab extends PluginSettingTab {
 
 			new Setting(settingsHighlights)
 				.setName("Custom text after all highlights")
-				.addText((text) =>
+				.addTextArea((text) =>
 					text
 						.setValue(settings.highlightCustomTextAfter)
 						.onChange(async (value) => {
@@ -515,7 +515,7 @@ export class SettingTab extends PluginSettingTab {
 
 			new Setting(settingsComments)
 				.setName("Custom text before all comments")
-				.addText((text) =>
+				.addTextArea((text) =>
 					text
 						.setValue(settings.commentCustomTextBefore)
 						.onChange(async (value) => {
@@ -527,7 +527,7 @@ export class SettingTab extends PluginSettingTab {
 
 			new Setting(settingsComments)
 				.setName("Custom text after all comments")
-				.addText((text) =>
+				.addTextArea((text) =>
 					text
 						.setValue(settings.commentCustomTextAfter)
 						.onChange(async (value) => {

@@ -1308,6 +1308,7 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
+			//OR WITHOUT ANY SPECIAL CONSIDERATIONS
 			if (lineElements.annotationType === "noKey") {
 				console.log("lineElements.annotationType === noKey")
 				if (lineElements.highlightText !== "") {
@@ -1323,6 +1324,7 @@ export default class MyPlugin extends Plugin {
 					if (lineElements.commentText !== "") {
 						lineElements.rowEdited =
 							lineElements.rowEdited +
+							commentPrepend +
 							commentFormatBefore +
 							lineElements.commentText +
 							commentFormatAfter;
