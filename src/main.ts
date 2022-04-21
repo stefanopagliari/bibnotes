@@ -1044,33 +1044,11 @@ export default class MyPlugin extends Plugin {
 				lineElements.zoteroBackLink.length > 0
 			) {
 				if (this.settings.highlightCitationsFormat !== "Pandoc") {
-					lineElements.citeKey =
-						"[" +
-						lineElements.citeKey +
-						"]" +
-						"(" +
-						lineElements.zoteroBackLink +
-						")";
-					lineElements.zoteroBackLink =
-						"[" +
-						" " +
-						"]" +
-						"(" +
-						lineElements.zoteroBackLink +
-						")";
+					lineElements.citeKey = "[" + lineElements.citeKey + "]" + "(" + lineElements.zoteroBackLink + ")";
+					lineElements.zoteroBackLink = "[" +	"Go to Zotero" + "]" + "(" + lineElements.zoteroBackLink +	")";
 				} else {
-					lineElements.citeKey =
-						lineElements.citeKey +
-						" [](" +
-						lineElements.zoteroBackLink +
-						")";
-					lineElements.zoteroBackLink =
-						"[" +
-						" " +
-						"]" +
-						"(" +
-						lineElements.zoteroBackLink +
-						")";
+					lineElements.citeKey = "[" + lineElements.citeKey + "](" + lineElements.zoteroBackLink + ")";
+					lineElements.zoteroBackLink = "[" + "Go to Zotero" + "]" + "(" + lineElements.zoteroBackLink + ")";
 				}
 			} else {
 				lineElements.zoteroBackLink = "";
@@ -1134,7 +1112,7 @@ export default class MyPlugin extends Plugin {
 						fs.existsSync(pathImageOld) ||
 						fs.existsSync(pathImageNew)
 					) {
-						//if the settings is to link to the image in teh zotero folder
+						//if the settings is to link to the image in the zotero folder
 						// console.log("before copy settings " + pathImageOld);
 						if (this.settings.imagesCopy === false) {
 							lineElements.rowEdited = "![](file://" + pathImageOld + ")" + lineElements.zoteroBackLink;
@@ -1151,7 +1129,6 @@ export default class MyPlugin extends Plugin {
 									}
 								);
 							}
-							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + lineElements.citeKey;
 							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + lineElements.zoteroBackLink;
 						}
 					} else {
@@ -1197,8 +1174,9 @@ export default class MyPlugin extends Plugin {
 					highlightFormatBefore +
 					lineElements.highlightText +
 					highlightFormatAfter +
-					lineElements.citeKey +
+					lineElements.zoteroBackLink +
 					colourTextAfter;
+
 
 				//Add the highlighted text to the previous one
 				indexRowsToBeRemoved.push(i - 1);
@@ -1226,7 +1204,7 @@ export default class MyPlugin extends Plugin {
 					highlightFormatBefore +
 					lineElements.highlightText +
 					highlightFormatAfter +
-					lineElements.citeKey +
+					lineElements.zoteroBackLink +
 					colourTextAfter;
 			}
 
@@ -1262,7 +1240,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatBefore +
 						lineElements.highlightText +
 						highlightFormatAfter +
-						lineElements.citeKey +
+						lineElements.zoteroBackLink +
 						colourTextAfter;
 				} else if (
 					lineElements.commentText == "" &&
@@ -1274,7 +1252,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatBefore +
 						lineElements.highlightText +
 						highlightFormatAfter +
-						lineElements.citeKey +
+						lineElements.zoteroBackLink +
 						colourTextAfter;
 				} else if (
 					lineElements.commentText !== "" &&
@@ -1312,7 +1290,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatBefore +
 						lineElements.highlightText +
 						highlightFormatAfter +
-						lineElements.citeKey +
+						lineElements.zoteroBackLink +
 						colourTextAfter;
 					console.log(lineElements);
 					if (lineElements.commentText !== "") {
