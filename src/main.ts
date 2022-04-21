@@ -225,7 +225,7 @@ export default class MyPlugin extends Plugin {
 		//Create field ZoteroLocalLibrary
 		if (selectedEntry.hasOwnProperty("select")) {
 			selectedEntry.localLibrary =
-				"[Zotero](" + selectedEntry.select + ")";
+				"(" + selectedEntry.select + ")";
 		}
 
 		//create field file
@@ -599,6 +599,7 @@ export default class MyPlugin extends Plugin {
 				pageLabel: undefined,
 				zoteroBackLink: "",
 				attachmentURI: "",
+				annotationKey: "",
 			};
 
 			//Record the extraction method
@@ -697,19 +698,19 @@ export default class MyPlugin extends Plugin {
 				}
 			}
 
-			//Create the zotero backlink
-			if (
-				lineElements.attachmentURI !== null &&
-				lineElements.pagePDF !== null
-			) {
-				lineElements.zoteroBackLink =
-					"zotero://open-pdf/library/items/" +
-					lineElements.attachmentURI +
-					"?page=" +
-					lineElements.pagePDF;
+			//Create the zotero backlink			
+			if (/"annotationKey":"[a-zA-Z0-9]+/gm.test(selectedLineOriginal)) {
+				let annotationKey = String(selectedLineOriginal.match(/"annotationKey":"[a-zA-Z0-9]+/gm));
+				if (annotationKey === null) {
+					lineElements.annotationKey = null;
+				} else {
+					annotationKey = annotationKey.replace(/"annotationKey":"/gm, "");
+					lineElements.annotationKey = annotationKey;
+				}
 			}
-
-			//zotero://open-pdf/library/items/TKT5MBJY?page=8
+			if (lineElements.attachmentURI !== null && lineElements.pagePDF !== null && lineElements.annotationKey !== null) {
+				lineElements.zoteroBackLink = "zotero://open-pdf/library/items/" + lineElements.attachmentURI + "?page=" + lineElements.pagePDF + "&annotation=" + lineElements.annotationKey;
+				//zotero://open-pdf/library/items/TKT5MBJY?page=8&annotation=J7DBQXWA
 
 			//Extract the citation within bracket
 			if (
@@ -1136,8 +1137,7 @@ export default class MyPlugin extends Plugin {
 						//if the settings is to link to the image in teh zotero folder
 						// console.log("before copy settings " + pathImageOld);
 						if (this.settings.imagesCopy === false) {
-							lineElements.rowEdited =
-								"![](file:///" + pathImageOld + ")";
+							lineElements.rowEdited = "![](file://" + pathImageOld + ")" + lineElements.zoteroBackLink;
 						}
 						//if the settings is to copy the image from Zotero to the Obsidian vault
 						else {
@@ -1151,14 +1151,8 @@ export default class MyPlugin extends Plugin {
 									}
 								);
 							}
-							lineElements.rowEdited =
-								"![[" +
-								citeKey +
-								"_" +
-								lineElements.imagePath +
-								".png" +
-								"]] " +
-								lineElements.citeKey;
+							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + lineElements.citeKey;
+							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + lineElements.zoteroBackLink;
 						}
 					} else {
 						new Notice(
