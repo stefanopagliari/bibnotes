@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.  
 
+## [0.9.14]
+### Improvement
+
 ## [0.9.10]
 ### Improvement
 - Added placeholder for {{creator}} which includes all the named entities (e.g. author, editor, etc...)
