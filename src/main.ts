@@ -225,7 +225,7 @@ export default class MyPlugin extends Plugin {
 		//Create field ZoteroLocalLibrary
 		if (selectedEntry.hasOwnProperty("select")) {
 			selectedEntry.localLibrary =
-				"[Zotero](" + selectedEntry.select + ")";
+				"(" + selectedEntry.select + ")";
 		}
 
 		//create field file
@@ -599,6 +599,7 @@ export default class MyPlugin extends Plugin {
 				pageLabel: undefined,
 				zoteroBackLink: "",
 				attachmentURI: "",
+				annotationKey: "",
 			};
 
 			//Record the extraction method
@@ -697,19 +698,19 @@ export default class MyPlugin extends Plugin {
 				}
 			}
 
-			//Create the zotero backlink
-			if (
-				lineElements.attachmentURI !== null &&
-				lineElements.pagePDF !== null
-			) {
-				lineElements.zoteroBackLink =
-					"zotero://open-pdf/library/items/" +
-					lineElements.attachmentURI +
-					"?page=" +
-					lineElements.pagePDF;
+			//Create the zotero backlink			
+			if (/"annotationKey":"[a-zA-Z0-9]+/gm.test(selectedLineOriginal)) {
+				let annotationKey = String(selectedLineOriginal.match(/"annotationKey":"[a-zA-Z0-9]+/gm));
+				if (annotationKey === null) {
+					lineElements.annotationKey = null;
+				} else {
+					annotationKey = annotationKey.replace(/"annotationKey":"/gm, "");
+					lineElements.annotationKey = annotationKey;
+				}
 			}
-
-			//zotero://open-pdf/library/items/TKT5MBJY?page=8
+			if (lineElements.attachmentURI !== null && lineElements.pagePDF !== null && lineElements.annotationKey !== null) {
+				lineElements.zoteroBackLink = "zotero://open-pdf/library/items/" + lineElements.attachmentURI + "?page=" + lineElements.pagePDF + "&annotation=" + lineElements.annotationKey;
+				//zotero://open-pdf/library/items/TKT5MBJY?page=8&annotation=J7DBQXWA
 
 			//Extract the citation within bracket
 			if (
@@ -1043,33 +1044,11 @@ export default class MyPlugin extends Plugin {
 				lineElements.zoteroBackLink.length > 0
 			) {
 				if (this.settings.highlightCitationsFormat !== "Pandoc") {
-					lineElements.citeKey =
-						"[" +
-						lineElements.citeKey +
-						"]" +
-						"(" +
-						lineElements.zoteroBackLink +
-						")";
-					lineElements.zoteroBackLink =
-						"[" +
-						" " +
-						"]" +
-						"(" +
-						lineElements.zoteroBackLink +
-						")";
+					lineElements.citeKey = "[" + lineElements.citeKey + "]" + "(" + lineElements.zoteroBackLink + ")";
+					lineElements.zoteroBackLink = "[" +	"Go to Zotero" + "]" + "(" + lineElements.zoteroBackLink +	")";
 				} else {
-					lineElements.citeKey =
-						lineElements.citeKey +
-						" [](" +
-						lineElements.zoteroBackLink +
-						")";
-					lineElements.zoteroBackLink =
-						"[" +
-						" " +
-						"]" +
-						"(" +
-						lineElements.zoteroBackLink +
-						")";
+					lineElements.citeKey = "[" + lineElements.citeKey + "](" + lineElements.zoteroBackLink + ")";
+					lineElements.zoteroBackLink = "[" + "Go to Zotero" + "]" + "(" + lineElements.zoteroBackLink + ")";
 				}
 			} else {
 				lineElements.zoteroBackLink = "";
@@ -1133,11 +1112,10 @@ export default class MyPlugin extends Plugin {
 						fs.existsSync(pathImageOld) ||
 						fs.existsSync(pathImageNew)
 					) {
-						//if the settings is to link to the image in teh zotero folder
+						//if the settings is to link to the image in the zotero folder
 						// console.log("before copy settings " + pathImageOld);
 						if (this.settings.imagesCopy === false) {
-							lineElements.rowEdited =
-								"![](file:///" + pathImageOld + ")";
+							lineElements.rowEdited = "![](file://" + pathImageOld + ")" + lineElements.zoteroBackLink;
 						}
 						//if the settings is to copy the image from Zotero to the Obsidian vault
 						else {
@@ -1151,14 +1129,7 @@ export default class MyPlugin extends Plugin {
 									}
 								);
 							}
-							lineElements.rowEdited =
-								"![[" +
-								citeKey +
-								"_" +
-								lineElements.imagePath +
-								".png" +
-								"]] " +
-								lineElements.citeKey;
+							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + lineElements.zoteroBackLink;
 						}
 					} else {
 						new Notice(
@@ -1203,8 +1174,9 @@ export default class MyPlugin extends Plugin {
 					highlightFormatBefore +
 					lineElements.highlightText +
 					highlightFormatAfter +
-					lineElements.citeKey +
+					lineElements.zoteroBackLink +
 					colourTextAfter;
+
 
 				//Add the highlighted text to the previous one
 				indexRowsToBeRemoved.push(i - 1);
@@ -1232,7 +1204,7 @@ export default class MyPlugin extends Plugin {
 					highlightFormatBefore +
 					lineElements.highlightText +
 					highlightFormatAfter +
-					lineElements.citeKey +
+					lineElements.zoteroBackLink +
 					colourTextAfter;
 			}
 
@@ -1268,7 +1240,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatBefore +
 						lineElements.highlightText +
 						highlightFormatAfter +
-						lineElements.citeKey +
+						lineElements.zoteroBackLink +
 						colourTextAfter;
 				} else if (
 					lineElements.commentText == "" &&
@@ -1280,7 +1252,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatBefore +
 						lineElements.highlightText +
 						highlightFormatAfter +
-						lineElements.citeKey +
+						lineElements.zoteroBackLink +
 						colourTextAfter;
 				} else if (
 					lineElements.commentText !== "" &&
@@ -1318,7 +1290,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatBefore +
 						lineElements.highlightText +
 						highlightFormatAfter +
-						lineElements.citeKey +
+						lineElements.zoteroBackLink +
 						colourTextAfter;
 					console.log(lineElements);
 					if (lineElements.commentText !== "") {
