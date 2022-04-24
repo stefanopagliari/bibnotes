@@ -302,6 +302,7 @@ export default class MyPlugin extends Plugin {
 				pageLabel: 0,
 				attachmentURI: "",
 				zoteroBackLink: "",
+				annotationKey: "",
 			};
 
 			//Extract the citeKey
@@ -533,6 +534,7 @@ export default class MyPlugin extends Plugin {
 				pageLabel: 0,
 				attachmentURI: "",
 				zoteroBackLink: "",
+				annotationKey: "",
 			};
 
 			lineElements.rowEdited = selectedLine;
