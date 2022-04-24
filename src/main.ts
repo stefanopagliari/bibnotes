@@ -225,6 +225,8 @@ export default class MyPlugin extends Plugin {
 		//Create field ZoteroLocalLibrary
 		if (selectedEntry.hasOwnProperty("select")) {
 			selectedEntry.localLibrary =
+				"[Zotero](" + selectedEntry.select + ")";
+			selectedEntry.localLibraryLink =
 				"(" + selectedEntry.select + ")";
 		}
 
@@ -711,7 +713,7 @@ export default class MyPlugin extends Plugin {
 			if (lineElements.attachmentURI !== null && lineElements.pagePDF !== null && lineElements.annotationKey !== null) {
 				lineElements.zoteroBackLink = "zotero://open-pdf/library/items/" + lineElements.attachmentURI + "?page=" + lineElements.pagePDF + "&annotation=" + lineElements.annotationKey;
 				//zotero://open-pdf/library/items/TKT5MBJY?page=8&annotation=J7DBQXWA
-
+			}
 			//Extract the citation within bracket
 			if (
 				/\(<span class="citation-item">.*<\/span>\)<\/span>/gm.test(
@@ -1044,11 +1046,33 @@ export default class MyPlugin extends Plugin {
 				lineElements.zoteroBackLink.length > 0
 			) {
 				if (this.settings.highlightCitationsFormat !== "Pandoc") {
-					lineElements.citeKey = "[" + lineElements.citeKey + "]" + "(" + lineElements.zoteroBackLink + ")";
-					lineElements.zoteroBackLink = "[" +	"Go to Zotero" + "]" + "(" + lineElements.zoteroBackLink +	")";
+					lineElements.citeKey =
+						"[" +
+						lineElements.citeKey +
+						"]" +
+						"(" +
+						lineElements.zoteroBackLink +
+						")";
+					lineElements.zoteroBackLink =
+						"[" +
+						" " +
+						"]" +
+						"(" +
+						lineElements.zoteroBackLink +
+						")";
 				} else {
-					lineElements.citeKey = "[" + lineElements.citeKey + "](" + lineElements.zoteroBackLink + ")";
-					lineElements.zoteroBackLink = "[" + "Go to Zotero" + "]" + "(" + lineElements.zoteroBackLink + ")";
+					lineElements.citeKey =
+						lineElements.citeKey +
+						" [](" +
+						lineElements.zoteroBackLink +
+						")";
+					lineElements.zoteroBackLink =
+						"[" +
+						" " +
+						"]" +
+						"(" +
+						lineElements.zoteroBackLink +
+						")";
 				}
 			} else {
 				lineElements.zoteroBackLink = "";
@@ -1290,7 +1314,7 @@ export default class MyPlugin extends Plugin {
 						highlightFormatBefore +
 						lineElements.highlightText +
 						highlightFormatAfter +
-						lineElements.zoteroBackLink +
+						lineElements.citeKey +
 						colourTextAfter;
 					console.log(lineElements);
 					if (lineElements.commentText !== "") {
