@@ -560,13 +560,13 @@ export default class MyPlugin extends Plugin {
 			.trim();
 
 		// Split the annotations into an array where each row is an entry
-		const lines = note.split(/<\/h1>|<\/p>/gm);
+		const lines = note.split(/<\/h1>|<\/p>|<h1>/gm);
 
 		const noteElements: AnnotationElements[] = [];
 
 		//Loop through the lines
 		const lengthLines = Object.keys(lines).length;
-		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
+		for (let indexLines = 1; indexLines < lengthLines; indexLines++) {
 			const selectedLineOriginal = unescape(lines[indexLines]);
 			// console.log(indexLines)
 			// console.log(selectedLineOriginal)
