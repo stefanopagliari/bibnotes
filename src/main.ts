@@ -424,10 +424,10 @@ export default class MyPlugin extends Plugin {
 			//Identify if the text is highlight or comment. if it is a comment extract the type of comment
 			const annotationCommentAll = "";
 			if (lineElements.citeKey.includes("(note on p.")) {
-				lineElements.commentText = extractedText.trim();
+				lineElements.commentText = extractedText;
 				lineElements.citeKey = "";
 			} else {
-				lineElements.highlightText = extractedText.trim();
+				lineElements.highlightText = extractedText;
 			}
 
 			// 	Extract the first word in the comment added to the annotation
