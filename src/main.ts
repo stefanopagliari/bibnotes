@@ -1193,8 +1193,7 @@ export default class MyPlugin extends Plugin {
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
 				noteElements[i].rowEdited =
-					noteElements[i - 1].rowEdited +
-					" ... " +
+					noteElements[i - 1].rowEdited.replace(/\[.*\)/, '').trim() +
 					this.settings.highlightCustomTextBefore +
 					colourTextBefore +
 					highlightFormatBefore +
