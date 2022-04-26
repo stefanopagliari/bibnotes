@@ -424,10 +424,10 @@ export default class MyPlugin extends Plugin {
 			//Identify if the text is highlight or comment. if it is a comment extract the type of comment
 			const annotationCommentAll = "";
 			if (lineElements.citeKey.includes("(note on p.")) {
-				lineElements.commentText = extractedText;
+				lineElements.commentText = extractedText.trim();
 				lineElements.citeKey = "";
 			} else {
-				lineElements.highlightText = extractedText;
+				lineElements.highlightText = extractedText.trim();
 			}
 
 			// 	Extract the first word in the comment added to the annotation
@@ -749,9 +749,8 @@ export default class MyPlugin extends Plugin {
 
 			//Extract the text of the annotation
 			if (endCiteKey !== 0) {
-				lineElements.highlightText = selectedLine
-					.substring(0, beginningCiteKey - 1)
-					.trim();
+				lineElements.highlightText = selectedLine.substring(0, beginningCiteKey - 1).trim();
+				lineElements.highlightText = lineElements.highlightText.replace(/((?<=\p{Unified_Ideograph})\s*(?=\p{Unified_Ideograph}))/ug, '');
 
 				// Remove quotation marks from annotationHighlight
 				["“", '"', "`", "'"].forEach(
@@ -1192,15 +1191,14 @@ export default class MyPlugin extends Plugin {
 
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
-				noteElements[i].rowEdited =
-					noteElements[i - 1].rowEdited.replace(/\[.*\)/, '').trim() +
+				noteElements[i].rowEdited = (noteElements[i - 1].rowEdited.replace(/\[.*\)/, '') +
 					this.settings.highlightCustomTextBefore +
 					colourTextBefore +
 					highlightFormatBefore +
 					lineElements.highlightText +
 					highlightFormatAfter +
 					lineElements.zoteroBackLink +
-					colourTextAfter;
+					colourTextAfter).replace(/((?<=\p{Unified_Ideograph})\s*(?=\p{Unified_Ideograph}))/ug, '');
 
 
 				//Add the highlighted text to the previous one
