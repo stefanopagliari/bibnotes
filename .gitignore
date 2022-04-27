@@ -1,3 +1,7 @@
+[submodule "path_to_submodule"] 
+path = bibnotes.wiki 
+url = git://https://github.com/stefanopagliari/bibnotes.git
+
 # vscode
 .vscode 
 
