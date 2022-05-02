@@ -1502,6 +1502,7 @@ export default class MyPlugin extends Plugin {
 		let extractedAnnotationsYellow = "";
 		let extractedAnnotationsRed = "";
 		let extractedAnnotationsGreen = "";
+		let extractedAnnotationsBlue = "";
 		let extractedAnnotationsPurple = "";
 		let extractedAnnotationsBlack = "";
 		let extractedAnnotationsWhite = "";
@@ -1650,6 +1651,8 @@ export default class MyPlugin extends Plugin {
 				resultsLineElements.highlightsRed.join("\n");
 			extractedAnnotationsGreen =
 				resultsLineElements.highlightsGreen.join("\n");
+			extractedAnnotationsBlue =
+				resultsLineElements.highlightsBlue.join("\n");
 			extractedAnnotationsPurple =
 				resultsLineElements.highlightsPurple.join("\n");
 			extractedAnnotationsBlack =
@@ -1681,6 +1684,7 @@ export default class MyPlugin extends Plugin {
 			extractedAnnotationsYellow: extractedAnnotationsYellow,
 			extractedAnnotationsRed: extractedAnnotationsRed,
 			extractedAnnotationsGreen: extractedAnnotationsGreen,
+			extractedAnnotationsBlue: extractedAnnotationsBlue,
 			extractedAnnotationsPurple: extractedAnnotationsPurple,
 			extractedAnnotationsBlack: extractedAnnotationsBlack,
 			extractedAnnotationsWhite: extractedAnnotationsWhite,
@@ -2160,6 +2164,10 @@ export default class MyPlugin extends Plugin {
 		litnote = litnote.replace(
 			"{{Green}}",
 			resultAnnotations.extractedAnnotationsGreen
+		);
+		litnote = litnote.replace(
+			"{{Blue}}",
+			resultAnnotations.extractedAnnotationsBlue
 		);
 		litnote = litnote.replace(
 			"{{Purple}}",
