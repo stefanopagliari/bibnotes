@@ -8,6 +8,8 @@ This plugin generates literaure notes from the source stored in your Zotero libr
 ## Installation
 The plugin is currently not not registered as a standard community plugin for downloading or updating within Obsidian. In order to install, you need to clone or unzip the latest release into your vault's .obsidian/plugins/ directory, then enabled in the Obsidian configuration.
 
+An alternative if you have the [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat/) installed: use `stefanopagliari/bibnotes` to add BibNotes Formatter as a Beta plugin, then enable it in the Community plugins tab.
+
 ## Importing your Zotero Library into Obsidian
 In order to import your references and notes from Zotero, you need to export your library as a "BetterBibTex JSON" format and save this file inside your vualt. To do to follow these steps:
 - install within Zotero the plugin ["Better BibTex for Zotero"](https://retorque.re/zotero-better-bibtex/installation/). For more information on how to install the plugin see the instructions on the [website of the plugin](https://retorque.re/zotero-better-bibtex/installation/).
