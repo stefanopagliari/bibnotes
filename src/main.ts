@@ -1176,7 +1176,6 @@ export default class MyPlugin extends Plugin {
 					}
 				}
 			}
-			console.log(lineElements.annotationType)
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
 				noteElements[i].rowEdited = (noteElements[i - 1].rowEdited.replace(/\[.*\)/, '') +
@@ -1379,8 +1378,7 @@ export default class MyPlugin extends Plugin {
 			if (selectedLine.annotationType === "typeImage") {
 				imagesArray.push(selectedLine.rowEdited);
 			}
-			console.log(selectedLine.annotationType)
-			console.log(selectedLine.rowEdited)
+		 
 
 		}
 
