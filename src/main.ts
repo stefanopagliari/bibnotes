@@ -474,8 +474,7 @@ export default class MyPlugin extends Plugin {
 						lineElements.annotationType;
 					noteElements[noteElements.length - 1].commentText =
 						lineElements.commentText;
-					// console.log(lineElements.annotationType)
-					// console.log(lineElements.commentText)
+
 
 					continue;
 				}
@@ -512,8 +511,6 @@ export default class MyPlugin extends Plugin {
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
 			// Correct encoding issues
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
-
-			//console.log("Line n." +indexLines + ": " + selectedLine)
 
 			const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -568,21 +565,17 @@ export default class MyPlugin extends Plugin {
 		const lengthLines = Object.keys(lines).length;
 		for (let indexLines = 1; indexLines < lengthLines; indexLines++) {
 			const selectedLineOriginal = unescape(lines[indexLines]);
-			// console.log(indexLines)
-			// console.log(selectedLineOriginal)
+		
 
 			//Remove HTML tags
 			let selectedLine = String(
 				selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, "")
 			);
-			// console.log(selectedLine)
 			// 	// Replace backticks with single quote
 			selectedLine = replaceTemplate(selectedLine, "`", "'");
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
 			// 	// Correct encoding issues
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
-
-			//console.log("Line n." +indexLines + ": " + selectedLine)
 
 			const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -739,13 +732,11 @@ export default class MyPlugin extends Plugin {
 			}
 			//Find the position where the CiteKey begins
 			const beginningCiteKey = selectedLine.indexOf(lineElements.citeKey);
-			//console.log("beginningCiteKey: " + beginningCiteKey)
 
 			//Find the position where the citekey ends
 			const endCiteKey =
 				selectedLine.indexOf(lineElements.citeKey) +
 				lineElements.citeKey.length;
-			//console.log("endCiteKey: " + endCiteKey)
 
 			//Extract the text of the annotation
 			if (endCiteKey !== 0) {
@@ -760,7 +751,6 @@ export default class MyPlugin extends Plugin {
 							lineElements.highlightText
 						))
 				);
-				//console.log("annotationHighlight after removeQuoteFromStart: "+ annotationHighlight);
 				["”", '"', "`", "'"].forEach(
 					(quote) =>
 						(lineElements.highlightText = removeQuoteFromEnd(
@@ -768,7 +758,6 @@ export default class MyPlugin extends Plugin {
 							lineElements.highlightText
 						))
 				);
-				//console.log("annotationHighlight after removeQuoteFromEnd: "+ annotationHighlight);
 			}
 
 			//Extract the comment made to an annotation (after the citeKey)
@@ -776,16 +765,13 @@ export default class MyPlugin extends Plugin {
 				const annotationCommentAll = selectedLine
 					.substring(endCiteKey + 1)
 					.trim();
-				//console.log("annotationCommentAll: "+ annotationCommentAll)
 
 				// 	Extract the first word in the comment added to the annotation
 				let firstBlank = annotationCommentAll.indexOf(" ");
 				//if (firstBlank===-1){firstBlank = annotationCommentAll.length}
-				//console.log("firstBlank:  "+ firstBlank)
 
 				const annotationCommentFirstWord =
 					annotationCommentAll.substring(0, firstBlank);
-				//console.log("annotationCommentFirstWord : " + annotationCommentFirstWord)
 				// Identify what type of annotation is based on the first word
 				if (lineElements.annotationType !== "typeImage") {
 					lineElements.annotationType = this.getAnnotationType(
@@ -793,7 +779,6 @@ export default class MyPlugin extends Plugin {
 						annotationCommentAll
 					);
 				}
-				//console.log(lineElements.annotationType)
 
 				// Extract the comment without the initial key and store it in
 				lineElements.commentText = "";
@@ -1046,6 +1031,7 @@ export default class MyPlugin extends Plugin {
 				this.settings.highlightCitationsLink === true &&
 				lineElements.zoteroBackLink.length > 0
 			) {
+
 				if (this.settings.highlightCitationsFormat !== "Pandoc") {
 					lineElements.citeKey =
 						"[" +
@@ -1078,6 +1064,8 @@ export default class MyPlugin extends Plugin {
 			} else {
 				lineElements.zoteroBackLink = "";
 			}
+			
+
 
 			//Extract the custom language assocaited with the highlight colour
 			let colourTextBefore = lineElements.colourTextBefore;
@@ -1138,7 +1126,6 @@ export default class MyPlugin extends Plugin {
 						fs.existsSync(pathImageNew)
 					) {
 						//if the settings is to link to the image in the zotero folder
-						// console.log("before copy settings " + pathImageOld);
 						if (this.settings.imagesCopy === false) {
 							lineElements.rowEdited = "![](file://" + pathImageOld + ")" + lineElements.zoteroBackLink;
 						}
@@ -1154,7 +1141,8 @@ export default class MyPlugin extends Plugin {
 									}
 								);
 							}
-							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + lineElements.zoteroBackLink;
+							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + 
+							lineElements.citeKey;
 						}
 					} else {
 						new Notice(
@@ -1188,7 +1176,7 @@ export default class MyPlugin extends Plugin {
 					}
 				}
 			}
-
+			console.log(lineElements.annotationType)
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
 				noteElements[i].rowEdited = (noteElements[i - 1].rowEdited.replace(/\[.*\)/, '') +
@@ -1227,7 +1215,7 @@ export default class MyPlugin extends Plugin {
 					highlightFormatBefore +
 					lineElements.highlightText +
 					highlightFormatAfter +
-					lineElements.zoteroBackLink +
+					lineElements.citeKey +
 					colourTextAfter;
 			}
 
@@ -1305,7 +1293,6 @@ export default class MyPlugin extends Plugin {
 			//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
 			//OR WITHOUT ANY SPECIAL CONSIDERATIONS
 			if (lineElements.annotationType === "noKey") {
-				console.log("lineElements.annotationType === noKey")
 				if (lineElements.highlightText !== "") {
 					lineElements.rowEdited =
 						highlightPrepend +
@@ -1315,7 +1302,6 @@ export default class MyPlugin extends Plugin {
 						highlightFormatAfter +
 						lineElements.citeKey +
 						colourTextAfter;
-					console.log(lineElements);
 					if (lineElements.commentText !== "") {
 						lineElements.rowEdited =
 							lineElements.rowEdited +
@@ -1329,8 +1315,7 @@ export default class MyPlugin extends Plugin {
 					lineElements.highlightText === "" &&
 					lineElements.commentText !== ""
 				) {
-					console.log("empty highlightText - value in commentText")
-					console.log(lineElements.rowEdited)
+
 
 					lineElements.rowEdited =
 						commentPrepend +
@@ -1338,7 +1323,6 @@ export default class MyPlugin extends Plugin {
 						lineElements.commentText +
 						commentFormatAfter +
 						lineElements.zoteroBackLink;
-					console.log(lineElements.rowEdited)	
 				}
 			}
 			
@@ -1357,7 +1341,6 @@ export default class MyPlugin extends Plugin {
 				index >= 0;
 				index--
 			) {
-				//console.log("indexRowsToBeRemoved : "+ index)
 				noteElementsArray.splice(indexRowsToBeRemoved[index], 1);
 			}
 		} 
@@ -1396,12 +1379,14 @@ export default class MyPlugin extends Plugin {
 			if (selectedLine.annotationType === "typeImage") {
 				imagesArray.push(selectedLine.rowEdited);
 			}
+			console.log(selectedLine.annotationType)
+			console.log(selectedLine.rowEdited)
+
 		}
 
 		// Add empty row in between rows if selected in the settings
 		if (isDoubleSpaced) {
 			for (let index = rowEditedArray.length - 1; index >= 0; index--) {
-				//console.log(index + " isDoubleSpaced")
 				rowEditedArray.splice(index, 0, "");
 			}
 		}
@@ -1424,7 +1409,6 @@ export default class MyPlugin extends Plugin {
 			imagesArray: imagesArray,
 			noteElements: noteElements,
 		};
-
 		return resultsLineElements;
 	}
 
@@ -1512,7 +1496,6 @@ export default class MyPlugin extends Plugin {
 		let extractedAnnotationsMagenta = "";
 		let extractedImages = "";
 		let extractedUserNote = "";
-		//console.log(selectedEntry.notes.length)
 
 		//Check the path to the data folder
 		if (selectedEntry.attachments[0] !== undefined) {
@@ -1567,14 +1550,12 @@ export default class MyPlugin extends Plugin {
 				}
 			}
 			this.pathZoteroStorage = pathZoteroStorage;
-			console.log(pathZoteroStorage);
 			this.zoteroBuildWindows = zoteroBuildWindows;
 		}
 
 		//run the function to parse the annotation for each note (there could be more than one)
 		let noteElements: AnnotationElements[] = [];
 		let userNoteElements: AnnotationElements[] = [];
-		console.log(selectedEntry.notes.length)
 		if (selectedEntry.notes.length > 0) {
 			for (
 				let indexNote = 0;
@@ -2222,7 +2203,6 @@ export default class MyPlugin extends Plugin {
 			missingFieldSetting,
 			this.settings.missingfieldreplacement
 		);
-		console.log(litnote)
 		// Compare old note and new note
 		if (
 			this.settings.saveManualEdits !== "Overwrite Entire Note" &&
