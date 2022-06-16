@@ -361,7 +361,7 @@ export function createLocalFileLink(reference: Reference) {
 			"[" +
 			reference.attachments[attachmentindex].title +
 			"](file://" + // added an extra "/" to make it work on Linux
-			attachmentPathCorrected +
+			encodeURI(attachmentPathCorrected) +
 			")"; //select the author
 
 		filesList.push(selectedfile);

@@ -24,7 +24,7 @@ import { fuzzySelectEntryFromJson, updateLibrary } from "./modal";
 //Import sample settings from /settings.ts
 import { SettingTab } from "./settings";
 import {
-	AnnotationElements,
+	AnnotationElements, 
 	MyPluginSettings,
 	Reference,
 	Collection,
@@ -1127,7 +1127,7 @@ export default class MyPlugin extends Plugin {
 					) {
 						//if the settings is to link to the image in the zotero folder
 						if (this.settings.imagesCopy === false) {
-							lineElements.rowEdited = "![](file://" + pathImageOld + ")" + lineElements.zoteroBackLink;
+							lineElements.rowEdited = "![](file://" + encodeURI(pathImageOld) + ")" + lineElements.zoteroBackLink;
 						}
 						//if the settings is to copy the image from Zotero to the Obsidian vault
 						else {

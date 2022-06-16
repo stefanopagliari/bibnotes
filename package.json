@@ -1,6 +1,6 @@
 {
 	"name": "bibnotes",
-	"version": "0.9.146",
+	"version": "0.9.147",
 	"description": "Plugin to export and format annotations from Zotero into Obsidian",
 	"main": "main.js",
 	"scripts": {
@@ -15,7 +15,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.2.0",
 		"@typescript-eslint/parser": "^5.2.0",
 		"builtin-modules": "^3.2.0",
-		"esbuild": "0.13.12",
+		"esbuild": "^0.13.12",
 		"obsidian": "^0.12.17",
 		"tslib": "2.3.1",
 		"typescript": "^4.4.4"
