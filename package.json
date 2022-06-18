@@ -1,6 +1,6 @@
 {
 	"name": "bibnotes",
-	"version": "0.9.147",
+	"version": "0.9.148",
 	"description": "Plugin to export and format annotations from Zotero into Obsidian",
 	"main": "main.js",
 	"scripts": {
@@ -22,6 +22,7 @@
 	},
 	"dependencies": {
 		"@popperjs/core": "^2.11.2",
+		"color-classifier": "^0.0.1",
 		"debugout.js": "^1.0.0",
 		"loglevel": "^1.8.0",
 		"node": "^17.2.0",

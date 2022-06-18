@@ -1,6 +1,7 @@
 // Import fs
 import * as fs from "fs";
 import { Debugout } from "debugout.js";
+import ColorClassifier, { Palette, AlgorithmTypes } from "color-classifier"
 
 //import { info, setLevel } from "loglevel";
 
@@ -46,6 +47,7 @@ import {
 	makeTags,
 	createCreatorAllList,
 } from "./utils";
+import { createImportSpecifier } from "typescript";
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -623,6 +625,9 @@ export default class MyPlugin extends Plugin {
 				highlightColour = highlightColour.replace('color":', "");
 				highlightColour = highlightColour.replace('"', "");
 				lineElements.highlightColour = highlightColour;
+
+			
+					
 			}
 
 			//Extracte the page of the pdf
@@ -673,7 +678,6 @@ export default class MyPlugin extends Plugin {
 					lineElements.attachmentURI = attachmentURI;
 				}
 			}
-
 			if (
 				/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm.test(
 					selectedLineOriginal
@@ -800,7 +804,6 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//Add the element to the array containing all the elements
-
 			noteElements.push(lineElements);
 		}
 		return noteElements;
@@ -811,54 +814,91 @@ export default class MyPlugin extends Plugin {
 			return lineElements;
 		}
 
-		//fix the label of the annotation colour - Zotero
+		//fix the label of the annotation colour - Zotero native reader
 		if (lineElements.highlightColour.includes("#ffd400")) {
 			lineElements.highlightColour = "yellow";
 		}
-		if (lineElements.highlightColour.includes("#ff6666")) {
+		else if (lineElements.highlightColour.includes("#ff6666")) {
 			lineElements.highlightColour = "red";
 		}
-		if (lineElements.highlightColour.includes("#5fb236")) {
+		else if (lineElements.highlightColour.includes("#5fb236")) {
 			lineElements.highlightColour = "green";
 		}
-		if (lineElements.highlightColour.includes("#2ea8e5")) {
+		else if (lineElements.highlightColour.includes("#2ea8e5")) {
 			lineElements.highlightColour = "blue";
 		}
-		if (lineElements.highlightColour.includes("#a28ae5")) {
+		else if (lineElements.highlightColour.includes("#a28ae5")) {
 			lineElements.highlightColour = "purple";
 		}
 
-		//fix the label of the annotation colour - Zotfile
-		if (lineElements.highlightColour.includes("#000000")) {
-			lineElements.highlightColour = "black";
+		//fix the label of the annotation colour - Zotfile and other annotators that are not the Zotero native reader
+		else {
+			const HexRegex = new RegExp(/#([a-fA-F0-9]{6})/g);	
+		
+			if(HexRegex.test(lineElements.highlightColour)){
+				const colorClassifier = new ColorClassifier(Palette.RAINBOW, AlgorithmTypes.HSV);
+			lineElements.highlightColour = colorClassifier.classify(String(lineElements.highlightColour.match(HexRegex)), "hex");
+			}   
+			
+			if (["##000000", "#000000"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "black";
+			} else if (["##FFFFFF", "#ffffff"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "white";
+			} else if (["##808080", "#808080"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "gray";
+			} else if (["##FF0000", "#ff0000"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "red";
+			} else if (["##FFA500", "#ffa500"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "orange";
+			} else if (["##FFFF00", "#ffff00"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "yellow";
+			} else if (["##00FF00", "#008000", "#00ff00"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "green";
+			} else if (["##00FFFF", "#00ffff"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "cyan";
+			} else if (["##0000FF", "#0000ff"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "blue";
+			} else if(["##FF00FF", "#800080", "#ff00ff"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
+				lineElements.highlightColour = "magenta";
+			}  
+
+			/*
+			if (lineElements.highlightColour.includes("##000000")) {
+				lineElements.highlightColour = "black";
+			}
+			else if (lineElements.highlightColour.includes("##FFFFFF")) {
+				lineElements.highlightColour = "white";
+			}
+			else if (lineElements.highlightColour.includes("##808080")) {
+				lineElements.highlightColour = "gray";
+			}
+			else if (lineElements.highlightColour.includes("##FF0000")) {
+				lineElements.highlightColour = "red";
+			}
+			else if (lineElements.highlightColour.includes("##FFA500")) {
+				lineElements.highlightColour = "orange";
+			}
+			else if (lineElements.highlightColour.includes("##FFFF00")) {
+				lineElements.highlightColour = "yellow";
+			} 
+			else if (lineElements.highlightColour.includes("##00FF00")) {
+				lineElements.highlightColour = "green";
+			}
+			else if (lineElements.highlightColour.includes("##00FFFF")) {
+				lineElements.highlightColour = "cyan";
+			}
+			else if (lineElements.highlightColour.includes("##0000FF")) {
+				lineElements.highlightColour = "blue";
+			}
+			else if (lineElements.highlightColour.includes("##FF00FF")) {
+				lineElements.highlightColour = "magenta";
+			}
+			*/
+
 		}
-		if (lineElements.highlightColour.includes("##FFFFFF")) {
-			lineElements.highlightColour = "white";
-		}
-		if (lineElements.highlightColour.includes("##808080")) {
-			lineElements.highlightColour = "gray";
-		}
-		if (lineElements.highlightColour.includes("##FF0000")) {
-			lineElements.highlightColour = "red";
-		}
-		if (lineElements.highlightColour.includes("##FFA500")) {
-			lineElements.highlightColour = "orange";
-		}
-		if (lineElements.highlightColour.includes("##FFFF00")) {
-			lineElements.highlightColour = "yellow";
-		}
-		if (lineElements.highlightColour.includes("##00FF00")) {
-			lineElements.highlightColour = "green";
-		}
-		if (lineElements.highlightColour.includes("##00FFFF")) {
-			lineElements.highlightColour = "cyan";
-		}
-		if (lineElements.highlightColour.includes("##0000FF")) {
-			lineElements.highlightColour = "blue";
-		}
-		if (lineElements.highlightColour.includes("##FF00FF")) {
-			lineElements.highlightColour = "magenta";
-		}
+		
+		
+	
 
 		//Zotfile Default
 		//{"Black": "#000000",
@@ -948,6 +988,7 @@ export default class MyPlugin extends Plugin {
 			if (lineElements.colourTextAfter == "null") {
 				lineElements.colourTextAfter = "";
 			}
+
 		}
 
 		return lineElements;
@@ -1143,7 +1184,7 @@ export default class MyPlugin extends Plugin {
 							}
 							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + 
 							lineElements.citeKey;
-						}
+						} 
 					} else {
 						new Notice(
 							`Cannot find image at "${pathImageOld}". Provide the correct zotero data directory location in the settings`
@@ -1378,7 +1419,7 @@ export default class MyPlugin extends Plugin {
 			if (selectedLine.annotationType === "typeImage") {
 				imagesArray.push(selectedLine.rowEdited);
 			}
-		 
+	
 
 		}
 
@@ -1570,7 +1611,7 @@ export default class MyPlugin extends Plugin {
 				let extractionType = undefined;
 
 				if (unescape(note).includes("<span class=")) {
-					extractionType = "Zotero";
+					extractionType = "Zotero"; 
 				} else if (
 					unescape(note).includes(
 						'<a href="zotero://open-pdf/library/'
@@ -1612,6 +1653,9 @@ export default class MyPlugin extends Plugin {
 				this.noteElements = noteElements;
 				this.userNoteElements = userNoteElements;
 			}
+
+		
+
 
 			//Run the function to edit each line
 			const resultsLineElements = this.formatNoteElements(
