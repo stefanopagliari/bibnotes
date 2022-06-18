@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [0.9.14]
 ### Improvement
 - The plugin also extracts the colour of highlights made with external PDF annotations and imported by Zotero (instead of Zotfile) using the "Add Note from Annotation". The plugin converts the HEX colour of the annotation into a palette comprising of ten colours (https://github.com/wadackel/color-classifier/blob/master/src/palette/rainbow.js) 
+- Added the possibility of specifying a custom hex colour in the highlight setting and the transformation associated with this colour. Added a "{{CustomHex}}" placeholder in the template gathering all the highlight using that colour
 - The backlink now directs to the specific annotation rather than the page in the pdf file (thanks to @CaoKang-David)
 - It is possible to name the notes with the author (thanks to @ThomasFKJorna)
 

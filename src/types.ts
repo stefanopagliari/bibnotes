@@ -57,6 +57,8 @@ export interface MyPluginSettings {
 	colourOrangeText: string;
 	colourCyanText: string;
 	colourMagentaText: string;
+	colourCustomHexValue: string;
+	colourCustomHexText: string;
 	multipleFieldsDivider: string;
 	nameFormat: string;
 	highlightCitationsFormat: string;

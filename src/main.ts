@@ -830,15 +830,21 @@ export default class MyPlugin extends Plugin {
 		else if (lineElements.highlightColour.includes("#a28ae5")) {
 			lineElements.highlightColour = "purple";
 		}
+		else if (lineElements.highlightColour.includes(this.settings.colourCustomHexValue)) {
+			lineElements.highlightColour = "customHex";
+		}
 
 		//fix the label of the annotation colour - Zotfile and other annotators that are not the Zotero native reader
 		else {
 			const HexRegex = new RegExp(/#([a-fA-F0-9]{6})/g);	
 		
 			if(HexRegex.test(lineElements.highlightColour)){
+				console.log(lineElements.highlightColour)
 				const colorClassifier = new ColorClassifier(Palette.RAINBOW, AlgorithmTypes.HSV);
 			lineElements.highlightColour = colorClassifier.classify(String(lineElements.highlightColour.match(HexRegex)), "hex");
 			}   
+			
+			
 			
 			if (["##000000", "#000000"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
 				lineElements.highlightColour = "black";
@@ -861,39 +867,8 @@ export default class MyPlugin extends Plugin {
 			} else if(["##FF00FF", "#800080", "#ff00ff"].some(colorStr=>lineElements.highlightColour.includes(colorStr))){
 				lineElements.highlightColour = "magenta";
 			}  
-
-			/*
-			if (lineElements.highlightColour.includes("##000000")) {
-				lineElements.highlightColour = "black";
-			}
-			else if (lineElements.highlightColour.includes("##FFFFFF")) {
-				lineElements.highlightColour = "white";
-			}
-			else if (lineElements.highlightColour.includes("##808080")) {
-				lineElements.highlightColour = "gray";
-			}
-			else if (lineElements.highlightColour.includes("##FF0000")) {
-				lineElements.highlightColour = "red";
-			}
-			else if (lineElements.highlightColour.includes("##FFA500")) {
-				lineElements.highlightColour = "orange";
-			}
-			else if (lineElements.highlightColour.includes("##FFFF00")) {
-				lineElements.highlightColour = "yellow";
-			} 
-			else if (lineElements.highlightColour.includes("##00FF00")) {
-				lineElements.highlightColour = "green";
-			}
-			else if (lineElements.highlightColour.includes("##00FFFF")) {
-				lineElements.highlightColour = "cyan";
-			}
-			else if (lineElements.highlightColour.includes("##0000FF")) {
-				lineElements.highlightColour = "blue";
-			}
-			else if (lineElements.highlightColour.includes("##FF00FF")) {
-				lineElements.highlightColour = "magenta";
-			}
-			*/
+			
+		console.log(lineElements.highlightColour)
 
 		}
 		
@@ -918,36 +893,41 @@ export default class MyPlugin extends Plugin {
 		if (lineElements.highlightColour == "yellow") {
 			colourTransformation = this.settings.colourYellowText;
 		}
-		if (lineElements.highlightColour == "red") {
+		else if (lineElements.highlightColour == "red") {
 			colourTransformation = this.settings.colourRedText;
 		}
-		if (lineElements.highlightColour == "green") {
+		else if (lineElements.highlightColour == "green") {
 			colourTransformation = this.settings.colourGreenText;
 		}
-		if (lineElements.highlightColour == "blue") {
+		else if (lineElements.highlightColour == "blue") {
 			colourTransformation = this.settings.colourBlueText;
 		}
-		if (lineElements.highlightColour == "purple") {
+		else if (lineElements.highlightColour == "purple") {
 			colourTransformation = this.settings.colourPurpleText;
 		}
-		if (lineElements.highlightColour == "black") {
+		else if (lineElements.highlightColour == "black") {
 			colourTransformation = this.settings.colourBlackText;
 		}
-		if (lineElements.highlightColour == "white") {
+		else if (lineElements.highlightColour == "white") {
 			colourTransformation = this.settings.colourWhiteText;
 		}
-		if (lineElements.highlightColour == "gray") {
+		else if (lineElements.highlightColour == "gray") {
 			colourTransformation = this.settings.colourGrayText;
 		}
-		if (lineElements.highlightColour == "orange") {
+		else if (lineElements.highlightColour == "orange") {
 			colourTransformation = this.settings.colourOrangeText;
 		}
-		if (lineElements.highlightColour == "cyan") {
+		else if (lineElements.highlightColour == "cyan") {
 			colourTransformation = this.settings.colourCyanText;
 		}
-		if (lineElements.highlightColour == "magenta") {
+		else if (lineElements.highlightColour == "magenta") {
 			colourTransformation = this.settings.colourMagentaText;
 		}
+		else if (lineElements.highlightColour == "customHex") {
+			colourTransformation = this.settings.colourCustomHexText;
+		}
+		
+
 
 	//extract the transformation from the highlight colour
 		if (lineElements.annotationType == "noKey") {
@@ -1023,6 +1003,7 @@ export default class MyPlugin extends Plugin {
 		const highlightsOrange: string[] = [];
 		const highlightsBlue: string[] = [];
 		const highlightsMagenta: string[] = [];
+		const highlightsCustomHex: string[] = [];
 		const imagesArray: string[] = [];
 
 		//Remove undefined elements
@@ -1413,6 +1394,8 @@ export default class MyPlugin extends Plugin {
 				highlightsBlue.push(selectedLine.rowEdited);
 			} else if (selectedLine.highlightColour === "magenta") {
 				highlightsMagenta.push(selectedLine.rowEdited);
+			} else if (selectedLine.highlightColour === "customHex") {
+				highlightsCustomHex.push(selectedLine.rowEdited);
 			}
 
 			//Copy the images in a specific array
@@ -1445,6 +1428,7 @@ export default class MyPlugin extends Plugin {
 			highlightsOrange: highlightsOrange,
 			highlightsBlue: highlightsBlue,
 			highlightsMagenta: highlightsMagenta,
+			highlightsCustomHex: highlightsCustomHex,
 			imagesArray: imagesArray,
 			noteElements: noteElements,
 		};
@@ -1533,6 +1517,7 @@ export default class MyPlugin extends Plugin {
 		let extractedAnnotationsCyan = "";
 		let extractedAnnotationsOrange = "";
 		let extractedAnnotationsMagenta = "";
+		let extractedAnnotationsCustomHex = "";
 		let extractedImages = "";
 		let extractedUserNote = "";
 
@@ -1690,6 +1675,8 @@ export default class MyPlugin extends Plugin {
 				resultsLineElements.highlightsOrange.join("\n");
 			extractedAnnotationsMagenta =
 				resultsLineElements.highlightsMagenta.join("\n");
+			extractedAnnotationsCustomHex =
+				resultsLineElements.highlightsCustomHex.join("\n");
 			extractedImages = resultsLineElements.imagesArray.join("\n");
 			//Creates an array with the notes from the user
 			const extractedUserNoteArray = Array.from(
@@ -1715,6 +1702,7 @@ export default class MyPlugin extends Plugin {
 			extractedAnnotationsCyan: extractedAnnotationsCyan,
 			extractedAnnotationsOrange: extractedAnnotationsOrange,
 			extractedAnnotationsMagenta: extractedAnnotationsMagenta,
+			extractedAnnotationsCustomHex: extractedAnnotationsCustomHex,
 			extractedImages: extractedImages,
 			noteElements: this.noteElements,
 		};
@@ -2219,6 +2207,10 @@ export default class MyPlugin extends Plugin {
 		litnote = litnote.replace(
 			"{{Magenta}}",
 			resultAnnotations.extractedAnnotationsMagenta
+		);
+		litnote = litnote.replace(
+			"{{CustomHex}}",
+			resultAnnotations.extractedAnnotationsCustomHex
 		);
 		litnote = litnote.replace(
 			"{{Images}}",

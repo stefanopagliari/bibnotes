@@ -896,8 +896,28 @@ export class SettingTab extends PluginSettingTab {
 						settings.colourMagentaText = value;
 						await plugin.saveSettings();
 					})); 		
- 
-			
+				
+				new Setting(settingsColour) 
+					.setName("Custom Hex Value")
+					.setDesc("")
+					.addText((text) =>
+					text
+						.setValue(settings.colourCustomHexValue)
+						.onChange(async (value) => {
+							settings.colourCustomHexValue = value;
+							await plugin.saveSettings();
+						})); 	
+				new Setting(settingsColour) 
+				.setName("Custom Hex Transformation")
+				.setDesc("")
+				.addText((text) =>
+				text
+					.setValue(settings.colourCustomHexText)
+					.onChange(async (value) => {
+						settings.colourCustomHexText = value;
+						await plugin.saveSettings();
+					})); 	
+
 			containerEl.createEl('h2', {text: 'Import Images'});
 		
 

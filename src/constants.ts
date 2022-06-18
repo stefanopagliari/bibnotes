@@ -161,6 +161,8 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	colourOrangeText: "{{highlight}}",
 	colourCyanText: "{{highlight}}",
 	colourMagentaText: "{{highlight}}",
+	colourCustomHexValue: "#999999",
+	colourCustomHexText: "{{highlight}}",
 	multipleFieldsDivider: ";",
 	nameFormat: "{{lastName}}, {{firstName}}",
 	highlightCitationsFormat: "Author, year, page number",
