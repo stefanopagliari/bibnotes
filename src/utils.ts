@@ -148,6 +148,17 @@ export function formatCreatorsName(creator: Creator, nameCustom: string) {
 	) {
 		nameCustom = nameCustom.replace("{{lastName}}", creator.lastName);
 		nameCustom = nameCustom.replace("{{firstName}}", creator.firstName);
+		const getInitials = function (string:string) {
+			let names = string.split(' '),
+				initials = names[0].substring(0, 1).toUpperCase()+".";
+		
+			if (names.length > 1) {
+				initials += names[names.length - 1].substring(0, 1).toUpperCase()+".";
+			}
+			return initials;
+		};
+
+		nameCustom = nameCustom.replace("{{firstNameInitials}}", getInitials(creator.firstName));
 		nameCustom = nameCustom.trim();
 		return nameCustom;
 	} else if (

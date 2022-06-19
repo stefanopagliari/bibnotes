@@ -181,7 +181,7 @@ export class SettingTab extends PluginSettingTab {
 
 			new Setting(settingsExport)
 			.setName("Format Names")
-			.setDesc('Specify how the names of the authors/editors should be exported.')
+			.setDesc('Specify how the names of the authors/editors should be exported. Accepted values are {{firstName}}, {{lastName}} and {{firstNameInitials}}')
 			.addTextArea((text) =>
 				text
 				.setValue(settings.nameFormat)

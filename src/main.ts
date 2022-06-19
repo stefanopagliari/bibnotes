@@ -10,6 +10,10 @@ import { Plugin, Notice, normalizePath } from "obsidian";
 
 import path from "path";
 
+import 'turndown'
+
+
+
 // wasn't actually used
 //import { BooleanLiteral, isTokenKind } from "typescript";
 
@@ -488,7 +492,14 @@ export default class MyPlugin extends Plugin {
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
 
-		note = note
+
+		
+		// Replace html formatting with markdown formatting
+		const turndownService = new TurndownService()
+		note = turndownService.turndown(note)
+
+
+		note = note 
 			// Replace backticks
 			.replace(/`/g, "'")
 			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
@@ -511,8 +522,11 @@ export default class MyPlugin extends Plugin {
 			// Replace backticks with single quote
 			selectedLine = replaceTemplate(selectedLine, "`", "'");
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
-			// Correct encoding issues
-			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
+			// Correct encoding issues with special character showing incorrectly
+			selectedLine = replaceTemplate(selectedLine, "&amp;", "&").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+
+
+			console.log(selectedLine)
 
 			const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -546,6 +560,7 @@ export default class MyPlugin extends Plugin {
 		return noteElements;
 	}
 	parseAnnotationLinesintoElementsZotero(note: string) {
+		
 		// clean the entire annotation
 		note = note
 			// .replace(
@@ -578,6 +593,8 @@ export default class MyPlugin extends Plugin {
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
 			// 	// Correct encoding issues
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
+
+			console.log(selectedLine)
 
 			const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -839,7 +856,6 @@ export default class MyPlugin extends Plugin {
 			const HexRegex = new RegExp(/#([a-fA-F0-9]{6})/g);	
 		
 			if(HexRegex.test(lineElements.highlightColour)){
-				console.log(lineElements.highlightColour)
 				const colorClassifier = new ColorClassifier(Palette.RAINBOW, AlgorithmTypes.HSV);
 			lineElements.highlightColour = colorClassifier.classify(String(lineElements.highlightColour.match(HexRegex)), "hex");
 			}   
@@ -868,7 +884,6 @@ export default class MyPlugin extends Plugin {
 				lineElements.highlightColour = "magenta";
 			}  
 			
-		console.log(lineElements.highlightColour)
 
 		}
 		
