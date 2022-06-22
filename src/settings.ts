@@ -940,7 +940,7 @@ export class SettingTab extends PluginSettingTab {
 				);
 			new Setting(importImages)
 				.setName("Zotero Local Folder")
-				.setDesc(`Add the path on your computer where Zotero's data is stored (e.g. "/Users/yourusername/Zotero/storage"). This field is required only when this is different from the folder where the PDF files are stored. To retrieve this information, open Zotero --> Preferences --> Advanced --> Files and Folder, and copy the "data directory location"`)
+				.setDesc(`Add the path on your computer where Zotero's data is stored (e.g. "/Users/yourusername/Zotero/storage"). This field is required only when this is different from the folder where the PDF files are stored. To retrieve this information, open Zotero --> Preferences --> Advanced --> Files and Folder, and copy the "data directory location", followed by the subdirectory "/storage"`)
 				.addText((text) =>
 				text
 					.setValue(settings.zoteroStoragePathManual)

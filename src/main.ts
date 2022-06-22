@@ -526,8 +526,6 @@ export default class MyPlugin extends Plugin {
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 
 
-			console.log(selectedLine)
-
 			const lineElements: AnnotationElements = {
 				highlightText: "",
 				highlightColour: "",
@@ -560,7 +558,6 @@ export default class MyPlugin extends Plugin {
 		return noteElements;
 	}
 	parseAnnotationLinesintoElementsZotero(note: string) {
-		
 		// clean the entire annotation
 		note = note
 			// .replace(
@@ -572,17 +569,16 @@ export default class MyPlugin extends Plugin {
 			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
 			.replace(/, p. p. /g, ", p. ")
 			.trim();
-
 		// Split the annotations into an array where each row is an entry
 		const lines = note.split(/<\/h1>|<\/p>|<h1>/gm);
-
 		const noteElements: AnnotationElements[] = [];
 
 		//Loop through the lines
 		const lengthLines = Object.keys(lines).length;
 		for (let indexLines = 1; indexLines < lengthLines; indexLines++) {
+
+
 			const selectedLineOriginal = unescape(lines[indexLines]);
-		
 
 			//Remove HTML tags
 			let selectedLine = String(
@@ -593,8 +589,6 @@ export default class MyPlugin extends Plugin {
 			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
 			// 	// Correct encoding issues
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&");
-
-			console.log(selectedLine)
 
 			const lineElements: AnnotationElements = {
 				highlightText: "",
@@ -1135,10 +1129,11 @@ export default class MyPlugin extends Plugin {
 					// Check if the user settings has approved the importing of images
 
 					pathImageOld = path.format({
-						dir: this.pathZoteroStorage + lineElements.imagePath,
+						dir: this.settings.zoteroStoragePathManual + lineElements.imagePath,
 						base: "image.png",
-					});
 
+					});
+					
 					pathImageNew = path.normalize(
 						path.format({
 							dir: normalizePath(
@@ -1164,6 +1159,7 @@ export default class MyPlugin extends Plugin {
 					) {
 						//if the settings is to link to the image in the zotero folder
 						if (this.settings.imagesCopy === false) {
+
 							lineElements.rowEdited = "![](file://" + encodeURI(pathImageOld) + ")" + lineElements.zoteroBackLink;
 						}
 						//if the settings is to copy the image from Zotero to the Obsidian vault
@@ -2176,11 +2172,10 @@ export default class MyPlugin extends Plugin {
 			"{{UserNotes}}",
 			resultAnnotations.extractedUserNote
 		);
-
-
+		
 
 		litnote = litnote.replace(
-			"{{Yellow}}",
+			"{{Yellow}}", 
 			resultAnnotations.extractedAnnotationsYellow
 		);
 		litnote = litnote.replace(

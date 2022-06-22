@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 
 ### Bugs
 - Fixed bugs that prevented notes added in Zotero using markdown from being formatted properly
+- Fixed code to manually select the folder where the images are located
 
 
 ## [0.9.10]
