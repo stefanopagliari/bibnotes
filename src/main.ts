@@ -1133,7 +1133,6 @@ export default class MyPlugin extends Plugin {
 						base: "image.png",
 
 					});
-					
 					pathImageNew = path.normalize(
 						path.format({
 							dir: normalizePath(
@@ -1144,9 +1143,8 @@ export default class MyPlugin extends Plugin {
 							),
 							base:
 								citeKey + "_" + lineElements.imagePath + ".png",
-						})
+						}) 
 					);
-
 					if (this.zoteroBuildWindows != true) {
 						pathImageNew = "/" + pathImageNew;
 					}
@@ -1154,8 +1152,7 @@ export default class MyPlugin extends Plugin {
 					//Check if the image exists within Zotero or already within the vault
 					if (
 						// replaced fs.existsSync with the obsidian adapter
-						fs.existsSync(pathImageOld) ||
-						fs.existsSync(pathImageNew)
+						fs.existsSync(pathImageOld) 
 					) {
 						//if the settings is to link to the image in the zotero folder
 						if (this.settings.imagesCopy === false) {
@@ -1173,7 +1170,7 @@ export default class MyPlugin extends Plugin {
 										if (err) throw err;
 									}
 								);
-							}
+							} 
 							lineElements.rowEdited = "![[" + citeKey + "_" + lineElements.imagePath + ".png]] " + 
 							lineElements.citeKey;
 						} 
@@ -2256,6 +2253,9 @@ export default class MyPlugin extends Plugin {
 			//Check if an old version exists. If the old version has annotations then add the new annotation to the old annotaiton
 
 			const existingNoteAll = String(fs.readFileSync(noteTitleFull));
+
+
+
 			litnote = this.compareOldNewNote(
 				existingNoteAll,
 				litnote,
@@ -2270,7 +2270,6 @@ export default class MyPlugin extends Plugin {
 		if (this.settings.debugMode === true) {
 			bugout.downloadLog();
 		}
-
 		fs.writeFile(noteTitleFull, litnote, function (err) {
 			if (err) console.log(err);
 		});

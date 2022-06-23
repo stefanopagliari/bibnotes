@@ -58,7 +58,6 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 		const bibtexArray: Reference[] = [];
 		for (let index = 0; index < data.items.length; index++) {
-			// console.log(index)
 			const selectedEntry: Reference = data.items[index];
 			const bibtexArrayItem = {} as Reference;
 
@@ -66,27 +65,22 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 			if (selectedEntry.hasOwnProperty("citationKey") == false) continue;
 			bibtexArrayItem.citationKey = selectedEntry.citationKey;
-			// console.log(bibtexArrayItem.citationKey)
 
 			//Extract the title key
 			bibtexArrayItem.title = selectedEntry.title;
-			// console.log(bibtexArrayItem.title)
 
 			// Extract the date
 			bibtexArrayItem.date = selectedEntry.date
- 			if (selectedEntry.hasOwnProperty("date")){
- 				selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm)
- 				bibtexArrayItem.date = selectedEntry.year
-			 }
-			// console.log(bibtexArrayItem.date)
+			if (selectedEntry.hasOwnProperty("date")){
+				selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm)
+				bibtexArrayItem.date = selectedEntry.year
+			}
 
 			//Extract the author
 			bibtexArrayItem.authorKey = createAuthorKey(selectedEntry.creators);
-			// console.log(bibtexArrayItem.authorKey)
 
 			//Extract the date the entri was modified
 			bibtexArrayItem.dateModified = selectedEntry.dateModified;
-			// console.log(bibtexArrayItem.dateModified)
 
 			//Create the reference
 			bibtexArrayItem.inlineReference =
@@ -100,7 +94,6 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 				"\n" +
 				bibtexArrayItem.citationKey;
 
-			// console.log(bibtexArrayItem.reference)
 			bibtexArray.push(bibtexArrayItem);
 		}
 		// Order the suggestions from the one modified most recently
@@ -135,7 +128,6 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 		bibtexArray.unshift(selectLibrary);
 		// 	]
 
-		//console.log(bibtexArray.citeKey)
 		this.selectArray = bibtexArray;
 		await this.updateSuggestions();
 		this.data = data;
@@ -224,7 +216,6 @@ export class updateLibrary extends Modal {
 
 		//Check the last time the library was updated
 		const lastUpdate = new Date(this.plugin.settings.lastUpdateDate);
-
 		//loop through all the entries in the bibliography to find out which ones have been modified since the last time the library on obsidian was updated.
 		for (let index = 0; index < data.items.length; index++) {
 			// console.log(index)
@@ -237,9 +228,23 @@ export class updateLibrary extends Modal {
 			// console.log(bibtexArrayItem.citationKey)
 
 			//Extract the date the entry was modified
-			const datemodified = new Date(selectedEntry.dateModified);
+			const noteDateModifiedArray = []
+			noteDateModifiedArray.push(selectedEntry.dateModified)
+			for (let index = 0; index < selectedEntry.notes.length; index++) {
+				noteDateModifiedArray.push(selectedEntry.notes[index].dateModified);
+				noteDateModifiedArray.sort((firstElement, secondElement) => { if (firstElement > secondElement) {
+					return -1;
+				}
+				if (firstElement < secondElement) {
+					return 1;
+				}
+				return 0; } 
+				);
+			}
+			
+			const datemodified = new Date(noteDateModifiedArray[0]);
+
 			if (datemodified < lastUpdate) continue; //skip if it was modified before the last update
-			//console.log(datemodified>lastUpdate)
 
 			//skip if the setting is to update only existing note and th enote is not found at the give folder
 			if (
@@ -267,7 +272,6 @@ export class updateLibrary extends Modal {
 		this.plugin.settings.lastUpdateDate = new Date();
 		this.plugin.saveSettings();
 
-		//console.log(this.plugin.settings.lastUpdateDate)
 	}
 
 	onClose() {}
