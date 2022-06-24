@@ -15,7 +15,7 @@ All notable changes to this project will be documented in this file.
 - Fixed code to manually select the folder where the images are located
 - Fixed bug in the modal updating the library. The plugin now recognizes changes also to existing notes rather than only to the metadata
 - Fixed bug in the path of the images on Windows
-- Fixed bug that removed the last character when updating a specific section
+- Fixed bug that removed the last character when updating a specific section (thanks to @xwying)
 - Added line break when adding a new line to an existing note
 
 
