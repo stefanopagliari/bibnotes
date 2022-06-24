@@ -507,7 +507,7 @@ export default class MyPlugin extends Plugin {
 			.trim();
 
 		// Split the annotations into an array where each row is an entry
-		const lines = note.split(/<\/h1>|<\/p>/gm);
+		const lines = note.split(/<\/h1>|\n\n|<\/p>/gm);
 
 		const noteElements: AnnotationElements[] = [];
 
@@ -1127,12 +1127,20 @@ export default class MyPlugin extends Plugin {
 				let pathImageNew = "";
 				if (this.settings.imagesImport) {
 					// Check if the user settings has approved the importing of images
+					pathImageOld = path.format({
+						dir: this.pathZoteroStorage + lineElements.imagePath,
+						base: "image.png",
 
+					});
+					
+					// If the path of the existing images has been defined in the settings, then take that
+					if(this.settings.zoteroStoragePathManual.length>0){
 					pathImageOld = path.format({
 						dir: this.settings.zoteroStoragePathManual + lineElements.imagePath,
 						base: "image.png",
 
-					});
+					})};
+					
 					pathImageNew = path.normalize(
 						path.format({
 							dir: normalizePath(
@@ -1140,14 +1148,15 @@ export default class MyPlugin extends Plugin {
 								this.app.vault.adapter.getBasePath() +
 									"\\" +
 									this.settings.imagesPath
-							),
+							), 
 							base:
 								citeKey + "_" + lineElements.imagePath + ".png",
 						}) 
 					);
-					if (this.zoteroBuildWindows != true) {
+					if (this.zoteroBuildWindows == false) {
 						pathImageNew = "/" + pathImageNew;
 					}
+					
 
 					//Check if the image exists within Zotero or already within the vault
 					if (
@@ -1642,7 +1651,6 @@ export default class MyPlugin extends Plugin {
 					userNoteElements =
 						userNoteElements.concat(noteElementsSingle); //concatenate the annotation element to the next one
 				}
-
 				this.noteElements = noteElements;
 				this.userNoteElements = userNoteElements;
 			}
@@ -2045,6 +2053,7 @@ export default class MyPlugin extends Plugin {
 			existingNote =
 				existingNote.slice(0, insertPosition) +
 				doubleSpaceAdd +
+				"\n"+
 				insertText +
 				existingNote.slice(insertPosition);
 		}
@@ -2065,13 +2074,13 @@ export default class MyPlugin extends Plugin {
 				startSaveOld = 0;
 			}
 
-			//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
+			//identify the keyword identifying the end of the section to be preserved. If is empty, the position is the end of the string. Otherwise find the match in the text
 			let endSaveOld: number = existingNote.length - 1;
 			if (endSave !== "") {
 				endSaveOld = existingNote.indexOf(endSave) - 1;
 			}
 			if (endSaveOld < 0) {
-				endSaveOld = existingNote.length - 1;
+				endSaveOld = existingNote.length;
 			}
 
 			//Find the sections of the existing note to be preserved

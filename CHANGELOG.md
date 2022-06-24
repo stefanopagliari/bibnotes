@@ -13,6 +13,10 @@ All notable changes to this project will be documented in this file.
 ### Bugs
 - Fixed bugs that prevented notes added in Zotero using markdown from being formatted properly
 - Fixed code to manually select the folder where the images are located
+- Fixed bug in the modal updating the library. The plugin now recognizes changes also to existing notes rather than only to the metadata
+- Fixed bug in the path of the images on Windows
+- Fixed bug that removed the last character when updating a specific section
+- Added line break when adding a new line to an existing note
 
 
 ## [0.9.10]
