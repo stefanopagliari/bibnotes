@@ -2077,7 +2077,7 @@ export default class MyPlugin extends Plugin {
 			//identify the keyword identifying the end of the section to be preserved. If is empty, the position is the end of the string. Otherwise find the match in the text
 			let endSaveOld: number = existingNote.length;
 			if (endSave !== "") {
-				endSaveOld = existingNote.indexOf(endSave) - 1;
+				endSaveOld = existingNote.indexOf(endSave) + endSave.length;
 			}
 			if (endSaveOld < 0) {
 				endSaveOld = existingNote.length;
@@ -2101,7 +2101,7 @@ export default class MyPlugin extends Plugin {
 			//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
 			let endSaveNew: number = newNote.length - 1;
 			if (endSave !== "") {
-				endSaveNew = newNote.indexOf(endSave) - 1;
+				endSaveNew = newNote.indexOf(endSave) + endSave.length - 1;
 			}
 			if (endSaveNew < 0) {
 				endSaveNew = newNote.length - 1;
