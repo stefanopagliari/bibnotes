@@ -2099,12 +2099,12 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//identify the keyword identifying the ebd of the section to be preserved is empty, the position is the end of the string. Otherwise find the match in the text
-			let endSaveNew: number = newNote.length - 1;
+			let endSaveNew: number = newNote.length;
 			if (endSave !== "") {
-				endSaveNew = newNote.indexOf(endSave) + endSave.length - 1;
+				endSaveNew = newNote.indexOf(endSave) + endSave.length;
 			}
 			if (endSaveNew < 0) {
-				endSaveNew = newNote.length - 1;
+				endSaveNew = newNote.length;
 			}
 
 			//Find the sections of the existing note before the one to be preserved
