@@ -2112,7 +2112,7 @@ export default class MyPlugin extends Plugin {
 			//Find the sections of the existing note after the one to be preserved
 			const newNotePreservedAfter = newNote.substring(
 				endSaveNew,
-				newNote.length - 1
+				newNote.length
 			);
 
 			const newNoteCombined =
