@@ -492,7 +492,7 @@ export default class MyPlugin extends Plugin {
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
 
-
+		console.log(note)
 		
 		// Replace html formatting with markdown formatting
 		const turndownService = new TurndownService()
@@ -505,23 +505,22 @@ export default class MyPlugin extends Plugin {
 			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
 			.replace(/, p. p. /g, ", p. ")
 			.trim();
-
+		console.log(note)
 		// Split the annotations into an array where each row is an entry
 		const lines = note.split(/<\/h1>|\n\n|<\/p>/gm);
-
+		console.log(lines)
 		const noteElements: AnnotationElements[] = [];
 
 		//Loop through the lines
 		const lengthLines = Object.keys(lines).length;
 		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
 			const selectedLineOriginal = unescape(lines[indexLines]);
-			//Remove HTML tags
-			let selectedLine = String(
-				selectedLineOriginal.replace(/<\/?[^>]+(>|$)/g, "")
-			);
+
+			console.log(selectedLineOriginal)
+			
 			// Replace backticks with single quote
-			selectedLine = replaceTemplate(selectedLine, "`", "'");
-			//selectedLine = replaceTemplate(selectedLine, "/<i/>", "");
+			let selectedLine = replaceTemplate(selectedLineOriginal, "`", "'");
+			
 			// Correct encoding issues with special character showing incorrectly
 			selectedLine = replaceTemplate(selectedLine, "&amp;", "&").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
 

@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Fixed bug in the path of the images on Windows
 - Fixed bug that removed the last character when updating a specific section (thanks to @xwying)
 - Added line break when adding a new line to an existing note
+- Corrected bug that prevented the use of `<` in notes
 
 
 ## [0.9.10]
