@@ -537,6 +537,28 @@ export class SettingTab extends PluginSettingTab {
 						})
 				);
 
+			new Setting(settingsComments)
+			.setName("Text dividing the highlight and the related comment")
+				.setDesc("e.g. <br> to place the comment on a different line")
+				.addText((text) =>
+				text
+					.setValue(settings.commentAppendDivider)
+					.onChange(async (value) => {
+						settings.commentAppendDivider = value;
+						await plugin.saveSettings();
+					})
+			);					
+			new Setting(settingsComments)
+				.setName("Text dividing the highlight and the related comment when the comment is moved before the highlight")
+				.addText((text) =>
+				text
+					.setValue(settings.commentPrependDivider)
+					.onChange(async (value) => {
+						settings.commentPrependDivider = value;
+						await plugin.saveSettings();
+					})
+			);	
+
 				containerEl.createEl('h3', {text: 'Additional Transformations'});
 				const settingsAdvanced: HTMLDetailsElement =
 					containerEl.createEl("details");
@@ -721,17 +743,8 @@ export class SettingTab extends PluginSettingTab {
 								}
 							})
 					);
-					
-					new Setting(settingsAdvanced)
-					.setDesc("Text placed between the comment and the related highlight")
-					.addText((text) =>
-					text
-						.setValue(settings.commentPrependDivider)
-						.onChange(async (value) => {
-							settings.commentPrependDivider = value;
-							await plugin.saveSettings();
-						})
-				);
+
+
 					new Setting(settingsAdvanced)
 					.setDesc("Always place the comment made to an highlight before the text of the highlight")
 					.addToggle((text) =>
@@ -744,7 +757,7 @@ export class SettingTab extends PluginSettingTab {
 						})
 					);
 
-					//commentPrependDivider
+
 				new Setting(settingsAdvanced)
 					.setName("Transform the highlight/comment into a task")
 					.addText((text) =>

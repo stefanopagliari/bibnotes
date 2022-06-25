@@ -19,6 +19,7 @@ export interface MyPluginSettings {
 	keyCommentPrepend: string;
 	commentPrependDefault: boolean;
 	commentPrependDivider: string;
+	commentAppendDivider: string;
 	keyH1: string;
 	keyH2: string;
 	keyH3: string;

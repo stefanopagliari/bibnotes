@@ -1241,6 +1241,7 @@ export default class MyPlugin extends Plugin {
 			}
 			//commentPrependDefault
 			if (lineElements.annotationType === "typeCommentPrepend") {
+				console.log(this.settings.commentPrependDivider )
 				//add the comment before the highlight
 				lineElements.rowEdited =
 					highlightPrepend +
@@ -1255,6 +1256,7 @@ export default class MyPlugin extends Plugin {
 					lineElements.citeKey +
 					colourTextAfter;
 			}
+			console.log(lineElements.annotationType)
 
 			// 	FORMAT THE HEADERS
 			//  Transform header in H1/H2/H3/H4/H5/H6 Level
@@ -1342,6 +1344,7 @@ export default class MyPlugin extends Plugin {
 					if (lineElements.commentText !== "") {
 						lineElements.rowEdited =
 							lineElements.rowEdited +
+							this.settings.commentAppendDivider +
 							commentPrepend +
 							commentFormatBefore +
 							lineElements.commentText +

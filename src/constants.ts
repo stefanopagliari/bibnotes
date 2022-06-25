@@ -125,6 +125,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	keyCommentPrepend: "%",
 	commentPrependDefault: false,
 	commentPrependDivider: ": ",
+	commentAppendDivider: "-> ",
 	keyH1: "#",
 	keyH2: "##",
 	keyH3: "###",

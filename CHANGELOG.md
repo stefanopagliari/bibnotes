@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - The backlink now directs to the specific annotation rather than the page in the pdf file (thanks to @CaoKang-David)
 - It is possible to name the notes with the author (thanks to @ThomasFKJorna)
 - Added {{firstNameInitials}} to the placeholders available to format the name of authors/editors. This is in addition to {{firstName}} and {{lastName}}
+- Added setting to specify the text between a highlight and a comment. This allows the user to set the comment related to a highlight in a different line (using <br>)
 
 ### Bugs
 - Fixed bugs that prevented notes added in Zotero using markdown from being formatted properly
