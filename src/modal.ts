@@ -151,6 +151,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 	) {
 		//Create an array where you store the citekey to be processed
 		let citeKeyToBeProcessed: string[] = [];
+		
 
 		//If the entire library has been selected, then add all the
 		if (referenceSelected.citationKey === "Entire Library") {

@@ -119,6 +119,14 @@ export default class MyPlugin extends Plugin {
 			isHighlightBullet,
 			isHighlightBlockquote,
 			isHighlightQuote,
+			tagCustomTextAfter,
+			tagCustomTextBefore,
+			isTagItalic,
+			isTagBold,
+			isTagHighlighted,
+			isTagBullet,
+			isTagBlockquote,
+			isTagQuote,
 		} = this.settings;
 
 		//Set the formatting variables based on the highlightsettings
@@ -151,7 +159,6 @@ export default class MyPlugin extends Plugin {
 			highlightItalic +
 			highlightBold +
 			highlightHighlighted +
-			" " +
 			highlightCustomTextAfter;
 
 		const highlightPrepend =
@@ -178,7 +185,46 @@ export default class MyPlugin extends Plugin {
 			commentCustomTextAfter;
 
 		const commentPrepend =
-			commentBullet + commentBlockquote + " " + commentCustomTextBefore;
+			commentBullet + commentBlockquote +  commentCustomTextBefore;
+
+		
+		//Set the tag formatting variables based on the tag settings
+		const [
+			tagItalic,
+			tagBold,
+			tagHighlighted,
+			tagBullet,
+			tagBlockquote,
+			tagQuoteOpen,
+			tagQuoteClose,
+		] = [
+			isTagItalic ? "*" : "",
+			isTagBold ? "**" : "",
+			isTagHighlighted ? "==" : "",
+			isTagBullet ? "- " : "",
+			isTagBlockquote ? "> " : "",
+			isTagQuote ? "“" : "",
+			isTagQuote ? "”" : "",
+		];
+
+		const tagFormatBefore =
+			tagHighlighted +
+			tagBold +
+			tagItalic +
+			tagQuoteOpen;
+
+		const tagFormatAfter =
+			tagQuoteClose +
+			tagItalic +
+			tagBold +
+			tagHighlighted +
+			tagCustomTextAfter;
+
+		let tagPrepend = ""	
+		if(tagBullet != "" || tagBlockquote != ""){tagPrepend = "\n" +
+			tagBullet + tagBlockquote + tagCustomTextBefore;} else {	
+				tagPrepend = tagBullet + tagBlockquote + tagCustomTextBefore;}	
+		 console.log(tagPrepend)
 
 		return {
 			highlightFormatBefore,
@@ -187,6 +233,9 @@ export default class MyPlugin extends Plugin {
 			commentFormatBefore,
 			commentFormatAfter,
 			commentPrepend,
+			tagFormatBefore,
+			tagFormatAfter,
+			tagPrepend,
 		};
 	}
 
@@ -492,7 +541,6 @@ export default class MyPlugin extends Plugin {
 
 	parseAnnotationLinesintoElementsUserNote(note: string) {
 
-		console.log(note)
 		
 		// Replace html formatting with markdown formatting
 		const turndownService = new TurndownService()
@@ -505,10 +553,8 @@ export default class MyPlugin extends Plugin {
 			// Correct when zotero exports wrong key (e.g. Author, date, p. p. pagenum)
 			.replace(/, p. p. /g, ", p. ")
 			.trim();
-		console.log(note)
 		// Split the annotations into an array where each row is an entry
 		const lines = note.split(/<\/h1>|\n\n|<\/p>/gm);
-		console.log(lines)
 		const noteElements: AnnotationElements[] = [];
 
 		//Loop through the lines
@@ -516,7 +562,6 @@ export default class MyPlugin extends Plugin {
 		for (let indexLines = 0; indexLines < lengthLines; indexLines++) {
 			const selectedLineOriginal = unescape(lines[indexLines]);
 
-			console.log(selectedLineOriginal)
 			
 			// Replace backticks with single quote
 			let selectedLine = replaceTemplate(selectedLineOriginal, "`", "'");
@@ -595,6 +640,8 @@ export default class MyPlugin extends Plugin {
 				annotationType: "",
 				citeKey: "",
 				commentText: "",
+				inlineTagsText: "",
+				inlineTagsArray: [],
 				rowOriginal: selectedLine,
 				rowEdited: selectedLine,
 				indexNote: undefined,
@@ -809,13 +856,67 @@ export default class MyPlugin extends Plugin {
 									annotationCommentAll.length
 								)
 								.trim();
+				
+				//Extract the tags
+
+				//check if the inline tags are found in the text of the comment
+				if (lineElements.commentText.includes(this.settings.TagBeginningConfig)){
+
+					//if the tags are at the end of the comment, tehn extract the text between the beginning of the tag and the end of the comment
+					if(this.settings.TagEndConfig.length==0){
+						lineElements.inlineTagsText = lineElements.commentText.slice(
+							lineElements.commentText.indexOf(this.settings.TagBeginningConfig),
+							lineElements.commentText.length,
+					);
+					} else {
+						//if the tags are in the middle/beginning of the comment, tehn extract the text between the beginning of the tag and the specified end  of the tag
+						lineElements.inlineTagsText = lineElements.commentText.slice(
+						lineElements.commentText.indexOf(this.settings.TagBeginningConfig),
+						lineElements.commentText.lastIndexOf(this.settings.TagEndConfig),
+						);
+					}
+				
+				//Remove the tags from the comment
+				lineElements.commentText = lineElements.commentText.replace(lineElements.inlineTagsText,"").trim()
+				}
+
+				//Check if there are any tags before performing manipulations of inlineTagsText
+				if(typeof lineElements.inlineTagsText !== `undefined`){
+					//Remove the tag beginning and end marker from the inlineTagsText
+					lineElements.inlineTagsText = lineElements.inlineTagsText.replace(this.settings.TagBeginningConfig,"");
+					
+					if(this.settings.TagEndConfig.length!=0){
+						lineElements.inlineTagsText = lineElements.inlineTagsText.replace(this.settings.TagEndConfig,"");
+					}
+					
+					//Split the different tags in an array if there are tags
+					lineElements.inlineTagsArray = lineElements.inlineTagsText.split(this.settings.TagDividerConfig)
+
+					// Identify what type of annotation is based on the tags word. Loop through each of the tags
+				if (lineElements.annotationType !== "typeImage") {
+					for (let indexTag = 0; indexTag < lineElements.inlineTagsArray.length; indexTag++) {
+						const tempAnnotationType = this.getAnnotationType(
+							lineElements.inlineTagsArray[indexTag],
+							annotationCommentAll);
+						//Currently bibnotes can only incorporate one transformation. So as soon as one of the tags matches one transformation this is applied to the code (superseding the first character) and the loop is interrupted. The tag is removed from the list that is printed after the comment 
+						if (tempAnnotationType != "noKey") {
+							lineElements.annotationType = tempAnnotationType; 
+							
+							//Remove this from the array
+							lineElements.inlineTagsArray.splice(indexTag,1)
+
+							break
+						}
+					}
+				}
+			}
+
 			} else {
 				lineElements.rowEdited = selectedLine;
 			}
-
 			//Add the element to the array containing all the elements
 			noteElements.push(lineElements);
-		}
+		} 
 		return noteElements;
 	}
 
@@ -992,10 +1093,15 @@ export default class MyPlugin extends Plugin {
 			highlightFormatAfter,
 			highlightFormatBefore,
 			highlightPrepend,
+			tagFormatBefore,
+			tagFormatAfter,
+			tagPrepend,
 		} = this.createFormatting();
 
 		//Create an index of rows to be removed
 		const indexRowsToBeRemoved: number[] = [];
+
+		//Create elements with subset of highlights/notes to be exported
 		const noteElementsArray: AnnotationElements[] = [];
 		const keywordArray: string[] = [];
 		const rowEditedArray: string[] = [];
@@ -1022,6 +1128,7 @@ export default class MyPlugin extends Plugin {
 			//Select one element to process
 			let lineElements = noteElements[i];
 
+			console.log(lineElements)
 
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements);
@@ -1118,6 +1225,63 @@ export default class MyPlugin extends Plugin {
 				lineElements.rowEdited =
 					"**" + lineElements.rowOriginal.toUpperCase() + "**";
 			}
+			
+			// ADD FORMATTING TO THE HIGHLIGHTS
+			if(lineElements.highlightText != ""){ lineElements.highlightFormatted = 
+				highlightPrepend +
+				colourTextBefore +
+				highlightFormatBefore +
+				lineElements.highlightText +
+				highlightFormatAfter +
+				colourTextAfter + 
+				" "} else {lineElements.highlightFormatted = ""} 
+			
+
+			// ADD FORMATTING TO THE COMMENTS
+			if(lineElements.commentText != ""){lineElements.commentFormatted = 
+				commentPrepend +
+				commentFormatBefore +
+				lineElements.commentText +
+				commentFormatAfter + " "} else {lineElements.commentFormatted = ""}
+
+			// ADD FORMATTING TO THE ZOTERO INLINE TAGS
+			const TempTag = lineElements.inlineTagsArray
+			.map(i => tagPrepend + tagFormatBefore + i + tagFormatAfter);
+			console.log(TempTag)
+
+			// Check if there are any inline tags
+			function allAreEmpty(arr:string[]) {
+				return arr.every(element => element == "");
+			}
+			console.log(allAreEmpty(lineElements.inlineTagsArray)); // 👉️ true
+
+			// If there are inline tags, format them. otherwise create empty element
+			if (allAreEmpty(lineElements.inlineTagsArray)==false){
+				lineElements.inlineTagsFormatted = TempTag.join(' ');
+				lineElements.inlineTagsFormatted = this.settings.tagCustomTextBeforeFirst + lineElements.inlineTagsFormatted + this.settings.tagCustomTextAfterLast
+			} else {lineElements.inlineTagsFormatted = ""}
+			console.log(lineElements.inlineTagsFormatted)
+			
+			
+			
+				//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
+			//OR WITHOUT ANY SPECIAL CONSIDERATIONS
+			if (lineElements.annotationType === "noKey") {
+				// if there is an highlighted text, then the reference goes after the highlight
+				if (lineElements.highlightText !== "") {
+					lineElements.rowEdited = 
+						lineElements.highlightFormatted +
+						lineElements.citeKey + " " +
+						lineElements.commentFormatted + 
+						lineElements.inlineTagsFormatted}
+				// if it is a standalone comment without highlight, the link to the pdf goes after the comment
+				else {lineElements.rowEdited = 
+						lineElements.highlightFormatted +
+						lineElements.commentFormatted +
+						lineElements.zoteroBackLink + " " +
+						lineElements.inlineTagsFormatted}}
+			
+		
 
 			//FORMAT IMAGES
 			if (lineElements.annotationType === "typeImage") {
@@ -1138,7 +1302,7 @@ export default class MyPlugin extends Plugin {
 						dir: this.settings.zoteroStoragePathManual + lineElements.imagePath,
 						base: "image.png",
 
-					})};
+					})}
 					
 					pathImageNew = path.normalize(
 						path.format({
@@ -1198,16 +1362,12 @@ export default class MyPlugin extends Plugin {
 							lineElements.rowEdited +
 							"\n" +
 							"\n" +
-							commentPrepend +
-							commentFormatBefore +
-							lineElements.commentText +
-							commentFormatAfter;
+							lineElements.commentFormatted +
+							lineElements.inlineTagsFormatted;
 					} else {
 						lineElements.rowEdited =
-							commentPrepend +
-							commentFormatBefore +
-							lineElements.commentText +
-							commentFormatAfter +
+							lineElements.commentFormatted +
+							lineElements.inlineTagsFormatted +
 							"\n" +
 							"\n" +
 							lineElements.rowEdited;
@@ -1217,13 +1377,13 @@ export default class MyPlugin extends Plugin {
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
 				noteElements[i].rowEdited = (noteElements[i - 1].rowEdited.replace(/\[.*\)/, '') +
-					this.settings.highlightCustomTextBefore +
-					colourTextBefore +
-					highlightFormatBefore +
-					lineElements.highlightText +
-					highlightFormatAfter +
-					lineElements.zoteroBackLink +
-					colourTextAfter).replace(/((?<=\p{Unified_Ideograph})\s*(?=\p{Unified_Ideograph}))/ug, '');
+					lineElements.highlightFormatted  +
+					lineElements.zoteroBackLink).replace(/((?<=\p{Unified_Ideograph})\s*(?=\p{Unified_Ideograph}))/ug, '') +
+					" " +
+					this.settings.commentAppendDivider +
+					lineElements.commentFormatted +
+					lineElements.inlineTagsFormatted
+					
 
 
 				//Add the highlighted text to the previous one
@@ -1241,7 +1401,6 @@ export default class MyPlugin extends Plugin {
 			}
 			//commentPrependDefault
 			if (lineElements.annotationType === "typeCommentPrepend") {
-				console.log(this.settings.commentPrependDivider )
 				//add the comment before the highlight
 				lineElements.rowEdited =
 					highlightPrepend +
@@ -1254,9 +1413,9 @@ export default class MyPlugin extends Plugin {
 					lineElements.highlightText +
 					highlightFormatAfter +
 					lineElements.citeKey +
-					colourTextAfter;
+					colourTextAfter +
+					lineElements.inlineTagsFormatted;
 			}
-			console.log(lineElements.annotationType)
 
 			// 	FORMAT THE HEADERS
 			//  Transform header in H1/H2/H3/H4/H5/H6 Level
@@ -1271,7 +1430,8 @@ export default class MyPlugin extends Plugin {
 					`\n${hashes} ` +
 					lineElements.highlightText +
 					lineElements.commentText +
-					lineElements.zoteroBackLink;
+					lineElements.zoteroBackLink +
+					lineElements.inlineTagsFormatted;
 			}
 
 			//Create Task
@@ -1291,10 +1451,11 @@ export default class MyPlugin extends Plugin {
 						lineElements.highlightText +
 						highlightFormatAfter +
 						lineElements.zoteroBackLink +
-						colourTextAfter;
+						colourTextAfter +
+						lineElements.inlineTagsFormatted;
 				} else if (
 					lineElements.commentText == "" &&
-					lineElements.highlightColour !== ""
+					lineElements.highlightText !== ""
 				) {
 					lineElements.rowEdited =
 						`- [ ] ` +
@@ -1303,17 +1464,19 @@ export default class MyPlugin extends Plugin {
 						lineElements.highlightText +
 						highlightFormatAfter +
 						lineElements.zoteroBackLink +
-						colourTextAfter;
+						colourTextAfter +
+						lineElements.inlineTagsFormatted;;
 				} else if (
 					lineElements.commentText !== "" &&
-					lineElements.highlightColour === ""
+					lineElements.highlightText === ""
 				) {
 					lineElements.rowEdited =
 						`- [ ] ` +
 						commentFormatBefore +
 						lineElements.commentText +
 						commentFormatAfter +
-						lineElements.zoteroBackLink;
+						lineElements.zoteroBackLink +
+						lineElements.inlineTagsFormatted;;
 				}
 			}
 
@@ -1329,47 +1492,13 @@ export default class MyPlugin extends Plugin {
 				indexRowsToBeRemoved.push(i);
 			}
 
-			//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
-			//OR WITHOUT ANY SPECIAL CONSIDERATIONS
-			if (lineElements.annotationType === "noKey") {
-				if (lineElements.highlightText !== "") {
-					lineElements.rowEdited =
-						highlightPrepend +
-						colourTextBefore +
-						highlightFormatBefore +
-						lineElements.highlightText +
-						highlightFormatAfter +
-						lineElements.citeKey +
-						colourTextAfter;
-					if (lineElements.commentText !== "") {
-						lineElements.rowEdited =
-							lineElements.rowEdited +
-							this.settings.commentAppendDivider +
-							commentPrepend +
-							commentFormatBefore +
-							lineElements.commentText +
-							commentFormatAfter;
-					}
-					// 	//FORMAT THE COMMENTS ADDED OUTSIDE OF ANY ANNOTATION
-				} else if (
-					lineElements.highlightText === "" &&
-					lineElements.commentText !== ""
-				) {
-
-
-					lineElements.rowEdited =
-						commentPrepend +
-						commentFormatBefore +
-						lineElements.commentText +
-						commentFormatAfter +
-						lineElements.zoteroBackLink;
-				}
-			}
+		
 			
 
 
 			//Copy the edited text into an array to be exported
 			noteElementsArray.push(lineElements);
+
 		}
 
 		// PERFORM THE FOLLOWING OPERATIONS ON THE WHOLE ARRAY
@@ -1524,6 +1653,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	extractAnnotation(selectedEntry: Reference, noteTitleFull: string) {
+
 		let extractedAnnotations = "";
 		let extractedAnnotationsYellow = "";
 		let extractedAnnotationsRed = "";
@@ -2139,6 +2269,7 @@ export default class MyPlugin extends Plugin {
 		const authorKey = createAuthorKey(selectedEntry.creators);
 		//set the authorkey field on the entry to use when creating the title
 		selectedEntry.authorKey = authorKey;
+
 
 		//create bugout to store and export logs in a file
 		let bugout = new Debugout({ realTimeLoggingOn: false });

@@ -559,7 +559,164 @@ export class SettingTab extends PluginSettingTab {
 					})
 			);	
 
-				containerEl.createEl('h3', {text: 'Additional Transformations'});
+			containerEl.createEl('h3', {text: 'Zotero Tags'});
+			const settingsTags: HTMLDetailsElement =
+				containerEl.createEl("details");
+				
+				settingsTags.setAttribute("open", "");
+				settingsTags.createEl("summary", {text: "" });
+
+				new Setting(settingsTags)				
+				.setDesc( " In order to extract tags added from the Zotero PDF reader, open Zotero -> Preferences -> Advanced -> Config Editor -> extensions.zotero.annotations.noteTemplates.highlight <br> Replace default value with: <p>{{highlight quotes='true'}} {{citation}} {{comment}} {{if tags}} Tag: {{tags join='; '}}{{endif}}</p>")
+
+				/*
+				new Setting(settingsTags)
+			
+				.setName("Text before the {{tags}} in the Zotero advanced config ")
+				.setDesc("Zotero -> Preferences -> Advanced -> Config Editor -> extensions.zotero.annotations.noteTemplates.highlight \n Default value: <p>{{highlight quotes='true'}} {{citation}} {{comment}} {{if tags}} Tag: {{tags join='; '}}{{endif}}</p>")
+				.addText((text) =>
+				text
+					.setValue(settings.TagBeginningConfig)
+					.onChange(async (value) => {
+						settings.TagBeginningConfig = value;
+						await plugin.saveSettings();
+					})
+				);
+				new Setting(settingsTags)
+					.setName("Text after the {{tags}} in the Zotero advanced config ")
+					.setDesc("Zotero -> Preferences -> Advanced -> Config Editor -> extensions.zotero.annotations.noteTemplates.highlight <br> Default value: <p>{{highlight quotes='true'}} {{citation}} {{comment}} {{if tags}} Tag: {{tags join='; '}}{{endif}}</p>")
+					.addText((text) =>
+					text
+						.setValue(settings.TagEndConfig)
+						.onChange(async (value) => {
+							settings.TagEndConfig = value;
+							await plugin.saveSettings();
+						})
+						);
+					new Setting(settingsTags)
+					.setName("Text between {{tags}} in the Zotero advanced config ")
+					.setDesc("Zotero -> Preferences -> Advanced -> Config Editor -> extensions.zotero.annotations.noteTemplates.highlight <br> Default value: <p>{{highlight quotes='true'}} {{citation}} {{comment}} {{if tags}} Tag: {{tags join='; '}}{{endif}}</p>")
+					.addText((text) =>
+					text
+						.setValue(settings.TagDividerConfig)
+						.onChange(async (value) => {
+							settings.TagDividerConfig = value;
+							await plugin.saveSettings();
+						})
+						);
+					*/
+					new Setting(settingsTags)
+					.setName("Quotation Marks")
+					.addToggle((text) =>
+						text
+							.setValue(settings.isTagQuote)
+							.onChange(async (value) => {
+								settings.isTagQuote = value;
+								await plugin.saveSettings();
+								this.display();
+							})
+					);
+		
+					new Setting(settingsTags).setName("Bold").addToggle((text) =>
+						text
+							.setValue(settings.isTagBold)
+							.onChange(async (value) => {
+								settings.isTagBold = value;
+								await plugin.saveSettings();
+								this.display();
+							})
+					);
+					new Setting(settingsTags).setName("Italic").addToggle((text) =>
+						text
+							.setValue(settings.isTagItalic)
+							.onChange(async (value) => {
+								settings.isTagItalic = value;
+								await plugin.saveSettings();
+								this.display();
+							})
+					);
+		
+					new Setting(settingsTags)
+						.setName("Highlighted")
+						.addToggle((text) =>
+							text
+								.setValue(settings.isTagHighlighted)
+								.onChange(async (value) => {
+									settings.isTagHighlighted = value;
+									await plugin.saveSettings();
+									this.display();
+								})
+						);
+					new Setting(settingsTags)
+						.setName("Bullet Points")
+						.addToggle((text) =>
+							text
+								.setValue(settings.isTagBullet)
+								.onChange(async (value) => {
+									settings.isTagBullet = value;
+									await plugin.saveSettings();
+									this.display();
+								})
+						);
+		
+					new Setting(settingsTags)
+						.setName("Blockquote")
+						.addToggle((text) =>
+							text
+								.setValue(settings.isTagBlockquote)
+								.onChange(async (value) => {
+									settings.isTagBlockquote = value;
+									await plugin.saveSettings();
+									this.display();
+								})
+						);
+		
+					new Setting(settingsTags)
+						.setName("Custom text before each individual tag")
+						.addTextArea((text) =>
+							text
+								.setValue(settings.tagCustomTextBefore)
+								.onChange(async (value) => {
+									settings.tagCustomTextBefore = value;
+									await plugin.saveSettings();
+								})
+						);
+		
+					new Setting(settingsTags)
+						.setName("Custom text after each individual tag")
+						.addTextArea((text) =>
+							text
+								.setValue(settings.tagCustomTextAfter)
+								.onChange(async (value) => {
+									settings.tagCustomTextAfter = value;
+									await plugin.saveSettings();
+								})
+						);
+
+					new Setting(settingsTags)
+						.setName("Custom text before first tag")
+						.addTextArea((text) =>
+							text
+								.setValue(settings.tagCustomTextBeforeFirst)
+								.onChange(async (value) => {
+									settings.tagCustomTextBeforeFirst = value;
+									await plugin.saveSettings();
+								})
+						);	
+					new Setting(settingsTags)
+						.setName("Custom text after last tag")
+						.addTextArea((text) =>
+							text
+								.setValue(settings.tagCustomTextAfterLast)
+								.onChange(async (value) => {
+									settings.tagCustomTextAfterLast = value;
+									await plugin.saveSettings();
+								})
+						);	
+
+						
+
+			containerEl.createEl('h3', {text: 'Additional Transformations'});
 				const settingsAdvanced: HTMLDetailsElement =
 					containerEl.createEl("details");
 					settingsAdvanced.setAttribute("open", "");
