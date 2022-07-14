@@ -324,6 +324,18 @@ export class SettingTab extends PluginSettingTab {
 							await plugin.saveSettings();
 							this.display();
 						})
+				);	
+				
+			new Setting(settingsCitations)
+				.setName("Structure of the extracted highlights/comments/tag")
+					.setDesc("Placeholder include {{highlight}}, {{comment}}, {{tag}}")
+					.addTextArea((text) =>
+					text
+						.setValue(settings.highlightExportTemplate)
+						.onChange(async (value) => {
+							settings.highlightExportTemplate = value;
+							await plugin.saveSettings();
+						})
 				);		
 
 
@@ -537,27 +549,27 @@ export class SettingTab extends PluginSettingTab {
 						})
 				);
 
-			new Setting(settingsComments)
-			.setName("Text dividing the highlight and the related comment")
-				.setDesc("e.g. <br> to place the comment on a different line")
-				.addText((text) =>
-				text
-					.setValue(settings.commentAppendDivider)
-					.onChange(async (value) => {
-						settings.commentAppendDivider = value;
-						await plugin.saveSettings();
-					})
-			);					
-			new Setting(settingsComments)
-				.setName("Text dividing the highlight and the related comment when the comment is moved before the highlight")
-				.addText((text) =>
-				text
-					.setValue(settings.commentPrependDivider)
-					.onChange(async (value) => {
-						settings.commentPrependDivider = value;
-						await plugin.saveSettings();
-					})
-			);	
+			// new Setting(settingsComments)
+			// .setName("Text dividing the highlight and the related comment")
+			// 	.setDesc("e.g. <br> to place the comment on a different line")
+			// 	.addText((text) =>
+			// 	text
+			// 		.setValue(settings.commentAppendDivider)
+			// 		.onChange(async (value) => {
+			// 			settings.commentAppendDivider = value;
+			// 			await plugin.saveSettings();
+			// 		})
+			// );					
+			// new Setting(settingsComments)
+			// 	.setName("Text dividing the highlight and the related comment when the comment is moved before the highlight")
+			// 	.addText((text) =>
+			// 	text
+			// 		.setValue(settings.commentPrependDivider)
+			// 		.onChange(async (value) => {
+			// 			settings.commentPrependDivider = value;
+			// 			await plugin.saveSettings();
+			// 		})
+			// );	
 
 			containerEl.createEl('h3', {text: 'Zotero Tags'});
 			const settingsTags: HTMLDetailsElement =
@@ -567,7 +579,7 @@ export class SettingTab extends PluginSettingTab {
 				settingsTags.createEl("summary", {text: "" });
 
 				new Setting(settingsTags)				
-				.setDesc( " In order to extract tags added from the Zotero PDF reader, open Zotero -> Preferences -> Advanced -> Config Editor -> extensions.zotero.annotations.noteTemplates.highlight <br> Replace default value with: <p>{{highlight quotes='true'}} {{citation}} {{comment}} {{if tags}} Tag: {{tags join='; '}}{{endif}}</p>")
+				.setDesc( "In order to extract tags added from the Zotero PDF reader, open Zotero -> Preferences -> Advanced -> Config Editor -> extensions.zotero.annotations.noteTemplates.highlight <br> Replace default value with: <p>{{highlight quotes='true'}} {{citation}} {{comment}} {{if tags}} Tag: {{tags join='; '}}{{endif}}</p>")
 
 				/*
 				new Setting(settingsTags)
@@ -605,6 +617,17 @@ export class SettingTab extends PluginSettingTab {
 						})
 						);
 					*/
+					new Setting(settingsTags)
+					.setName("Hash sign (#)")
+					.addToggle((text) =>
+						text
+							.setValue(settings.isTagHash)
+							.onChange(async (value) => {
+								settings.isTagHash = value;
+								await plugin.saveSettings();
+								this.display();
+							})
+					);
 					new Setting(settingsTags)
 					.setName("Quotation Marks")
 					.addToggle((text) =>
@@ -693,26 +716,26 @@ export class SettingTab extends PluginSettingTab {
 								})
 						);
 
-					new Setting(settingsTags)
-						.setName("Custom text before first tag")
-						.addTextArea((text) =>
-							text
-								.setValue(settings.tagCustomTextBeforeFirst)
-								.onChange(async (value) => {
-									settings.tagCustomTextBeforeFirst = value;
-									await plugin.saveSettings();
-								})
-						);	
-					new Setting(settingsTags)
-						.setName("Custom text after last tag")
-						.addTextArea((text) =>
-							text
-								.setValue(settings.tagCustomTextAfterLast)
-								.onChange(async (value) => {
-									settings.tagCustomTextAfterLast = value;
-									await plugin.saveSettings();
-								})
-						);	
+					// new Setting(settingsTags)
+					// 	.setName("Custom text before first tag")
+					// 	.addTextArea((text) =>
+					// 		text
+					// 			.setValue(settings.tagCustomTextBeforeFirst)
+					// 			.onChange(async (value) => {
+					// 				settings.tagCustomTextBeforeFirst = value;
+					// 				await plugin.saveSettings();
+					// 			})
+					// 	);	
+					// new Setting(settingsTags)
+					// 	.setName("Custom text after last tag")
+					// 	.addTextArea((text) =>
+					// 		text
+					// 			.setValue(settings.tagCustomTextAfterLast)
+					// 			.onChange(async (value) => {
+					// 				settings.tagCustomTextAfterLast = value;
+					// 				await plugin.saveSettings();
+					// 			})
+					// 	);	
 
 						
 

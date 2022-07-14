@@ -127,6 +127,7 @@ export default class MyPlugin extends Plugin {
 			isTagBullet,
 			isTagBlockquote,
 			isTagQuote,
+			isTagHash,
 		} = this.settings;
 
 		//Set the formatting variables based on the highlightsettings
@@ -161,8 +162,12 @@ export default class MyPlugin extends Plugin {
 			highlightHighlighted +
 			highlightCustomTextAfter;
 
-		const highlightPrepend =
-			highlightBullet + highlightBlockquote + highlightCustomTextBefore;
+		let highlightPrepend = ""	
+			if(highlightBullet != "" || highlightBlockquote != ""){highlightPrepend = 	
+				"\n" +		
+				highlightBullet + 
+				highlightBlockquote + 
+				highlightCustomTextBefore}
 
 		//Set the formatting variables based on the comments settings
 		const commentItalic = isCommentItalic ? "*" : "";
@@ -183,13 +188,19 @@ export default class MyPlugin extends Plugin {
 			commentBold +
 			commentHighlighted +
 			commentCustomTextAfter;
-
-		const commentPrepend =
-			commentBullet + commentBlockquote +  commentCustomTextBefore;
+		
+		let commentPrepend = ""	
+		if(commentBullet != "" || commentBlockquote != ""){
+			commentPrepend = 
+			"\n" +		
+			commentBullet + 
+			commentBlockquote + 
+			commentCustomTextBefore};
 
 		
 		//Set the tag formatting variables based on the tag settings
 		const [
+			tagHash,
 			tagItalic,
 			tagBold,
 			tagHighlighted,
@@ -198,6 +209,7 @@ export default class MyPlugin extends Plugin {
 			tagQuoteOpen,
 			tagQuoteClose,
 		] = [
+			isTagHash ? "#" : "",
 			isTagItalic ? "*" : "",
 			isTagBold ? "**" : "",
 			isTagHighlighted ? "==" : "",
@@ -208,6 +220,7 @@ export default class MyPlugin extends Plugin {
 		];
 
 		const tagFormatBefore =
+			tagHash +
 			tagHighlighted +
 			tagBold +
 			tagItalic +
@@ -224,7 +237,6 @@ export default class MyPlugin extends Plugin {
 		if(tagBullet != "" || tagBlockquote != ""){tagPrepend = "\n" +
 			tagBullet + tagBlockquote + tagCustomTextBefore;} else {	
 				tagPrepend = tagBullet + tagBlockquote + tagCustomTextBefore;}	
-		 console.log(tagPrepend)
 
 		return {
 			highlightFormatBefore,
@@ -620,7 +632,7 @@ export default class MyPlugin extends Plugin {
 		//Loop through the lines
 		const lengthLines = Object.keys(lines).length;
 		for (let indexLines = 1; indexLines < lengthLines; indexLines++) {
-
+			console.log("indexLines: "+ indexLines)
 
 			const selectedLineOriginal = unescape(lines[indexLines]);
 
@@ -714,6 +726,7 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//Extract the attachment URI
+			console.log(selectedLineOriginal)
 
 			if (
 				/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(
@@ -735,6 +748,8 @@ export default class MyPlugin extends Plugin {
 					lineElements.attachmentURI = attachmentURI;
 				}
 			}
+
+
 			if (
 				/"attachmentURI":"http:\/\/zotero.org\/users\/local\/[a-zA-Z0-9]*\/items\/[a-zA-Z0-9]*/gm.test(
 					selectedLineOriginal
@@ -755,8 +770,31 @@ export default class MyPlugin extends Plugin {
 					lineElements.attachmentURI = attachmentURI;
 				}
 			}
+	
+ 			if (
+				/"uris":\["http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(
+					selectedLineOriginal
+				) && lineElements.attachmentURI == ""
+			){
+				let attachmentURI = String(
+					selectedLineOriginal.match(
+						/"uris":\["http:\/\/zotero\.org\/users\/\d+\/items\/\w+/g
+					)
+				);
+				if (attachmentURI === null) {
+					lineElements.attachmentURI = null;
+				} else {
+					attachmentURI = attachmentURI.replace(
+						/"uris":\["http:\/\/zotero\.org\/users\/\d+\/items\//g,
+						""
+					);
+					lineElements.attachmentURI = attachmentURI;
+				}
+	
+			}
 
-			//Create the zotero backlink			
+		
+ 			//Create the zotero backlink			
 			if (/"annotationKey":"[a-zA-Z0-9]+/gm.test(selectedLineOriginal)) {
 				let annotationKey = String(selectedLineOriginal.match(/"annotationKey":"[a-zA-Z0-9]+/gm));
 				if (annotationKey === null) {
@@ -768,7 +806,7 @@ export default class MyPlugin extends Plugin {
 			}
 			if (lineElements.attachmentURI !== null && lineElements.pagePDF !== null && lineElements.annotationKey !== null) {
 				lineElements.zoteroBackLink = "zotero://open-pdf/library/items/" + lineElements.attachmentURI + "?page=" + lineElements.pagePDF + "&annotation=" + lineElements.annotationKey;
-				//zotero://open-pdf/library/items/TKT5MBJY?page=8&annotation=J7DBQXWA
+				
 			}
 			//Extract the citation within bracket
 			if (
@@ -1063,7 +1101,24 @@ export default class MyPlugin extends Plugin {
 			}
 		}
     
+	// Extract the colour template
+	const arr = ['{{highlight}}', '{{comment}}', '{{tag}}'];
+	const containsHighlightCommentTag = arr.some(element => {
+		if (colourTransformation.includes(element)) {
+			return true;
+		// if a specific template has not been set for the specific colour, then import the default	template
+		} 
+		return false;
+	});
+	if (containsHighlightCommentTag == true){lineElements.colourTemplate = colourTransformation}
+	else {lineElements.colourTemplate = this.settings.highlightExportTemplate}
+
+	
+	
+	
+
 	//extract the text to be pre-pended/appended
+	 
 		if (colourTransformation.includes("{{highlight}}")) {
 			lineElements.colourTextBefore = String(
 				colourTransformation.match(/.+?(?={{highlight}})/)
@@ -1127,8 +1182,6 @@ export default class MyPlugin extends Plugin {
 		for (let i = 0; i < noteElements.length; i++) {
 			//Select one element to process
 			let lineElements = noteElements[i];
-
-			console.log(lineElements)
 
 			//Run the function to extract the transformation associated with the highlighted colour
 			lineElements = this.formatColourHighlight(lineElements);
@@ -1227,61 +1280,132 @@ export default class MyPlugin extends Plugin {
 			}
 			
 			// ADD FORMATTING TO THE HIGHLIGHTS
-			if(lineElements.highlightText != ""){ lineElements.highlightFormatted = 
-				highlightPrepend +
-				colourTextBefore +
-				highlightFormatBefore +
-				lineElements.highlightText +
-				highlightFormatAfter +
-				colourTextAfter + 
-				" "} else {lineElements.highlightFormatted = ""} 
+			if(lineElements.highlightText != ""){ 
+				lineElements.highlightFormatted = 
+					highlightPrepend +
+					highlightFormatBefore +
+					lineElements.highlightText +
+					highlightFormatAfter +
+					" " +
+					lineElements.citeKey + 
+					" ";
+				lineElements.highlightFormattedNoPrepend = 
+					highlightFormatBefore +
+					lineElements.highlightText +
+					highlightFormatAfter +
+					" " +
+					lineElements.citeKey + 
+					" ";
+			
+			} else {
+				lineElements.highlightFormatted = "";
+				lineElements.highlightFormattedNoPrepend= ""} 
 			
 
 			// ADD FORMATTING TO THE COMMENTS
-			if(lineElements.commentText != ""){lineElements.commentFormatted = 
-				commentPrepend +
-				commentFormatBefore +
-				lineElements.commentText +
-				commentFormatAfter + " "} else {lineElements.commentFormatted = ""}
+			if(lineElements.commentText != "" && lineElements.highlightText!=""){
+				lineElements.commentFormatted = 
+					commentPrepend +
+					commentFormatBefore +
+					lineElements.commentText +
+					commentFormatAfter + " ";
+				lineElements.commentFormattedNoPrepend = 
+					commentFormatBefore +
+					lineElements.commentText +
+					commentFormatAfter + " ";	
+				} 
+			//Add Citation to the comment if the highlight is empty
+			else if (lineElements.commentText != "" && lineElements.highlightText==""){
+				lineElements.commentFormatted = 
+					commentPrepend +
+					commentFormatBefore +
+					lineElements.commentText +
+					commentFormatAfter + 
+					" " +
+					lineElements.zoteroBackLink + 
+					" ";
+				lineElements.commentFormattedNoPrepend = 
+					commentFormatBefore +
+					lineElements.commentText +
+					commentFormatAfter + 
+					" " +
+					lineElements.zoteroBackLink + 
+					" ";	
+				} else {
+					lineElements.commentFormatted = "";
+					lineElements.commentFormattedNoPrepend = ""
+				}
+				
+
 
 			// ADD FORMATTING TO THE ZOTERO INLINE TAGS
+			//if the hash is added to the tag, then remove empty spaces
+			if(this.settings.isTagHash==true){
+				for (let index = 0; index < lineElements.inlineTagsArray.length; index++) {
+					lineElements.inlineTagsArray[index] = lineElements.inlineTagsArray[index].replace(/ /g, "")
+				}
+				//{}
+			}
+
 			const TempTag = lineElements.inlineTagsArray
 			.map(i => tagPrepend + tagFormatBefore + i + tagFormatAfter);
-			console.log(TempTag)
+			// if there are two tags, remove one
+			
+			//format the tags so that only the hash sign is added only if there was not one already
+			for (let index = 0; index < TempTag.length; index++) {
+				TempTag[index] = TempTag[index].replace("##", "#");
+				//if(this.settings.isTagHash==true){TempTag[index] = TempTag[index].replace(" ", "")}
+			}
+			
+				console.log(TempTag)
+			
+
+			const TempTagNoPrepend = lineElements.inlineTagsArray
+			.map(i => tagFormatBefore + i + tagFormatAfter);
+			for (let index = 0; index < TempTagNoPrepend.length; index++) {
+				TempTagNoPrepend[index] = TempTagNoPrepend[index].replace("##", "#");
+				//if(this.settings.isTagHash==true){TempTagNoPrepend[index] = TempTagNoPrepend[index].replace(" ", "")}
+			}
+			 
 
 			// Check if there are any inline tags
-			function allAreEmpty(arr:string[]) {
-				return arr.every(element => element == "");
-			}
-			console.log(allAreEmpty(lineElements.inlineTagsArray)); // 👉️ true
+			function allAreEmpty(arr:string[]) {return arr.every(element => element == "");}
 
 			// If there are inline tags, format them. otherwise create empty element
 			if (allAreEmpty(lineElements.inlineTagsArray)==false){
 				lineElements.inlineTagsFormatted = TempTag.join(' ');
-				lineElements.inlineTagsFormatted = this.settings.tagCustomTextBeforeFirst + lineElements.inlineTagsFormatted + this.settings.tagCustomTextAfterLast
-			} else {lineElements.inlineTagsFormatted = ""}
-			console.log(lineElements.inlineTagsFormatted)
+				// lineElements.inlineTagsFormatted = lineElements.inlineTagsFormatted + this.settings.tagCustomTextAfterLast;
+
+				lineElements.inlineTagsFormattedNoPrepend = TempTagNoPrepend.join(' ');
+				// lineElements.inlineTagsFormatted = lineElements.inlineTagsFormatted + this.settings.tagCustomTextAfterLast;
+
+			} else {
+				lineElements.inlineTagsFormatted = "";
+				lineElements.inlineTagsFormattedNoPrepend = "";
+			}
 			
+			//
 			
+			//Extract from the setting the template for exporitng the highlight/comment/tag for different colours
 			
+			lineElements.colourTemplateFormatted = lineElements.colourTemplate.replace("{{highlight}}", lineElements.highlightFormatted)
+			lineElements.colourTemplateFormatted = lineElements.colourTemplateFormatted.replace("{{comment}}", lineElements.commentFormatted)
+			lineElements.colourTemplateFormatted = lineElements.colourTemplateFormatted.replace("{{tag}}", lineElements.inlineTagsFormatted)
+			//lineElements.colourTemplate = lineElements.colourTemplate + "\n"
+			lineElements.colourTemplateFormatted=lineElements.colourTemplateFormatted.replace(/^\s+/g, '');
+
+			////Extract from the setting the template for exporitng the highlight/comment/tag for different colours but without prepend signs. This can be used to create tasks/heading
+			lineElements.colourTemplateNoPrepend = lineElements.colourTemplate.replace("{{highlight}}", lineElements.highlightFormattedNoPrepend)
+			lineElements.colourTemplateNoPrepend = lineElements.colourTemplateNoPrepend.replace("{{comment}}", lineElements.commentFormattedNoPrepend)
+			lineElements.colourTemplateNoPrepend = lineElements.colourTemplateNoPrepend.replace("{{tag}}", lineElements.inlineTagsFormattedNoPrepend)
+			//lineElements.colourTemplate = lineElements.colourTemplate + "\n"
+			lineElements.colourTemplateNoPrepend=lineElements.colourTemplateNoPrepend.replace(/^\s+/g, '');
+
+
+ 
 				//FORMAT HIGHLIGHTED SENTENCES WITHOUT ANY COMMENT
 			//OR WITHOUT ANY SPECIAL CONSIDERATIONS
-			if (lineElements.annotationType === "noKey") {
-				// if there is an highlighted text, then the reference goes after the highlight
-				if (lineElements.highlightText !== "") {
-					lineElements.rowEdited = 
-						lineElements.highlightFormatted +
-						lineElements.citeKey + " " +
-						lineElements.commentFormatted + 
-						lineElements.inlineTagsFormatted}
-				// if it is a standalone comment without highlight, the link to the pdf goes after the comment
-				else {lineElements.rowEdited = 
-						lineElements.highlightFormatted +
-						lineElements.commentFormatted +
-						lineElements.zoteroBackLink + " " +
-						lineElements.inlineTagsFormatted}}
-			
-		
+			if (lineElements.annotationType === "noKey") {lineElements.rowEdited = lineElements.colourTemplateFormatted}
 
 			//FORMAT IMAGES
 			if (lineElements.annotationType === "typeImage") {
@@ -1376,11 +1500,8 @@ export default class MyPlugin extends Plugin {
 			}
 			// MERGE HIGHLIGHT WITH THE PREVIOUS ONE ABOVE
 			if (lineElements.annotationType === "typeMergeAbove") {
-				noteElements[i].rowEdited = (noteElements[i - 1].rowEdited.replace(/\[.*\)/, '') +
-					lineElements.highlightFormatted  +
-					lineElements.zoteroBackLink).replace(/((?<=\p{Unified_Ideograph})\s*(?=\p{Unified_Ideograph}))/ug, '') +
-					" " +
-					this.settings.commentAppendDivider +
+				noteElements[i].rowEdited = (noteElements[i - 1].rowEdited.replace(/\[.*\)/, '')).replace(/\s+$/g, '') + " " +
+					lineElements.highlightFormattedNoPrepend.replace(/^\s+/g, '')  +
 					lineElements.commentFormatted +
 					lineElements.inlineTagsFormatted
 					
@@ -1404,16 +1525,8 @@ export default class MyPlugin extends Plugin {
 				//add the comment before the highlight
 				lineElements.rowEdited =
 					highlightPrepend +
-					commentFormatBefore +
-					lineElements.commentText +
-					commentFormatAfter +
-					this.settings.commentPrependDivider +
-					colourTextBefore +
-					highlightFormatBefore +
-					lineElements.highlightText +
-					highlightFormatAfter +
-					lineElements.citeKey +
-					colourTextAfter +
+					lineElements.commentFormattedNoPrepend +
+					lineElements.highlightFormattedNoPrepend +
 					lineElements.inlineTagsFormatted;
 			}
 
@@ -1427,7 +1540,7 @@ export default class MyPlugin extends Plugin {
 				const level = parseInt(lastChar);
 				const hashes = "#".repeat(level);
 				lineElements.rowEdited =
-					`\n${hashes} ` +
+					`${hashes} ` +
 					lineElements.highlightText +
 					lineElements.commentText +
 					lineElements.zoteroBackLink +
@@ -1436,48 +1549,45 @@ export default class MyPlugin extends Plugin {
 
 			//Create Task
 			if (lineElements.annotationType == "typeTask") {
-				if (
-					lineElements.commentText !== "" &&
-					lineElements.highlightText !== ""
-				) {
-					lineElements.rowEdited =
-						`- [ ] ` +
-						commentFormatBefore +
-						lineElements.commentText +
-						commentFormatAfter +
-						" - " +
-						colourTextBefore +
-						highlightFormatBefore +
-						lineElements.highlightText +
-						highlightFormatAfter +
-						lineElements.zoteroBackLink +
-						colourTextAfter +
-						lineElements.inlineTagsFormatted;
-				} else if (
-					lineElements.commentText == "" &&
-					lineElements.highlightText !== ""
-				) {
-					lineElements.rowEdited =
-						`- [ ] ` +
-						colourTextBefore +
-						highlightFormatBefore +
-						lineElements.highlightText +
-						highlightFormatAfter +
-						lineElements.zoteroBackLink +
-						colourTextAfter +
-						lineElements.inlineTagsFormatted;;
-				} else if (
-					lineElements.commentText !== "" &&
-					lineElements.highlightText === ""
-				) {
-					lineElements.rowEdited =
-						`- [ ] ` +
-						commentFormatBefore +
-						lineElements.commentText +
-						commentFormatAfter +
-						lineElements.zoteroBackLink +
-						lineElements.inlineTagsFormatted;;
-				}
+				lineElements.rowEdited =
+					`- [ ] ` +
+					lineElements.colourTemplateNoPrepend
+				// if (
+				// 	lineElements.commentText !== "" &&
+				// 	lineElements.highlightText !== ""
+				// ) {
+				// 	lineElements.rowEdited =
+				// 		`- [ ] ` +
+				// 		lineElements.commentFormattedNoPrepend +
+				// 		" - " +
+				// 		lineElements.highlightFormattedNoPrepend +
+				// 		lineElements.inlineTagsFormatted;
+				// } else if (
+				// 	lineElements.commentText == "" &&
+				// 	lineElements.highlightText !== ""
+				// ) {
+				// 	lineElements.rowEdited =
+				// 		`- [ ] ` +
+				// 		colourTextBefore +
+				// 		highlightFormatBefore +
+				// 		lineElements.highlightText +
+				// 		highlightFormatAfter +
+				// 		lineElements.zoteroBackLink +
+				// 		colourTextAfter +
+				// 		lineElements.inlineTagsFormatted;;
+				// } else if (
+				// 	lineElements.commentText !== "" &&
+				// 	lineElements.highlightText === ""
+				// ) {
+				// 	lineElements.rowEdited =
+				// 		`- [ ] ` +
+				// 		commentFormatBefore +
+				// 		lineElements.commentText +
+				// 		commentFormatAfter +
+				// 		lineElements.zoteroBackLink +
+				// 		lineElements.inlineTagsFormatted;;
+				// }
+			
 			}
 
 			//FORMAT KEYWORDS

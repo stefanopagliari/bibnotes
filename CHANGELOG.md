@@ -1,9 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.  
-
+## [0.9.2]
+### Improvement
+- The plugin extracts tags added usiong the Zotero PDF Reader. "In order to extract tags added from the Zotero PDF reader, open Zotero -> Preferences -> Advanced -> Config Editor -> extensions.zotero.annotations.noteTemplates.highlight <br> Replace default value with: <p>{{highlight quotes='true'}} {{citation}} {{comment}} {{if tags}} Tag: {{tags join='; '}}{{endif}}</p>"
+- Different formatting options have been added to the tags extracted from the zotero pdf reader (e.g. hash, bold, bullet point, italic, highlight)
+- The tag extracted from the zotero pdf reader can be used to trigger transformations in the text (e.g. heading, todo), using the same keywords found in the first word of the text
+- Added settings that allows to define the placement of the highlight, comments and tags extracted from Zotero. Placeholder include {{highlight}}, {{comment}}, {{tag}}". This setting allows you to define the order of these elements and to include an elements in between them (e.g. line break). In addition to the general placement setting, it is also possible to define specific arrangements for the highlights of a given colour. This replaces the previous settings "text dividing the highlight and the related comment" and "Text dividing the highlight and the related comment when the comment is moved before the highlight". This custom tgext now can be included in the general setting in between the {{highlight}} and {{comment}} placeholder.
+ 
 ## [0.9.14]
 ### Improvement
+
 - The plugin also extracts the colour of highlights made with external PDF annotations and imported by Zotero (instead of Zotfile) using the "Add Note from Annotation". The plugin converts the HEX colour of the annotation into a palette comprising of ten colours (https://github.com/wadackel/color-classifier/blob/master/src/palette/rainbow.js) 
 - Added the possibility of specifying a custom hex colour in the highlight setting and the transformation associated with this colour. Added a "{{CustomHex}}" placeholder in the template gathering all the highlight using that colour
 - The backlink now directs to the specific annotation rather than the page in the pdf file (thanks to @CaoKang-David)
