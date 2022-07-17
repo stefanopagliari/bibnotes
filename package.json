@@ -1,6 +1,6 @@
 {
 	"name": "bibnotes",
-	"version": "0.9.20",
+	"version": "0.9.201",
 	"description": "Plugin to export and format annotations from Zotero into Obsidian",
 	"main": "main.js",
 	"scripts": {
@@ -11,6 +11,7 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
+		"@types/better-sqlite3": "^7.5.0",
 		"@types/node": "^16.11.10",
 		"@typescript-eslint/eslint-plugin": "^5.2.0",
 		"@typescript-eslint/parser": "^5.2.0",

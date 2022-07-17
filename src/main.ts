@@ -2,6 +2,9 @@
 import * as fs from "fs";
 import { Debugout } from "debugout.js";
 import ColorClassifier, { Palette, AlgorithmTypes } from "color-classifier"
+//import  Database from "better-sqlite3";
+//import DB from "better-sqlite3";
+
 
 //import { info, setLevel } from "loglevel";
 
@@ -300,12 +303,12 @@ export default class MyPlugin extends Plugin {
 		//create field file
 		//if (selectedEntry.hasOwnProperty("attachment.")){
 		selectedEntry.file = createLocalFileLink(selectedEntry);
-
-		// Create an array with all the fields
+ 		// Create an array with all the fields
 		const entriesArray = Object.keys(selectedEntry);
 		//replace the single-value placeholders with the value of the field
+	
 		note = replaceAllTemplates(entriesArray, note, selectedEntry);
-
+	
 		//remove single backticks but retain triple backticks
 		note = note.replace(/```/g, "HEREISAPLACEHOLDERFORBACKTICK");
 		note = note.replace(/`/g, "'");
@@ -632,7 +635,6 @@ export default class MyPlugin extends Plugin {
 		//Loop through the lines
 		const lengthLines = Object.keys(lines).length;
 		for (let indexLines = 1; indexLines < lengthLines; indexLines++) {
-			console.log("indexLines: "+ indexLines)
 
 			const selectedLineOriginal = unescape(lines[indexLines]);
 
@@ -726,7 +728,6 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//Extract the attachment URI
-			console.log(selectedLineOriginal)
 
 			if (
 				/attachmentURI":"http:\/\/zotero\.org\/users\/\d+\/items\/\w+/gm.test(
@@ -1357,7 +1358,6 @@ export default class MyPlugin extends Plugin {
 				//if(this.settings.isTagHash==true){TempTag[index] = TempTag[index].replace(" ", "")}
 			}
 			
-				console.log(TempTag)
 			
 
 			const TempTagNoPrepend = lineElements.inlineTagsArray
@@ -1365,7 +1365,7 @@ export default class MyPlugin extends Plugin {
 			for (let index = 0; index < TempTagNoPrepend.length; index++) {
 				TempTagNoPrepend[index] = TempTagNoPrepend[index].replace("##", "#");
 				//if(this.settings.isTagHash==true){TempTagNoPrepend[index] = TempTagNoPrepend[index].replace(" ", "")}
-			}
+			} 
 			 
 
 			// Check if there are any inline tags
@@ -2398,6 +2398,7 @@ export default class MyPlugin extends Plugin {
 		//Extract the list of collections
 		litnote = this.parseCollection(selectedEntry, data, litnote);
 
+
 		//Define the name and full path of the file to be exported
 		const noteTitleFull = createNoteTitle(
 			selectedEntry,
@@ -2526,5 +2527,18 @@ export default class MyPlugin extends Plugin {
 			if (err) console.log(err);
 		});
 		new Notice(`Imported ${selectedEntry.citationKey}!`);
+	}
+
+	checkSQLite(){
+		//console.log("launch SQLITE")
+		
+		
+		
+		//const db = require('better-sqlite3')('/Users/stefanopagliari/Zotero/zotero.sqlite');
+
+		//const db = new Database('/Users/stefanopagliari/Zotero/zotero.sqlite');
+		//const defaultRoot = path.join(homedir(), "Zotero");
+		//zoteroDbPath: path.join(defaultRoot, "zotero.sqlite"),
+
 	}
 }

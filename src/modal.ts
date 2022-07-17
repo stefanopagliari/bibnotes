@@ -42,6 +42,11 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 			this.focusInput();
 		}
 
+
+		//Check sqlite 3
+		this.plugin.checkSQLite();
+
+		
 		//Load the Json file
 
 		//Create the full path

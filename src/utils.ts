@@ -200,7 +200,6 @@ export const createCreatorList = (
 		}
 	}
 
-	// console.log(creatorList);
 
 	const creatorListBracket = creatorList.map(makeWiki);
 
@@ -307,7 +306,6 @@ export function replaceMissingFields(
 			.trim();
 		copy = copy.replace(TEMPLATE_REG, missingfieldreplacement).trim();
 	} else if (missingfield === "Remove (entire row)") {
-		//console.log("Trying to remove all rows with missing field");
 		const lines = copy.split(/\r?\n/);
 		// 	run function to determine where we still have double curly brackets
 		for (let j = 0; j < lines.length; j++) {
@@ -342,7 +340,6 @@ export function replaceMissingFields(
 	);
 	copy = copy.replace("## Tags and Collections\n" + "\n", "\n");
 
-	//console.log(copy)
 	return copy;
 }
 
@@ -363,18 +360,14 @@ export function createLocalFileLink(reference: Reference) {
 		if (reference.attachments[attachmentindex].path == undefined) {
 			reference.attachments[attachmentindex].path = "";
 		}
-
-		const attachmentPathCorrected = reference.attachments[
-			attachmentindex
-		].path.replaceAll(" ", "%20");
-
+		
 		const selectedfile: string =
 			"[" +
 			reference.attachments[attachmentindex].title +
 			"](file://" + // added an extra "/" to make it work on Linux
-			encodeURI(attachmentPathCorrected) +
+			encodeURI(reference.attachments[attachmentindex].path) +
 			")"; //select the author
-
+	
 		filesList.push(selectedfile);
 	}
 	//turn the array into a string
@@ -416,7 +409,6 @@ export function createNoteTitle(
 	const exportPathFull = path.normalize(
 		vaultPath + "/" + exportPath + "/" + exportTitle + ".md"
 	);
-	//console.log("exportPathFull: "+ exportPathFull)
 
 	return exportPathFull;
 }
