@@ -296,8 +296,9 @@ export default class MyPlugin extends Plugin {
 		if (selectedEntry.hasOwnProperty("select")) {
 			selectedEntry.localLibrary =
 				"[Zotero](" + selectedEntry.select + ")";
-			selectedEntry.localLibraryLink =
-				"(" + selectedEntry.select + ")";
+			selectedEntry.localLibraryLink = selectedEntry.select;
+			console.log(selectedEntry.localLibrary)	
+			console.log(selectedEntry.localLibraryLink)	 
 		}
 
 		//create field file
