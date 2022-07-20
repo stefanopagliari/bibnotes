@@ -58,7 +58,8 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 				this.plugin.settings.bibPath
 		);
 		const data = JSON.parse(rawdata.toString()); // rawdata is a buffer, convert to string
-
+		console.log(data)	
+		console.log(data.items)
 		//const checkAdmonition  = this.app.plugins.getPlugin("obsidian-admonition")._loaded
 
 		const bibtexArray: Reference[] = [];

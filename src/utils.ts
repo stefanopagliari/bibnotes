@@ -364,7 +364,7 @@ export function createLocalFileLink(reference: Reference) {
 		const selectedfile: string =
 			"[" +
 			reference.attachments[attachmentindex].title +
-			"](file:///" + // added an extra "/" to make it work on Linux
+			"](file:////" + // added an extra "/" to make it work on Linux
 			encodeURI(reference.attachments[attachmentindex].path.replaceAll(" ", " ")) +
 			")"; //select the author
 		 

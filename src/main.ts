@@ -297,10 +297,9 @@ export default class MyPlugin extends Plugin {
 			selectedEntry.localLibrary =
 				"[Zotero](" + selectedEntry.select + ")";
 			selectedEntry.localLibraryLink = selectedEntry.select;
-			console.log(selectedEntry.localLibrary)	
-			console.log(selectedEntry.localLibraryLink)	 
+	 
 		}
-
+ 
 		//create field file
 		//if (selectedEntry.hasOwnProperty("attachment.")){
 		selectedEntry.file = createLocalFileLink(selectedEntry);
@@ -1112,6 +1111,7 @@ export default class MyPlugin extends Plugin {
 		} 
 		return false;
 	});
+
 	if (containsHighlightCommentTag == true){lineElements.colourTemplate = colourTransformation}
 	else {lineElements.colourTemplate = this.settings.highlightExportTemplate}
 
@@ -1302,7 +1302,6 @@ export default class MyPlugin extends Plugin {
 			} else {
 				lineElements.highlightFormatted = "";
 				lineElements.highlightFormattedNoPrepend= ""} 
-			
 
 			// ADD FORMATTING TO THE COMMENTS
 			if(lineElements.commentText != "" && lineElements.highlightText!=""){
@@ -1388,7 +1387,10 @@ export default class MyPlugin extends Plugin {
 			//
 			
 			//Extract from the setting the template for exporitng the highlight/comment/tag for different colours
-			
+			if (typeof lineElements.colourTemplate == 'undefined'){lineElements.colourTemplate = this.settings.highlightExportTemplate}
+
+			if(lineElements.colourTemplate.length==0){lineElements.colourTemplate= ""}
+
 			lineElements.colourTemplateFormatted = lineElements.colourTemplate.replace("{{highlight}}", lineElements.highlightFormatted)
 			lineElements.colourTemplateFormatted = lineElements.colourTemplateFormatted.replace("{{comment}}", lineElements.commentFormatted)
 			lineElements.colourTemplateFormatted = lineElements.colourTemplateFormatted.replace("{{tag}}", lineElements.inlineTagsFormatted)
@@ -2531,7 +2533,6 @@ export default class MyPlugin extends Plugin {
 	}
 
 	checkSQLite(){
-		//console.log("launch SQLITE")
 		
 		
 		
