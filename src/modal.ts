@@ -45,7 +45,6 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 		//Check sqlite 3
 		this.plugin.checkSQLite();
-
 		
 		//Load the Json file
 
@@ -53,13 +52,12 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 		//const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
 		const rawdata = fs.readFileSync(
-			this.app.vault.adapter.getBasePath() +
+			this.app.vault.adapter.getBasePath() + 
 				"/" +
 				this.plugin.settings.bibPath
 		);
 		const data = JSON.parse(rawdata.toString()); // rawdata is a buffer, convert to string
-		console.log(data)	
-		console.log(data.items)
+
 		//const checkAdmonition  = this.app.plugins.getPlugin("obsidian-admonition")._loaded
 
 		const bibtexArray: Reference[] = [];

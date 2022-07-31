@@ -5,7 +5,6 @@ import ColorClassifier, { Palette, AlgorithmTypes } from "color-classifier"
 //import  Database from "better-sqlite3";
 //import DB from "better-sqlite3";
 
-
 //import { info, setLevel } from "loglevel";
 
 import { Plugin, Notice, normalizePath } from "obsidian";
@@ -13,12 +12,9 @@ import { Plugin, Notice, normalizePath } from "obsidian";
 
 import path from "path";
 
-import 'turndown'
+import 'turndown' 
+ 
 
-
-
-// wasn't actually used
-//import { BooleanLiteral, isTokenKind } from "typescript";
 
 import {
 	DEFAULT_SETTINGS,
@@ -32,7 +28,7 @@ import { fuzzySelectEntryFromJson, updateLibrary } from "./modal";
 //Import sample settings from /settings.ts
 import { SettingTab } from "./settings";
 import {
-	AnnotationElements, 
+	AnnotationElements,  
 	MyPluginSettings,
 	Reference,
 	Collection,
@@ -341,6 +337,8 @@ export default class MyPlugin extends Plugin {
 			//Remote html tags
 			const selectedLineOriginal = lines[indexLines];
 
+
+
 			const selectedLine = selectedLineOriginal.replace(
 				/<\/?[^>]+(>|$)/g,
 				""
@@ -352,7 +350,7 @@ export default class MyPlugin extends Plugin {
 			}
 
 			//Crety empty lineElements
-			const lineElements: AnnotationElements = {
+			const lineElements: AnnotationElements = { 
 				highlightText: "",
 				highlightColour: "",
 				annotationType: "",
@@ -377,8 +375,9 @@ export default class MyPlugin extends Plugin {
 
 			//Extract the citeKey
 			lineElements.citeKey = String(selectedLine.match(/\(([^)]+)\)+$/g));
+			if (lineElements.citeKey == `null`){lineElements.citeKey = String(selectedLine.match(/\(([^D+]+) \d+\S+\)/g))}; 
 
-			const posCiteKeyBegins = selectedLine.indexOf(lineElements.citeKey);
+			const posCiteKeyBegins = selectedLine.indexOf(lineElements.citeKey); 
 
 			let extractedText = "";
 			if (posCiteKeyBegins !== -1) {
@@ -492,6 +491,7 @@ export default class MyPlugin extends Plugin {
 			// }
 
 			//Identify if the text is highlight or comment. if it is a comment extract the type of comment
+			
 			const annotationCommentAll = "";
 			if (lineElements.citeKey.includes("(note on p.")) {
 				lineElements.commentText = extractedText;
@@ -920,6 +920,7 @@ export default class MyPlugin extends Plugin {
 				}
 
 				//Check if there are any tags before performing manipulations of inlineTagsText
+				
 				if(typeof lineElements.inlineTagsText !== `undefined`){
 					//Remove the tag beginning and end marker from the inlineTagsText
 					lineElements.inlineTagsText = lineElements.inlineTagsText.replace(this.settings.TagBeginningConfig,"");
@@ -1341,6 +1342,8 @@ export default class MyPlugin extends Plugin {
 
 			// ADD FORMATTING TO THE ZOTERO INLINE TAGS
 			//if the hash is added to the tag, then remove empty spaces
+			if (typeof lineElements.inlineTagsArray == 'undefined'){lineElements.inlineTagsArray= []}
+
 			if(this.settings.isTagHash==true){
 				for (let index = 0; index < lineElements.inlineTagsArray.length; index++) {
 					lineElements.inlineTagsArray[index] = lineElements.inlineTagsArray[index].replace(/ /g, "")
@@ -1850,6 +1853,7 @@ export default class MyPlugin extends Plugin {
 			) {
 				let note = selectedEntry.notes[indexNote].note;
 
+
 				// Remove special characters that would break the replacement of the text in the template
 			//lineElements.rowEdited = lineElements.rowEdited.replaceAll("$>", '$$'); 
 				note = note.replaceAll("$&", '$ &'); 
@@ -1872,7 +1876,6 @@ export default class MyPlugin extends Plugin {
 				} else {
 					extractionType = "Other";
 				}
-
 				let noteElementsSingle: AnnotationElements[] = []; // array of elements
 				if (extractionType === "Zotero") {
 					noteElementsSingle =
@@ -2484,7 +2487,7 @@ export default class MyPlugin extends Plugin {
 		if (extractedKeywords == undefined) {
 			extractedKeywords = [];
 		}
-
+		
 		// Join the tags in the metadata with the tags extracted in the text and replace them in the text
 		litnote = replaceTagList(
 			selectedEntry,
@@ -2511,7 +2514,6 @@ export default class MyPlugin extends Plugin {
 			const existingNoteAll = String(fs.readFileSync(noteTitleFull));
 
 
-
 			litnote = this.compareOldNewNote(
 				existingNoteAll,
 				litnote,
@@ -2527,7 +2529,7 @@ export default class MyPlugin extends Plugin {
 			bugout.downloadLog();
 		}
 		fs.writeFile(noteTitleFull, litnote, function (err) {
-			if (err) console.log(err);
+			if (err) console.log(err);  
 		});
 		new Notice(`Imported ${selectedEntry.citationKey}!`);
 	}
