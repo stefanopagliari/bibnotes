@@ -296,6 +296,20 @@ export default class MyPlugin extends Plugin {
 	 
 		}
  
+		//Fix itemType
+		if(selectedEntry.itemType == "journalArticle"){selectedEntry.itemType = "Journal Article"}
+		if(selectedEntry.itemType == "report"){selectedEntry.itemType = "Report"}
+		if(selectedEntry.itemType == "bookSection"){selectedEntry.itemType = "Book Section"}
+		if(selectedEntry.itemType == "newspaperArticle"){selectedEntry.itemType = "Newspaper Article"}
+		if(selectedEntry.itemType == "book"){selectedEntry.itemType = "Book"}
+		//Capitalize the first letter
+		selectedEntry.itemType = selectedEntry.itemType.charAt(0).toUpperCase() + selectedEntry.itemType.slice(1);
+		
+		
+		
+
+		 
+
 		//create field file
 		//if (selectedEntry.hasOwnProperty("attachment.")){
 		selectedEntry.file = createLocalFileLink(selectedEntry);
