@@ -27,8 +27,8 @@ export class SettingTab extends PluginSettingTab {
 		importLibrary.createEl("summary", {text: "" });
 
 		new Setting(importLibrary)
-			.setName("Bibtex File")
-			.setDesc("Add Path to the *BetterBibTex Json* file to be imported")
+			.setName("BetterBibTex Json File")
+			.setDesc("Add relative path from the vault folder to the *BetterBibTex Json* file to be imported. For instance, add `library.json` if the file (library.json) is in the root folder. Instead, if the file is in a subfolder, specify first the subfolder followed by the name of the file (e.g. 'zotero/library.json' if the json file is located in a subfolder of your vault called 'zotero') ")
 			.addText((text) =>
 				text
 					.setPlaceholder("/path/to/BetterBibTex.json")

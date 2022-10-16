@@ -23,7 +23,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 		config: Record<string, never>;
 		items: Reference[];
 		version: string;
-		__proto__: Record<string, never>; 
+		__proto__: Record<string, never>;
 	};
 	keyWordArray: string[];
 	noteElements: AnnotationElements[];
@@ -45,16 +45,20 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 		//Check sqlite 3
 		this.plugin.checkSQLite();
-		
+
 		//Load the Json file
+
+		// Check if the json file exists
+		const jsonPath = this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath
+		if (!fs.existsSync(jsonPath)) { new Notice("No BetterBibTex Json file found at " + jsonPath) }
 
 		//Create the full path
 
 		//const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
 		const rawdata = fs.readFileSync(
-			this.app.vault.adapter.getBasePath() + 
-				"/" +
-				this.plugin.settings.bibPath
+			this.app.vault.adapter.getBasePath() +
+			"/" +
+			this.plugin.settings.bibPath
 		);
 		const data = JSON.parse(rawdata.toString()); // rawdata is a buffer, convert to string
 
@@ -75,7 +79,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 
 			// Extract the date
 			bibtexArrayItem.date = selectedEntry.date
-			if (selectedEntry.hasOwnProperty("date")){
+			if (selectedEntry.hasOwnProperty("date")) {
 				selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm)
 				bibtexArrayItem.date = selectedEntry.year
 			}
@@ -118,6 +122,10 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 			dateModified: "",
 			itemKey: "",
 			title: "",
+			citationFull: "",
+			citationInLine: "",
+			citationShort: "",
+			localLibraryLink: "",
 			creators: [],
 			// added the missing properties
 			itemID: 0,
@@ -155,7 +163,7 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 	) {
 		//Create an array where you store the citekey to be processed
 		let citeKeyToBeProcessed: string[] = [];
-		
+
 
 		//If the entire library has been selected, then add all the
 		if (referenceSelected.citationKey === "Entire Library") {
@@ -210,10 +218,14 @@ export class updateLibrary extends Modal {
 		console.log("Updating Zotero library");
 		//const data = require(this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath)
 
+		// Check if the json file exists
+		const jsonPath = this.app.vault.adapter.getBasePath() + "/" + this.plugin.settings.bibPath
+		if (!fs.existsSync(jsonPath)) { new Notice("No BetterBibTex Json file found at " + jsonPath) }
+
 		const rawdata = fs.readFileSync(
 			this.app.vault.adapter.getBasePath() +
-				"/" +
-				this.plugin.settings.bibPath
+			"/" +
+			this.plugin.settings.bibPath
 		);
 		const data = JSON.parse(rawdata.toString()); // rawdata is a buffer, converted to string
 
@@ -237,16 +249,18 @@ export class updateLibrary extends Modal {
 			noteDateModifiedArray.push(selectedEntry.dateModified)
 			for (let index = 0; index < selectedEntry.notes.length; index++) {
 				noteDateModifiedArray.push(selectedEntry.notes[index].dateModified);
-				noteDateModifiedArray.sort((firstElement, secondElement) => { if (firstElement > secondElement) {
-					return -1;
+				noteDateModifiedArray.sort((firstElement, secondElement) => {
+					if (firstElement > secondElement) {
+						return -1;
+					}
+					if (firstElement < secondElement) {
+						return 1;
+					}
+					return 0;
 				}
-				if (firstElement < secondElement) {
-					return 1;
-				}
-				return 0; } 
 				);
 			}
-			
+
 			const datemodified = new Date(noteDateModifiedArray[0]);
 
 			if (datemodified < lastUpdate) continue; //skip if it was modified before the last update
@@ -254,7 +268,7 @@ export class updateLibrary extends Modal {
 			//skip if the setting is to update only existing note and th enote is not found at the give folder
 			if (
 				this.plugin.settings.updateLibrary ===
-					"Only update existing notes" &&
+				"Only update existing notes" &&
 				!fs.existsSync(
 					createNoteTitle(
 						selectedEntry,
@@ -279,5 +293,5 @@ export class updateLibrary extends Modal {
 
 	}
 
-	onClose() {}
+	onClose() { }
 }

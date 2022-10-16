@@ -111,6 +111,7 @@ export const createAuthorKey = (creators: CreatorArray) => {
 	if (authorKey.length > 2) {
 		authorKeyFixed = authorKey[0] + " et al.";
 	}
+	console.log(authorKeyFixed)
 	return authorKeyFixed;
 };
 
@@ -148,12 +149,12 @@ export function formatCreatorsName(creator: Creator, nameCustom: string) {
 	) {
 		nameCustom = nameCustom.replace("{{lastName}}", creator.lastName);
 		nameCustom = nameCustom.replace("{{firstName}}", creator.firstName);
-		const getInitials = function (string:string) {
+		const getInitials = function (string: string) {
 			let names = string.split(' '),
-				initials = names[0].substring(0, 1).toUpperCase()+".";
-		
+				initials = names[0].substring(0, 1).toUpperCase() + ".";
+
 			if (names.length > 1) {
-				initials += names[names.length - 1].substring(0, 1).toUpperCase()+".";
+				initials += names[names.length - 1].substring(0, 1).toUpperCase() + ".";
 			}
 			return initials;
 		};
@@ -199,7 +200,7 @@ export const createCreatorList = (
 			creatorList.push(formatCreatorsName(creator, nameFormat));
 		}
 	}
-
+	console.log(creatorList)
 
 	const creatorListBracket = creatorList.map(makeWiki);
 
@@ -309,7 +310,7 @@ export function replaceMissingFields(
 		const lines = copy.split(/\r?\n/);
 		// 	run function to determine where we still have double curly brackets
 		for (let j = 0; j < lines.length; j++) {
-			
+
 			if (lines[j].match(TEMPLATE_REG)) {
 				lines.splice(j, 1);
 				j--;
@@ -360,15 +361,15 @@ export function createLocalFileLink(reference: Reference) {
 		if (reference.attachments[attachmentindex].path == undefined) {
 			reference.attachments[attachmentindex].path = "";
 		}
-		
+
 		const selectedfile: string =
 			"[" +
 			reference.attachments[attachmentindex].title +
 			"](file:///" + // added an extra "/" to make it work on Linux
 			encodeURI(reference.attachments[attachmentindex].path.replaceAll(" ", " ")) +
 			")"; //select the author
-		 
-		
+
+
 		filesList.push(selectedfile);
 	}
 	//turn the array into a string

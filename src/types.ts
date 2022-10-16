@@ -89,6 +89,9 @@ export interface Reference {
 	id: number;
 	citationKey: string;
 	year: string;
+	citationInLine: string;
+	citationShort: string;
+	citationFull: string;
 	itemType: string;
 	inlineReference: string;
 	date: string;
@@ -96,6 +99,10 @@ export interface Reference {
 	itemKey: string;
 	itemID: number;
 	title: string;
+	publicationTitle: string;
+	volume: number;
+	issue: number;
+	pages: string;
 	creators: {
 		creatorType: string;
 		firstName: string;
