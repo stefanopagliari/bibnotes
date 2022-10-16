@@ -111,7 +111,6 @@ export const createAuthorKey = (creators: CreatorArray) => {
 	if (authorKey.length > 2) {
 		authorKeyFixed = authorKey[0] + " et al.";
 	}
-	console.log(authorKeyFixed)
 	return authorKeyFixed;
 };
 
@@ -200,7 +199,6 @@ export const createCreatorList = (
 			creatorList.push(formatCreatorsName(creator, nameFormat));
 		}
 	}
-	console.log(creatorList)
 
 	const creatorListBracket = creatorList.map(makeWiki);
 

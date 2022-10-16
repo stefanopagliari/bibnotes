@@ -318,7 +318,6 @@ export default class MyPlugin extends Plugin {
 			")"
 		selectedEntry.citationInLine = selectedEntry.citationInLine.replace("()", "")
 		// Replace short and full citation
-		console.log(Object.keys(selectedEntry))
 		if (selectedEntry.itemType == "Journal Article") {
 			selectedEntry.citationShort = selectedEntry.citationInLine +
 				" " +
