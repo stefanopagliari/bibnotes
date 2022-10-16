@@ -337,11 +337,13 @@ export default class MyPlugin extends Plugin {
 				"pp. " +
 				selectedEntry.pages +
 				"."
+
+			selectedEntry.citationFull = selectedEntry.citationFull.replace("() ", "")
+			selectedEntry.citationShort = selectedEntry.citationShort.replace("** ", "")
+			selectedEntry.citationFull = selectedEntry.citationFull.replace("** ", "")
+			selectedEntry.citationFull = selectedEntry.citationFull.replace("pp. ", "")
+
 		}
-		selectedEntry.citationFull = selectedEntry.citationFull.replace("() ", "")
-		selectedEntry.citationShort = selectedEntry.citationShort.replace("** ", "")
-		selectedEntry.citationFull = selectedEntry.citationFull.replace("** ", "")
-		selectedEntry.citationFull = selectedEntry.citationFull.replace("pp. ", "")
 
 		//create field file
 		//if (selectedEntry.hasOwnProperty("attachment.")){
