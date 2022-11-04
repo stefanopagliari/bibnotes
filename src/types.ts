@@ -86,10 +86,14 @@ export interface MyPluginSettings {
 
 export interface Reference {
 	authorKey: string;
+	authorKeyInitials: string;
+	authorKeyFullName: string;
 	id: number;
 	citationKey: string;
 	year: string;
 	citationInLine: string;
+	citationInLineInitials: string;
+	citationInLineFullName: string;
 	citationShort: string;
 	citationFull: string;
 	itemType: string;

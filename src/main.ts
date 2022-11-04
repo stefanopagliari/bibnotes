@@ -47,6 +47,8 @@ import {
 	replaceTemplate,
 	makeTags,
 	createCreatorAllList,
+	createAuthorKeyInitials,
+	createAuthorKeyFullName,
 } from "./utils";
 import { createImportSpecifier } from "typescript";
 
@@ -310,13 +312,31 @@ export default class MyPlugin extends Plugin {
 		selectedEntry.itemType = selectedEntry.itemType.charAt(0).toUpperCase() + selectedEntry.itemType.slice(1);
 
 
-		// Replace in-line citation
+		// Create in-line citation (e.g. Collier, Laporte and Seawright (2009))
 		selectedEntry.citationInLine = createAuthorKey(selectedEntry.creators) +
 			" " +
 			"(" +
 			selectedEntry.year +
 			")"
 		selectedEntry.citationInLine = selectedEntry.citationInLine.replace("()", "")
+
+
+		// Create in-line citation with initials (e.g. Collier, D., Laporte, J. and Seawright, J. (2009))
+		selectedEntry.citationInLineInitials = createAuthorKeyInitials(selectedEntry.creators) +
+			" " +
+			"(" +
+			selectedEntry.year +
+			")"
+		selectedEntry.citationInLineInitials = selectedEntry.citationInLineInitials.replace("()", "")
+
+		// Create in-line citation with initials (e.g. Collier, D., Laporte, J. and Seawright, J. (2009))
+		selectedEntry.citationInLineFullName = createAuthorKeyFullName(selectedEntry.creators) +
+			" " +
+			"(" +
+			selectedEntry.year +
+			")"
+		selectedEntry.citationInLineFullName = selectedEntry.citationInLineFullName.replace("()", "")
+
 		// Replace short and full citation
 		if (selectedEntry.itemType == "Journal Article") {
 			selectedEntry.citationShort = selectedEntry.citationInLine +
@@ -2436,8 +2456,11 @@ export default class MyPlugin extends Plugin {
 	) {
 		//Extract the reference within bracket to faciliate comparison
 		const authorKey = createAuthorKey(selectedEntry.creators);
-		//set the authorkey field on the entry to use when creating the title
+		//set the authorkey field (with or without first name) on the entry to use when creating the title and to replace in the template
 		selectedEntry.authorKey = authorKey;
+		selectedEntry.authorKeyInitials = createAuthorKeyInitials(selectedEntry.creators)
+		selectedEntry.authorKeyFullName = createAuthorKeyFullName(selectedEntry.creators)
+
 
 
 		//create bugout to store and export logs in a file
