@@ -207,7 +207,7 @@ export const createAuthorKeyFullName = (creators: CreatorArray) => {
 	//Adjust the authorKey depending on the number of authors
 
 	if (authorKey.length == 1) {
-		authorKeyFixed = authorKeyReverse[0];
+		authorKeyFixed = authorKey[0];
 	}
 	if (authorKey.length == 2) {
 		authorKeyFixed = authorKey[0] + " and " + authorKeyReverse[1];
