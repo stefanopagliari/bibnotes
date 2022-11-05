@@ -1,6 +1,6 @@
 {
 	"name": "bibnotes",
-	"version": "0.9.213",
+	"version": "0.9.214",
 	"description": "Plugin to export and format annotations from Zotero into Obsidian",
 	"main": "main.js",
 	"scripts": {
