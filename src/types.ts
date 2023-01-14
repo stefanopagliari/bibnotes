@@ -90,6 +90,7 @@ export interface Reference {
 	authorKeyFullName: string;
 	id: number;
 	citationKey: string;
+	citeKey: string;
 	year: string;
 	citationInLine: string;
 	citationInLineInitials: string;

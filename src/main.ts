@@ -302,6 +302,9 @@ export default class MyPlugin extends Plugin {
 
 		}
 
+		//Create citekey
+		selectedEntry.citeKey = selectedEntry.citationKey
+
 		//Fix itemType
 		if (selectedEntry.itemType == "journalArticle") { selectedEntry.itemType = "Journal Article" }
 		if (selectedEntry.itemType == "report") { selectedEntry.itemType = "Report" }
@@ -370,6 +373,7 @@ export default class MyPlugin extends Plugin {
 		selectedEntry.file = createLocalFileLink(selectedEntry);
 		// Create an array with all the fields
 		const entriesArray = Object.keys(selectedEntry);
+
 
 		//replace the single-value placeholders with the value of the field
 		note = replaceAllTemplates(entriesArray, note, selectedEntry);
@@ -1842,7 +1846,6 @@ export default class MyPlugin extends Plugin {
 	}
 
 	extractAnnotation(selectedEntry: Reference, noteTitleFull: string) {
-
 		let extractedAnnotations = "";
 		let extractedAnnotationsYellow = "";
 		let extractedAnnotationsRed = "";
