@@ -36,6 +36,7 @@ export interface MyPluginSettings {
 	isHighlightItalic: boolean;
 	isHighlightBold: boolean;
 	isHighlightHighlighted: boolean;
+	isHighlightColoured: boolean;
 	isHighlightBullet: boolean;
 	isHighlightBlockquote: boolean;
 	isHighlightQuote: boolean;
@@ -44,6 +45,7 @@ export interface MyPluginSettings {
 	isCommentItalic: boolean;
 	isCommentBold: boolean;
 	isCommentHighlighted: boolean;
+	isCommentColoured: boolean;
 	isCommentBullet: boolean;
 	isCommentBlockquote: boolean;
 	isCommentQuote: boolean;
@@ -52,6 +54,7 @@ export interface MyPluginSettings {
 	isTagItalic: boolean;
 	isTagBold: boolean;
 	isTagHighlighted: boolean;
+	isTagColoured: boolean;
 	isTagBullet: boolean;
 	isTagBlockquote: boolean;
 	isTagQuote: boolean;

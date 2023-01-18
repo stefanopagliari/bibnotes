@@ -19,17 +19,16 @@ export function replaceAllTemplates(
 	for (let z = 0; z < entriesArray.length; z++) {
 		// 	 Identify the keyword to be replaced
 		const KW = entriesArray[z];
-		console.log(KW)
+
 		const KW_Brackets = "{{" + KW + "}}";
 		// 	 replace the keyword in the template
-		console.log(KW_Brackets)
-		console.log(`${selectedEntry[KW as keyof Reference]}`)
+
 		copy = replaceTemplate(
 			copy,
 			KW_Brackets,
 			`${selectedEntry[KW as keyof Reference]}`
 		);
-		console.log(copy)
+
 		// fixed the type
 	}
 	return copy;

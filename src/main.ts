@@ -107,6 +107,7 @@ export default class MyPlugin extends Plugin {
 			isCommentItalic,
 			isCommentBold,
 			isCommentHighlighted,
+			isCommentColoured,
 			isCommentBullet,
 			isCommentBlockquote,
 			isCommentQuote,
@@ -115,6 +116,7 @@ export default class MyPlugin extends Plugin {
 			isHighlightItalic,
 			isHighlightBold,
 			isHighlightHighlighted,
+			isHighlightColoured,
 			isHighlightBullet,
 			isHighlightBlockquote,
 			isHighlightQuote,
@@ -123,6 +125,7 @@ export default class MyPlugin extends Plugin {
 			isTagItalic,
 			isTagBold,
 			isTagHighlighted,
+			isTagColoured,
 			isTagBullet,
 			isTagBlockquote,
 			isTagQuote,
@@ -141,15 +144,24 @@ export default class MyPlugin extends Plugin {
 		] = [
 				isHighlightItalic ? "*" : "",
 				isHighlightBold ? "**" : "",
-				isHighlightHighlighted ? "==" : "",
+				isHighlightHighlighted == true && isHighlightColoured == false ? "==" : "",
 				isHighlightBullet ? "- " : "",
 				isHighlightBlockquote ? "> " : "",
 				isHighlightQuote ? "“" : "",
 				isHighlightQuote ? "”" : "",
 			];
+		//console.log(highlightColour)
+		let highlightColouredBefore = ""
+		let highlightColouredAfter = ""
+
+		if (isHighlightColoured == true) {
+			highlightColouredBefore = '<mark style="background: SELECTED_COLOUR>'
+			highlightColouredAfter = "</mark>"
+		}
 
 		const highlightFormatBefore =
 			highlightHighlighted +
+			highlightColouredBefore +
 			highlightBold +
 			highlightItalic +
 			highlightQuoteOpen;
@@ -158,6 +170,7 @@ export default class MyPlugin extends Plugin {
 			highlightQuoteClose +
 			highlightItalic +
 			highlightBold +
+			highlightColouredAfter +
 			highlightHighlighted +
 			highlightCustomTextAfter;
 
@@ -173,20 +186,33 @@ export default class MyPlugin extends Plugin {
 		//Set the formatting variables based on the comments settings
 		const commentItalic = isCommentItalic ? "*" : "";
 		const commentBold = isCommentBold ? "**" : "";
-		const commentHighlighted = isCommentHighlighted ? "==" : "";
+		const commentHighlighted = isCommentHighlighted == true && isCommentColoured == false ? "==" : "";
 		const commentBullet = isCommentBullet ? "- " : "";
 		const commentBlockquote = isCommentBlockquote ? "> " : "";
 		const commentQuoteOpen = isCommentQuote ? "“" : "";
 		const commentQuoteClose = isCommentQuote ? "”" : "";
 
+		let commentColouredBefore = ""
+		let commentColouredAfter = ""
+
+		if (isCommentColoured == true) {
+			commentColouredBefore = '<mark style="background: SELECTED_COLOUR>'
+			commentColouredAfter = "</mark>"
+		}
+
 		//Create formatting to be added before and after highlights
 		const commentFormatBefore =
-			commentHighlighted + commentBold + commentItalic + commentQuoteOpen;
+			commentHighlighted +
+			commentColouredBefore
+		commentBold +
+			commentItalic +
+			commentQuoteOpen;
 
 		const commentFormatAfter =
 			commentQuoteClose +
 			commentItalic +
 			commentBold +
+			commentColouredAfter +
 			commentHighlighted +
 			commentCustomTextAfter;
 
@@ -197,7 +223,7 @@ export default class MyPlugin extends Plugin {
 				commentBullet +
 				commentBlockquote +
 				commentCustomTextBefore
-		};
+		}
 
 
 		//Set the tag formatting variables based on the tag settings
@@ -214,16 +240,24 @@ export default class MyPlugin extends Plugin {
 				isTagHash ? "#" : "",
 				isTagItalic ? "*" : "",
 				isTagBold ? "**" : "",
-				isTagHighlighted ? "==" : "",
+				isTagHighlighted == true && isTagColoured == false ? "==" : "",
 				isTagBullet ? "- " : "",
 				isTagBlockquote ? "> " : "",
 				isTagQuote ? "“" : "",
 				isTagQuote ? "”" : "",
 			];
 
+		let tagColouredBefore = ""
+		let tagColouredAfter = ""
+
+		if (isTagColoured == true) {
+			tagColouredBefore = '<mark style="background: SELECTED_COLOUR>'
+			tagColouredAfter = "</mark>"
+		}
 		const tagFormatBefore =
 			tagHash +
 			tagHighlighted +
+			tagColouredBefore +
 			tagBold +
 			tagItalic +
 			tagQuoteOpen;
@@ -232,6 +266,7 @@ export default class MyPlugin extends Plugin {
 			tagQuoteClose +
 			tagItalic +
 			tagBold +
+			tagColouredAfter +
 			tagHighlighted +
 			tagCustomTextAfter;
 
@@ -293,7 +328,6 @@ export default class MyPlugin extends Plugin {
 		if (selectedEntry.hasOwnProperty("date")) {
 			selectedEntry.year = selectedEntry.date.match(/\d\d\d\d/gm) + "";
 		}
-
 		//Create field ZoteroLocalLibrary
 		if (selectedEntry.hasOwnProperty("select")) {
 			selectedEntry.localLibrary =
@@ -1350,6 +1384,12 @@ export default class MyPlugin extends Plugin {
 				lineElements.annotationType = "typeExtractedHeading";
 			}
 
+			// REPLACE COLOUR OF HIGHLIGHT/COMMENT/TAG IN THE HIGHLIGHTCOLOURED
+			const highlightFormatBeforeColoured = highlightFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
+			const commentFormatBeforeColoured = highlightFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
+			const tagFormatBeforeColoured = highlightFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
+
+
 			//FORMAT THE HEADINGS IDENTIFIED BY ZOTERO
 			//Transforms headings exported by Zotero into H3 (this could be changed later)
 			if (lineElements.annotationType === "typeExtractedHeading") {
@@ -1361,14 +1401,14 @@ export default class MyPlugin extends Plugin {
 			if (lineElements.highlightText != "") {
 				lineElements.highlightFormatted =
 					highlightPrepend +
-					highlightFormatBefore +
+					highlightFormatBeforeColoured +
 					lineElements.highlightText +
 					highlightFormatAfter +
 					" " +
 					lineElements.citeKey +
 					" ";
 				lineElements.highlightFormattedNoPrepend =
-					highlightFormatBefore +
+					highlightFormatBeforeColoured +
 					lineElements.highlightText +
 					highlightFormatAfter +
 					" " +
@@ -1384,11 +1424,11 @@ export default class MyPlugin extends Plugin {
 			if (lineElements.commentText != "" && lineElements.highlightText != "") {
 				lineElements.commentFormatted =
 					commentPrepend +
-					commentFormatBefore +
+					commentFormatBeforeColoured +
 					lineElements.commentText +
 					commentFormatAfter + " ";
 				lineElements.commentFormattedNoPrepend =
-					commentFormatBefore +
+					commentFormatBeforeColoured +
 					lineElements.commentText +
 					commentFormatAfter + " ";
 			}
@@ -1396,14 +1436,14 @@ export default class MyPlugin extends Plugin {
 			else if (lineElements.commentText != "" && lineElements.highlightText == "") {
 				lineElements.commentFormatted =
 					commentPrepend +
-					commentFormatBefore +
+					commentFormatBeforeColoured +
 					lineElements.commentText +
 					commentFormatAfter +
 					" " +
 					lineElements.zoteroBackLink +
 					" ";
 				lineElements.commentFormattedNoPrepend =
-					commentFormatBefore +
+					commentFormatBeforeColoured +
 					lineElements.commentText +
 					commentFormatAfter +
 					" " +

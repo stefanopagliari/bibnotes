@@ -1,107 +1,107 @@
 import { MyPluginSettings } from "./types";
 
 export const templatePlain = "# {{title}}\n" +
-"\n" + 
-"## Metadata\n" +
-"- **CiteKey**: {{citekey}}\n " +
-"- **Type**: {{itemType}}\n " +
-"- **Title**: {{title}}, \n " +
-"- **Author**: {{author}};  \n"+
-"- **Editor**: {{editor}};  \n"+
-"- **Translator**: {{translator}}\n"+
-"- **Publisher**: {{publisher}},\n"+
-"- **Location**: {{place}},\n"+
-"- **Series**: {{series}}\n"+
-"- **Series Number**: {{seriesNumber}}\n"+
-"- **Journal**: {{publicationTitle}}, \n"+
-"- **Volume**: {{volume}},\n"+
-"- **Issue**: {{issue}}\n"+
-"- **Pages**: {{pages}}\n"+
-"- **Year**: {{year}} \n"+
-"- **DOI**: {{DOI}}\n"+
-"- **ISSN**: {{ISSN}}\n"+
-"- **ISBN**: {{ISBN}}\n"+
-"\n"+
-"## Abstract\n" +
-"{{abstractNote}}" +
-"\n"+
-"## Files and Links\n"+
-"- **Url**: {{url}}\n"+
-"- **Uri**: {{uri}}\n"+
-"- **Eprint**: {{eprint}}\n"+
-"- **File**: {{file}}\n"+
-"- **Local Library**: [Zotero]({{localLibraryLink}})\n"+
-"\n"+
-"## Tags and Collections\n"+
-"- **Keywords**: {{keywordsAll}}\n"+
-"- **Collections**: {{collectionsParent}}\n"+
-"\n" +
-"\n" +
-"----"+
-"\n" +
-"\n" +
-"## Comments\n" +
-"{{UserNotes}}\n" +
-"\n" +
-"\n" +
-"----"+
-"\n" +
-"\n" +
-"## Extracted Annotations\n" +
-"{{PDFNotes}}"
+	"\n" +
+	"## Metadata\n" +
+	"- **CiteKey**: {{citekey}}\n " +
+	"- **Type**: {{itemType}}\n " +
+	"- **Title**: {{title}}, \n " +
+	"- **Author**: {{author}};  \n" +
+	"- **Editor**: {{editor}};  \n" +
+	"- **Translator**: {{translator}}\n" +
+	"- **Publisher**: {{publisher}},\n" +
+	"- **Location**: {{place}},\n" +
+	"- **Series**: {{series}}\n" +
+	"- **Series Number**: {{seriesNumber}}\n" +
+	"- **Journal**: {{publicationTitle}}, \n" +
+	"- **Volume**: {{volume}},\n" +
+	"- **Issue**: {{issue}}\n" +
+	"- **Pages**: {{pages}}\n" +
+	"- **Year**: {{year}} \n" +
+	"- **DOI**: {{DOI}}\n" +
+	"- **ISSN**: {{ISSN}}\n" +
+	"- **ISBN**: {{ISBN}}\n" +
+	"\n" +
+	"## Abstract\n" +
+	"{{abstractNote}}" +
+	"\n" +
+	"## Files and Links\n" +
+	"- **Url**: {{url}}\n" +
+	"- **Uri**: {{uri}}\n" +
+	"- **Eprint**: {{eprint}}\n" +
+	"- **File**: {{file}}\n" +
+	"- **Local Library**: [Zotero]({{localLibraryLink}})\n" +
+	"\n" +
+	"## Tags and Collections\n" +
+	"- **Keywords**: {{keywordsAll}}\n" +
+	"- **Collections**: {{collectionsParent}}\n" +
+	"\n" +
+	"\n" +
+	"----" +
+	"\n" +
+	"\n" +
+	"## Comments\n" +
+	"{{UserNotes}}\n" +
+	"\n" +
+	"\n" +
+	"----" +
+	"\n" +
+	"\n" +
+	"## Extracted Annotations\n" +
+	"{{PDFNotes}}"
 
 export const templateAdmonition = "# {{title}}\n" +
-"\n" + 
-"``` ad-info\n" +
-"title: Metadata\n" +
-"- **CiteKey**: {{citekey}}\n" +
-"- **Type**: {{itemType}}\n" +
-"- **Author**: {{author}}\n"+
-"- **Editor**: {{editor}}\n"+
-"- **Translator**: {{translator}}\n"+
-"- **Publisher**: {{publisher}}\n"+
-"- **Location**: {{place}}\n"+
-"- **Series**: {{series}}\n"+
-"- **Series Number**: {{seriesNumber}}\n"+
-"- **Journal**: {{publicationTitle}}\n"+
-"- **Volume**: {{volume}}\n"+
-"- **Issue**: {{issue}}\n"+
-"- **Pages**: {{pages}}\n"+
-"- **Year**: {{year}} \n"+
-"- **DOI**: {{DOI}}\n"+
-"- **ISSN**: {{ISSN}}\n"+
-"- **ISBN**: {{ISBN}}\n"+
-"```\n" +
-"```ad-quote\n" +
-"title: Abstract\n" +
-"{{abstractNote}}\n" +
-"```\n" +
-"```ad-abstract\n" +
-"title: Files and Links\n" +
-"- **Url**: {{url}}\n"+
-"- **Uri**: {{uri}}\n"+
-"- **Eprint**: {{eprint}}\n"+
-"- **File**: {{file}}\n"+
-"- **Local Library**: [Zotero]({{localLibraryLink}})\n"+
-"```\n" +
-"```ad-note\n" +
-"title: Tags and Collections\n" +
-"- **Keywords**: {{keywordsAll}}\n"+
-"- **Collections**: {{collectionsParent}}\n"+
-"```\n" +
-"\n" +
-"----"+
-"\n" +
-"\n" +
-"## Comments\n" +
-"{{UserNotes}}\n"+
-"\n" +
-"\n" +
-"----"+
-"\n" +
-"\n" +
-"## Extracted Annotations\n" +
-"{{PDFNotes}}"
+	"\n" +
+	"``` ad-info\n" +
+	"title: Metadata\n" +
+	"- **CiteKey**: {{citekey}}\n" +
+	"- **Type**: {{itemType}}\n" +
+	"- **Author**: {{author}}\n" +
+	"- **Editor**: {{editor}}\n" +
+	"- **Translator**: {{translator}}\n" +
+	"- **Publisher**: {{publisher}}\n" +
+	"- **Location**: {{place}}\n" +
+	"- **Series**: {{series}}\n" +
+	"- **Series Number**: {{seriesNumber}}\n" +
+	"- **Journal**: {{publicationTitle}}\n" +
+	"- **Volume**: {{volume}}\n" +
+	"- **Issue**: {{issue}}\n" +
+	"- **Pages**: {{pages}}\n" +
+	"- **Year**: {{year}} \n" +
+	"- **DOI**: {{DOI}}\n" +
+	"- **ISSN**: {{ISSN}}\n" +
+	"- **ISBN**: {{ISBN}}\n" +
+	"```\n" +
+	"```ad-quote\n" +
+	"title: Abstract\n" +
+	"{{abstractNote}}\n" +
+	"```\n" +
+	"```ad-abstract\n" +
+	"title: Files and Links\n" +
+	"- **Url**: {{url}}\n" +
+	"- **Uri**: {{uri}}\n" +
+	"- **Eprint**: {{eprint}}\n" +
+	"- **File**: {{file}}\n" +
+	"- **Local Library**: [Zotero]({{localLibraryLink}})\n" +
+	"```\n" +
+	"```ad-note\n" +
+	"title: Tags and Collections\n" +
+	"- **Keywords**: {{keywordsAll}}\n" +
+	"- **Collections**: {{collectionsParent}}\n" +
+	"```\n" +
+	"\n" +
+	"----" +
+	"\n" +
+	"\n" +
+	"## Comments\n" +
+	"{{UserNotes}}\n" +
+	"\n" +
+	"\n" +
+	"----" +
+	"\n" +
+	"\n" +
+	"## Extracted Annotations\n" +
+	"{{PDFNotes}}"
 
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
@@ -140,6 +140,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	isHighlightItalic: true,
 	isHighlightBold: false,
 	isHighlightHighlighted: false,
+	isHighlightColoured: false,
 	isHighlightBullet: true,
 	isHighlightBlockquote: false,
 	isHighlightQuote: true,
@@ -148,6 +149,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	isCommentItalic: false,
 	isCommentBold: true,
 	isCommentHighlighted: false,
+	isCommentColoured: false,
 	isCommentBullet: false,
 	isCommentBlockquote: true,
 	isCommentQuote: false,
@@ -156,6 +158,7 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	isTagItalic: false,
 	isTagBold: false,
 	isTagHighlighted: false,
+	isTagColoured: false,
 	isTagBullet: false,
 	isTagBlockquote: false,
 	isTagQuote: false,

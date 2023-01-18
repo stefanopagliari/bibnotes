@@ -394,12 +394,24 @@ export class SettingTab extends PluginSettingTab {
 			);
 
 		new Setting(settingsHighlights)
-			.setName("Highlighted")
+			.setName("Highlighted (markdown")
 			.addToggle((text) =>
 				text
 					.setValue(settings.isHighlightHighlighted)
 					.onChange(async (value) => {
 						settings.isHighlightHighlighted = value;
+						await plugin.saveSettings();
+						this.display();
+					})
+			);
+
+		new Setting(settingsHighlights)
+			.setName("Highlighted (original colour)")
+			.addToggle((text) =>
+				text
+					.setValue(settings.isHighlightColoured)
+					.onChange(async (value) => {
+						settings.isHighlightColoured = value;
 						await plugin.saveSettings();
 						this.display();
 					})
@@ -491,7 +503,7 @@ export class SettingTab extends PluginSettingTab {
 		);
 
 		new Setting(settingsComments)
-			.setName("Highlighted")
+			.setName("Highlighted (markdown)")
 			.addToggle((text) =>
 				text
 					.setValue(settings.isCommentHighlighted)
@@ -501,6 +513,21 @@ export class SettingTab extends PluginSettingTab {
 						this.display();
 					})
 			);
+
+		new Setting(settingsComments)
+			.setName("Highlighted (original colour)")
+			.addToggle((text) =>
+				text
+					.setValue(settings.isCommentColoured)
+					.onChange(async (value) => {
+						settings.isCommentColoured = value;
+						await plugin.saveSettings();
+						this.display();
+					})
+			);
+
+
+
 		new Setting(settingsComments)
 			.setName("Bullet Points")
 			.addToggle((text) =>
@@ -660,8 +687,7 @@ export class SettingTab extends PluginSettingTab {
 		);
 
 		new Setting(settingsTags)
-			.setName("Highlighted")
-			.addToggle((text) =>
+			.setName("Highlighted (markdown)").addToggle((text) =>
 				text
 					.setValue(settings.isTagHighlighted)
 					.onChange(async (value) => {
@@ -670,6 +696,20 @@ export class SettingTab extends PluginSettingTab {
 						this.display();
 					})
 			);
+
+		new Setting(settingsTags)
+			.setName("Highlighted (original colour)")
+			.addToggle((text) =>
+				text
+					.setValue(settings.isTagColoured)
+					.onChange(async (value) => {
+						settings.isTagColoured = value;
+						await plugin.saveSettings();
+						this.display();
+					})
+			);
+
+
 		new Setting(settingsTags)
 			.setName("Bullet Points")
 			.addToggle((text) =>
