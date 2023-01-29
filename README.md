@@ -75,6 +75,7 @@ By default the plugin will export both the metadata and the notes stored in Zote
   - {{uri}}: link to the entry on the Zotero website
   - {{eprint}}
   - {{file}}: local path of the file attached to the entry
+  - {{filePath}}: links to the attachments associated with the entry within Zotero.
   - {{localLibrary}}: link to the entry on the Zotero app
   - {{select}}: link to the attachment on the Zotero app
   - {{keywordsZotero}}: tags found in the metadata of the entry

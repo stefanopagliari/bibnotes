@@ -35,6 +35,7 @@ import {
 import {
 	createAuthorKey,
 	createLocalFileLink,
+	createLocalFilePathLink,
 	createCreatorList,
 	createNoteTitle,
 	makeWiki,
@@ -403,8 +404,12 @@ export default class MyPlugin extends Plugin {
 		}
 
 		//create field file
-		//if (selectedEntry.hasOwnProperty("attachment.")){
 		selectedEntry.file = createLocalFileLink(selectedEntry);
+		//create field path field
+		selectedEntry.filePath = createLocalFilePathLink(selectedEntry);
+
+
+
 		// Create an array with all the fields
 		const entriesArray = Object.keys(selectedEntry);
 

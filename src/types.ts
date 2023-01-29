@@ -118,6 +118,7 @@ export interface Reference {
 		name: string;
 	}[];
 	file: string;
+	filePath: string;
 	localLibrary: string;
 	localLibraryLink: string;
 	select: string;
@@ -127,6 +128,7 @@ export interface Reference {
 		itemType: string;
 		path: string;
 		relations: string[];
+		select: string;
 		tags: string[];
 		title: string;
 		uri: string;
