@@ -119,6 +119,7 @@ export interface Reference {
 	}[];
 	file: string;
 	filePath: string;
+	zoteroReaderLink: string;
 	localLibrary: string;
 	localLibraryLink: string;
 	select: string;

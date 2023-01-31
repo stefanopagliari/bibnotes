@@ -2,7 +2,6 @@ import MyPlugin from "./main";
 import * as fs from "fs";
 import { App, Modal, FuzzySuggestModal, Notice, Platform } from "obsidian";
 
-
 import { Reference, AnnotationElements } from "./types";
 
 import {
@@ -42,9 +41,9 @@ export class fuzzySelectEntryFromJson extends FuzzySuggestModal<Reference> {
 			this.focusInput();
 		}
 
+		// Import 'better-sqlite3' (not working)
+		//const db = new Database('/Users/sbbj963/Zotero/zotero.sqlite');
 
-		//Check sqlite 3
-		this.plugin.checkSQLite();
 
 		//Load the Json file
 

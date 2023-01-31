@@ -636,6 +636,42 @@ export function createLocalFilePathLink(reference: Reference) {
 	return filesPathListString;
 }
 
+
+export function createZoteroReaderPathLink(reference: Reference) {
+	//if there is no attachment, return placeholder
+	if (reference.attachments.length == 0) return "{{localFilePathLink}}";
+	const filesPathList: string[] = [];
+
+	for (
+		let attachmentindex = 0;
+		attachmentindex < reference.attachments.length;
+		attachmentindex++
+	) {
+		if (reference.attachments[attachmentindex].itemType !== "attachment")
+			continue;
+
+		//remove white spaces from file name
+		if (reference.attachments[attachmentindex].select == undefined) {
+			reference.attachments[attachmentindex].select = "";
+		}
+
+		const selectedFilePath: string =
+			"[" +
+			reference.attachments[attachmentindex].title +
+			"](" +
+			encodeURI(reference.attachments[attachmentindex].select).replace(
+				"select",
+				"open-pdf"
+			) + ")"; //select the author
+
+
+		filesPathList.push(selectedFilePath);
+	}
+	//turn the array into a string
+	const filesPathListString = filesPathList.join("; ");
+	return filesPathListString;
+}
+
 export function createNoteTitle(
 	selectedEntry: Reference,
 	exportTitle: string,
