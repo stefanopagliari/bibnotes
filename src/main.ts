@@ -1396,8 +1396,8 @@ export default class MyPlugin extends Plugin {
 
 			// REPLACE COLOUR OF HIGHLIGHT/COMMENT/TAG IN THE HIGHLIGHTCOLOURED
 			const highlightFormatBeforeColoured = highlightFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
-			const commentFormatBeforeColoured = highlightFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
-			const tagFormatBeforeColoured = highlightFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
+			const commentFormatBeforeColoured = commentFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
+			const tagFormatBeforeColoured = tagFormatBefore.replace("SELECTED_COLOUR", lineElements.highlightColour + ";")
 
 
 			//FORMAT THE HEADINGS IDENTIFIED BY ZOTERO
@@ -1478,7 +1478,7 @@ export default class MyPlugin extends Plugin {
 			}
 
 			const TempTag = lineElements.inlineTagsArray
-				.map(i => tagPrepend + tagFormatBefore + i + tagFormatAfter);
+				.map(i => tagPrepend + tagFormatBeforeColoured + i + tagFormatAfter);
 			// if there are two tags, remove one
 
 			//format the tags so that only the hash sign is added only if there was not one already
@@ -1490,7 +1490,7 @@ export default class MyPlugin extends Plugin {
 
 
 			const TempTagNoPrepend = lineElements.inlineTagsArray
-				.map(i => tagFormatBefore + i + tagFormatAfter);
+				.map(i => tagFormatBeforeColoured + i + tagFormatAfter);
 			for (let index = 0; index < TempTagNoPrepend.length; index++) {
 				TempTagNoPrepend[index] = TempTagNoPrepend[index].replace("##", "#");
 				//if(this.settings.isTagHash==true){TempTagNoPrepend[index] = TempTagNoPrepend[index].replace(" ", "")}
