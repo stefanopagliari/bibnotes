@@ -157,7 +157,7 @@ export default class MyPlugin extends Plugin {
 		let highlightColouredAfter = ""
 
 		if (isHighlightColoured == true) {
-			highlightColouredBefore = '<mark style="background: SELECTED_COLOUR>'
+			highlightColouredBefore = '<mark style="background: SELECTED_COLOUR">'
 			highlightColouredAfter = "</mark>"
 		}
 
@@ -198,7 +198,7 @@ export default class MyPlugin extends Plugin {
 		let commentColouredAfter = ""
 
 		if (isCommentColoured == true) {
-			commentColouredBefore = '<mark style="background: SELECTED_COLOUR>'
+			commentColouredBefore = '<mark style="background: SELECTED_COLOUR">'
 			commentColouredAfter = "</mark>"
 		}
 
@@ -253,7 +253,7 @@ export default class MyPlugin extends Plugin {
 		let tagColouredAfter = ""
 
 		if (isTagColoured == true) {
-			tagColouredBefore = '<mark style="background: SELECTED_COLOUR>'
+			tagColouredBefore = '<mark style="background: SELECTED_COLOUR">'
 			tagColouredAfter = "</mark>"
 		}
 		const tagFormatBefore =
