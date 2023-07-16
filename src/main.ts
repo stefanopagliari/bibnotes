@@ -51,6 +51,7 @@ import {
 	createCreatorAllList,
 	createAuthorKeyInitials,
 	createAuthorKeyFullName,
+	parseCiteKeyFromNoteName,
 } from "./utils";
 import { createImportSpecifier } from "typescript";
 
@@ -86,6 +87,16 @@ export default class MyPlugin extends Plugin {
 				new updateLibrary(this.app, this).open();
 			},
 		});
+
+		//Add Command to Update the current active note
+		this.addCommand({
+			id: "updateCurrentNote",
+			name: "Update Current Note",
+			callback: () => {
+				this.updateCurrentNote();
+			},
+		});
+
 	}
 
 	onunload() { }
@@ -2673,5 +2684,46 @@ export default class MyPlugin extends Plugin {
 		//const defaultRoot = path.join(homedir(), "Zotero");
 		//zoteroDbPath: path.join(defaultRoot, "zotero.sqlite"),
 
+	}
+
+	updateCurrentNote(){
+		console.log("Updating Current Note");
+
+		// Check if the json file exists
+		const jsonPath = this.app.vault.adapter.getBasePath() + "/" + this.settings.bibPath
+		if (!fs.existsSync(jsonPath)) { new Notice("No BetterBibTex Json file found at " + jsonPath) }
+
+		const rawdata = fs.readFileSync(
+			this.app.vault.adapter.getBasePath() +
+			"/" +
+			this.settings.bibPath
+		);
+		const data = JSON.parse(rawdata.toString()); // rawdata is a buffer, converted to strin
+
+		// Find the citeKey of current note in file name
+		const currentNoteName = this.app.workspace.getActiveFile().name
+		const noteTitleFormat = this.settings.exportTitle+'.md'
+
+		const citeKey = parseCiteKeyFromNoteName(currentNoteName, noteTitleFormat);
+	
+		if (citeKey != null){
+			// find entry in library using citeKey
+			const entryIndex = data.items.findIndex(
+				(item: { citationKey: string }) =>
+					item.citationKey ===
+					citeKey
+			);
+			if (entryIndex!=-1){
+				// update current note
+				const currentEntry:Reference = data.items[entryIndex]
+				this.createNote(currentEntry, data);
+				new Notice("Current Note " + currentNoteName + " updated");
+			}
+			else{
+				new Notice("Current Note " + currentNoteName + " not found in the library");
+			}
+		}else{
+			new Notice("Cannot find citeKey from Current Note:" + currentNoteName);
+		}
 	}
 }

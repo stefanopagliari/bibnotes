@@ -879,3 +879,20 @@ export function openSelectedNote(
 	//Open the Note ina new leaf
 	this.app.workspace.getUnpinnedLeaf().openFile(myFile);
 }
+
+export function parseCiteKeyFromNoteName(noteName:string, format:string) {
+	// find {{citeKey}} in note title format
+	const match = format.match("{{citeKey}}");
+	if (match != null) {
+		// search value of citekey in noteName using patterns around {{citekey}} in format string
+		// if format = '@{{citekey}}.md'
+		// then regExp = '@(s*[a-zA-Z0-9]+s*).md'
+		// works if format = '{{citekey}}.md' or '@{{citekey}}-{{title}}.md'
+		// formats like '@{{citekey}}{{title}}' won't work
+		const regExp = format.substring(
+			match.index != 0 ? match.index - 1 : match.index, 
+			match.index + match[0].length + 1)
+			.replace("{{citeKey}}", "(s*[a-zA-Z0-9]+s*)");
+		return noteName.match(regExp)[1];
+	}
+}
