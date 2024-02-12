@@ -1568,7 +1568,7 @@ function replaceTemplate(stringAdd, find, replace) {
 }
 var makeWiki = (str) => "[[" + str + "]]";
 var makeQuotes = (str) => '"' + str + '"';
-var makeTags = (str) => "#" + str;
+var makeTags = (str) => "#" + str.replace(/\s+/g, '_');
 var createAuthorKey = (creators) => {
   const authorKey = [];
   const editorKey = [];
@@ -5144,7 +5144,7 @@ var MyPlugin = class extends import_obsidian6.Plugin {
       }
       if (this.settings.isTagHash == true) {
         for (let index = 0; index < lineElements.inlineTagsArray.length; index++) {
-          lineElements.inlineTagsArray[index] = lineElements.inlineTagsArray[index].replace(/ /g, "");
+          lineElements.inlineTagsArray[index] = lineElements.inlineTagsArray[index].replace(/ /g, "_");
         }
       }
       const TempTag = lineElements.inlineTagsArray.map((i2) => tagPrepend + tagFormatBefore + i2 + tagFormatAfter);
