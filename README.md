@@ -1,3 +1,5 @@
+# Important: this plugin is no longer in development
+
 # BibNotes Formatter (for Zotero)
 
 This plugin generates literaure notes from the source stored in your Zotero library, including both the metadata and the annotations that are stored within Zotero (extracted using the native PDF Reader or the Zotfile plugin). The settings of the plugin provide different tools to customize the format of the literature notes, as well as to perform different transformations to the text of the annotations.
