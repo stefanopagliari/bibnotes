@@ -1483,7 +1483,8 @@ export default class MyPlugin extends Plugin {
 
 			if (this.settings.isTagHash == true) {
 				for (let index = 0; index < lineElements.inlineTagsArray.length; index++) {
-					lineElements.inlineTagsArray[index] = lineElements.inlineTagsArray[index].replace(/ /g, "")
+					// lineElements.inlineTagsArray[index] = lineElements.inlineTagsArray[index].replace(/ /g, "")
+					lineElements.inlineTagsArray[index] = lineElements.inlineTagsArray[index].replace(/ /g, "_")
 				}
 				//{}
 			}

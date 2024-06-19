@@ -48,7 +48,11 @@ export function replaceTemplate(
 
 export const makeWiki = (str: string) => "[[" + str + "]]";
 export const makeQuotes = (str: string) => '"' + str + '"';
-export const makeTags = (str: string) => "#" + str;
+// export const makeTags = (str: string) => "#" + str;
+// replace in-tag spaces with a underscore (add tag format settings in config later)
+// I assume str is tag from zotero item or PDF note as-it-is
+export const makeTags = (str: string) => "#" + str.replace(/\s+/g, '_');
+
 
 export const createAuthorKey = (creators: CreatorArray) => {
 	const authorKey: string[] = [];
